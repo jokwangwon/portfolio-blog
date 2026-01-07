@@ -1,0 +1,50 @@
+spring:
+  # DataSource
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:portfolio_blog}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # JPA
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:your-secret-key-here-minimum-256-bits-recommended-change-this-in-production}
+  access-expiration: ${JWT_ACCESS_EXPIRATION:900000}  # 15 minutes
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7 days
+
+# CORS Configuration
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:5173
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+  allowed-headers: "*"
+  allow-credentials: true
+
+# Logging
+logging:
+  level:
+    org.springframework.security: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# SpringDoc OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  show-actuator: true

@@ -476,8 +476,8 @@ CI/CD: GitHub Actions
 
 ## 문의
 
-- **개발자**: 기원테크
-- **이메일**: your.email@example.com
+- **개발자**: 조광원
+- **이메일**: tgdata200@gmail.com
 - **블로그**: https://yourdomain.com
 - **GitHub**: https://github.com/yourusername
 
