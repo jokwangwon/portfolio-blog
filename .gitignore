@@ -1,0 +1,195 @@
+# 통합 .gitignore
+
+# ==================== General ====================
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ==================== Backend (Java/Spring Boot) ====================
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Maven (선택적)
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Spring Boot
+*.log
+*.log.*
+spring-boot-*.log
+
+# IDE
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+# ==================== Frontend (Next.js/React) ====================
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+.vercel
+
+# Production
+dist/
+build/
+
+# Testing
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ==================== AI API (Python/FastAPI) ====================
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyCharm
+.idea/
+*.iml
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ==================== Database ====================
+# PostgreSQL
+*.sql.backup
+
+# Redis
+dump.rdb
+
+# ==================== Docker ====================
+# Docker volumes (로컬 데이터)
+docker-compose.override.yml
+volumes/
+
+# ==================== AI Models ====================
+# 모델 파일 (용량이 크므로 Git LFS 사용 권장)
+*.gguf
+*.bin
+*.safetensors
+models/*.pth
+models/*.pt
+
+# 단, 작은 테스트 모델은 예외 가능
+!models/test-*.gguf
+
+# ==================== Security ====================
+# Secrets
+*.pem
+*.key
+*.p12
+*.jks
+.env
+.env.local
+secrets/
+credentials.json
+
+# AWS
+.aws/
+
+# ==================== OS ====================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ==================== Logs ====================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==================== Temporary ====================
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# ==================== Documentation (Build Output) ====================
+docs/_build/
+site/
+
+# ==================== Keep ====================
+# 유지해야 할 파일들 (예외 처리)
+!.gitkeep
+!.editorconfig
+!DEVELOPMENT_GUIDE.md

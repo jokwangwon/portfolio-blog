@@ -1,0 +1,64 @@
+# EditorConfig
+# 모든 에디터/IDE에서 일관된 코딩 스타일 유지
+
+root = true
+
+# ==================== 전역 설정 ====================
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# ==================== Java/Kotlin ====================
+[*.{java,kt,kts}]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# ==================== TypeScript/JavaScript ====================
+[*.{ts,tsx,js,jsx}]
+indent_style = space
+indent_size = 2
+max_line_length = 100
+
+# ==================== Python ====================
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 88  # Black 기본값
+
+# ==================== JSON ====================
+[*.json]
+indent_style = space
+indent_size = 2
+
+# ==================== YAML ====================
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# ==================== Markdown ====================
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# ==================== XML ====================
+[*.xml]
+indent_style = space
+indent_size = 2
+
+# ==================== Gradle ====================
+[*.gradle]
+indent_style = space
+indent_size = 4
+
+# ==================== SQL ====================
+[*.sql]
+indent_style = space
+indent_size = 2
+
+# ==================== Properties ====================
+[*.properties]
+indent_style = space
+indent_size = 4
