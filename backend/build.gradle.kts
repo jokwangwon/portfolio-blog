@@ -22,6 +22,12 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
 
+    the<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension>().apply {
+        imports {
+            mavenBom("org.springframework.boot:spring-boot-dependencies:3.2.1")
+        }
+    }
+
     dependencies {
         // Lombok
         compileOnly("org.projectlombok:lombok")
