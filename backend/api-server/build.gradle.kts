@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":security"))
     implementation(project(":module-blog"))
     implementation(project(":module-user"))
+    implementation(project(":module-registry"))
     implementation(project(":module-benchmark"))
 
     // Spring Boot Starters
