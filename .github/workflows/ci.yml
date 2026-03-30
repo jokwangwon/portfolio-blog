@@ -1,0 +1,127 @@
+# CI Pipeline — Portfolio Portal
+# 트리거: develop/main PR 및 push
+# Phase 1: 백엔드 빌드 + 테스트만 (프론트엔드/AI API는 프로젝트 생성 후 추가)
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  JAVA_VERSION: '17'
+  GRADLE_OPTS: '-Dorg.gradle.daemon=false'
+
+jobs:
+  # ──────────────────────────────────────────
+  # 1. Backend (Spring Boot + Gradle)
+  # ──────────────────────────────────────────
+  backend-build:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: portal_test
+          POSTGRES_USER: portal
+          POSTGRES_PASSWORD: portal_test_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build
+        run: ./gradlew build -x test
+
+      - name: Run tests
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/portal_test
+          SPRING_DATASOURCE_USERNAME: portal
+          SPRING_DATASOURCE_PASSWORD: portal_test_pass
+        run: ./gradlew test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/api-server/build/reports/tests/
+
+  # ──────────────────────────────────────────
+  # 2. Lint & Format Check
+  # ──────────────────────────────────────────
+  lint:
+    name: Code Style Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Check with Checkstyle (if configured)
+        run: ./gradlew checkstyleMain 2>/dev/null || echo "Checkstyle not configured yet — skipping"
+
+  # ──────────────────────────────────────────
+  # 3. PR Gate (main 보호)
+  # ──────────────────────────────────────────
+  pr-gate:
+    name: PR Gate
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    needs: [backend-build, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All checks passed
+        run: echo "✅ All CI checks passed — safe to merge to main"

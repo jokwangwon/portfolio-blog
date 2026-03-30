@@ -56,7 +56,8 @@ docs/
 │   ├── database-erd.md               # ERD 다이어그램
 │   ├── observability-design.md       # 🔴 Observability 설계
 │   ├── jwt-security-enhancement.md   # 🟠 JWT 보안 강화
-│   └── pixel-office-design.md        # 🟠 AI 픽셀 오피스 설계
+│   ├── pixel-office-design.md        # 🟠 AI 픽셀 오피스 설계
+│   └── multi-agent-system-design.md  # 🟠 멀티 에이전트 합의 시스템 설계
 │
 ├── api/                              # API 명세
 │   ├── API_SPECIFICATION.md          # API 엔드포인트 상세 명세
@@ -77,7 +78,8 @@ docs/
 │   ├── ADR-003-jwt-refresh-token-rotation.md
 │   ├── ADR-004-test-strategy.md
 │   ├── ADR-005-pixel-office-tech-stack.md
-│   └── ADR-006-microservice-architecture.md
+│   ├── ADR-006-microservice-architecture.md
+│   └── ADR-007-multi-agent-consensus-system.md
 │
 ├── sessions/                         # 세션별 작업 로그
 │   ├── README.md                     # 세션 로그 가이드
@@ -146,6 +148,7 @@ architecture-review.md (검토 및 개선안)
 | 2026-03-26 | 누락 ADR 생성 (002, 003, 004) | `ADR-002`, `ADR-003`, `ADR-004` |
 | 2026-03-30 | CONTEXT.md 현행화, INDEX.md 갱신 | `CONTEXT.md`, `INDEX.md` |
 | 2026-03-30 | **아키텍처 전환** — 독립 서비스 + 중앙 포털 | `blog-architecture-context.md`, `depth-2`, `ADR-006` |
+| 2026-03-30 | Git 워크플로우 보완 + 멀티 에이전트 시스템 설계 | `DEVELOPMENT_GUIDE.md`, `multi-agent-system-design.md`, `ADR-007` |
 
 ---
 
