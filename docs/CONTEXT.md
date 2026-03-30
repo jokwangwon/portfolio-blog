@@ -3,19 +3,20 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-30 (세션 #7)
+**최종 업데이트**: 2026-03-30 (세션 #8)
 
 ---
 
 ## 🎯 현재 프로젝트 상태
 
 ### Phase
-**Phase 1: 백엔드 개발** (진행 중 ~50%)
+**Phase 1: 백엔드 개발** (진행 중 ~55%)
 
-### 마지막 작업 (세션 #7, 2026-03-30)
-- module-registry 모듈 생성 (Service Registry CRUD + Controller)
-- Controller 레이어 단위 테스트 (CategoryController, PostController)
-- 전체 테스트 90개 달성 (11개 파일, 전부 통과)
+### 마지막 작업 (세션 #8, 2026-03-30)
+- ServiceHealthChecker 구현 (@Scheduled 폴링, RestTemplate 5초 timeout)
+- Nginx API Gateway 설정 (URL 패턴 라우팅, WebSocket 지원)
+- Sentry 에러 트래킹 연동 (Spring Boot + Logback appender)
+- 전체 테스트 95개 달성 (12개 파일, 전부 통과)
 
 ### 완료된 개발
 - Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈) — 세션 #1
@@ -28,6 +29,8 @@
 - Health Check + Service Contract + JSON 로깅 — 세션 #6
 - module-registry (Service Registry CRUD) — 세션 #7
 - Controller 테스트 + 총 90개 테스트 — 세션 #7
+- ServiceHealthChecker + Nginx Gateway + Sentry 연동 — 세션 #8
+- 전체 테스트 95개 (12개 파일) — 세션 #8
 
 ### 현재 상황
 **아키텍처 전환 완료**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006).
@@ -45,7 +48,7 @@
    - [x] Portal API 리네이밍 (blog → portal) — 세션 #4에서 완료
    - [x] module-registry 신규 생성 — 세션 #7에서 완료
    - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
-   - [ ] Nginx API Gateway 설정
+   - [x] Nginx API Gateway 설정 — 세션 #8에서 완료
 
 2. **데이터베이스 분리 + 초기화**
    - [x] portal_db / ai_bench_db 물리 분리 (서비스별 독립 PostgreSQL 컨테이너) — 세션 #4에서 완료
@@ -55,7 +58,7 @@
 ### 다음 (Next)
 3. **기본 인프라**
    - [x] Logback JSON 로깅 설정 — 세션 #6에서 완료
-   - [ ] Sentry 연동 (무료 티어)
+   - [x] Sentry 연동 (무료 티어) — 세션 #8에서 완료
    - [x] Health Check 엔드포인트 + Service Contract 구현 — 세션 #6에서 완료
 
 4. **프론트엔드 + AI API**
@@ -150,7 +153,7 @@
 - [x] 코드 리네이밍 (blog → portal) — 세션 #4에서 완료
 - [x] module-registry 생성 — 세션 #7에서 완료
 - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
-- [ ] Nginx Gateway 설정
+- [x] Nginx Gateway 설정 — 세션 #8에서 완료
 - [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
 
 ---
@@ -206,12 +209,12 @@
 - [x] Portal API 리네이밍 — 세션 #4에서 완료
 - [x] module-registry 생성 — 세션 #7에서 완료
 - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
-- [ ] Nginx API Gateway 설정
+- [x] Nginx API Gateway 설정 — 세션 #8에서 완료
 - [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
 - [ ] Flyway 마이그레이션 (V1__init_portal_schema.sql)
-- [ ] 구조화된 JSON 로깅 (Logback)
-- [ ] Sentry 연동
-- [ ] Health Check + Service Contract 구현
+- [x] 구조화된 JSON 로깅 (Logback) — 세션 #6에서 완료
+- [x] Sentry 연동 — 세션 #8에서 완료
+- [x] Health Check + Service Contract 구현 — 세션 #6에서 완료
 - [ ] Next.js Shell App 프로젝트 생성
 - [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
 - [ ] OAuth2 소셜 로그인
@@ -239,33 +242,32 @@
 
 ## 📝 마지막 대화 요약
 
-### 세션 #2 (2026-03-26)
-- Pixel Office 설계 완료 (PixiJS + @pixi/react)
-- 문서 일관성 분석 → 7개 문제 중 4개 해결
-- 누락 ADR 3개 생성, 세션 로그 체계 복구
+### 세션 #7 (2026-03-30)
+- module-registry 모듈 생성 (Service Registry CRUD + Controller)
+- Controller 단위 테스트 (CategoryController, PostController)
+- 전체 테스트 90개 달성
 
-### 세션 #3 (2026-03-30)
-- CONTEXT.md 현행화
-- **아키텍처 전환**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006)
-- 3개 문서 전면 재작성 (blog-architecture-context.md, depth-2, ADR-006)
-- INDEX.md, CONTEXT.md, decisions/README.md 갱신
+### 세션 #8 (2026-03-30)
+- ServiceHealthChecker 구현 (@Scheduled 폴링)
+- Nginx API Gateway 설정 (URL 패턴 라우팅, WebSocket 지원)
+- Sentry 에러 트래킹 연동 (Spring Boot + Logback appender)
+- 전체 테스트 95개 달성 (12개 파일)
 
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### 우선 작업: 아키텍처 전환 코드 적용
-1. Portal API 리네이밍 (blog → portal, 패키지명/프로젝트명)
-2. module-registry 신규 생성 (ServiceRegistryEntry, ServiceCacheEntry)
-3. module-benchmark 독립 서비스로 분리 → ai-benchmark-api/
-4. Nginx API Gateway 설정 (docker-compose에 추가)
-5. DB 분리: portal_db + ai_bench_db 생성
+### 우선 작업: Phase 1A 잔여
+1. @EnableScheduling 설정 (api-server Application 클래스)
+2. Integration Test (Testcontainers PostgreSQL)
+3. module-benchmark 제거 (ai-benchmark-api 독립 서비스 분리)
+4. Nginx Gateway 실제 테스트 (docker-compose 기동)
 
 ### 이후 우선순위
 1. Flyway 마이그레이션 (V1__init_portal_schema.sql)
-2. Service Contract 구현 (/health, /api/summary)
-3. 구조화된 JSON 로깅 설정 (Logback)
-4. Next.js Shell App 프로젝트 생성
+2. Next.js Shell App 프로젝트 생성
+3. AI Benchmark API (FastAPI) 독립 프로젝트 생성
+4. OAuth2 소셜 로그인 (Google, GitHub)
 
 ---
 
