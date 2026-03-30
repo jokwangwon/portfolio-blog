@@ -3,27 +3,30 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-30 (세션 #5)
+**최종 업데이트**: 2026-03-30 (세션 #6)
 
 ---
 
 ## 🎯 현재 프로젝트 상태
 
 ### Phase
-**Phase 1: 백엔드 개발** (진행 중 ~30%)
+**Phase 1: 백엔드 개발** (진행 중 ~45%)
 
-### 마지막 작업 (세션 #5, 2026-03-30)
-- Git 워크플로우 보완 (develop 브랜치, Phase별 push 정책)
-- GitHub Actions CI 파이프라인 구축
-- 멀티 에이전트 합의 시스템 설계 (ADR-007)
-- jwt-security-enhancement.md Access Token 만료 15분으로 통일
+### 마지막 작업 (세션 #6, 2026-03-30)
+- CLAUDE.md 프로젝트 지시 파일 생성 (SDD+TDD, 에이전트 프로토콜)
+- 서비스 레이어 전체 단위 테스트 69개 작성 (8개 파일)
+- Health Check + Service Contract (/health, /api/summary)
+- Logback JSON 구조화 로깅 + MDC 필터 (request_id 추적)
 
-### 완료된 개발 (세션 #1, 2026-01-07)
-- Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈)
-- JPA 엔티티 전체 구현 (User, Blog, Benchmark 도메인)
-- Spring Security + JWT 인증 구현
-- 인증 API (회원가입, 로그인, 토큰 갱신, 로그아웃)
-- Docker Compose 설정 (PostgreSQL + TimescaleDB)
+### 완료된 개발
+- Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈) — 세션 #1
+- JPA 엔티티 전체 구현 (User, Blog, Benchmark 도메인) — 세션 #1
+- Spring Security + JWT 인증 구현 — 세션 #1
+- 인증 API (회원가입, 로그인, 토큰 갱신, 로그아웃) — 세션 #1
+- Docker Compose 설정 (PostgreSQL + TimescaleDB) — 세션 #1
+- Blog CRUD, Auth Cookie 리팩토링, Flyway V2-V5 — 세션 #5
+- 서비스 레이어 단위 테스트 69개 (8 파일) — 세션 #6
+- Health Check + Service Contract + JSON 로깅 — 세션 #6
 
 ### 현재 상황
 **아키텍처 전환 완료**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006).
@@ -50,9 +53,9 @@
 
 ### 다음 (Next)
 3. **기본 인프라**
-   - [ ] Logback JSON 로깅 설정
+   - [x] Logback JSON 로깅 설정 — 세션 #6에서 완료
    - [ ] Sentry 연동 (무료 티어)
-   - [ ] Health Check 엔드포인트 + Service Contract 구현
+   - [x] Health Check 엔드포인트 + Service Contract 구현 — 세션 #6에서 완료
 
 4. **프론트엔드 + AI API**
    - [ ] Next.js Shell App 프로젝트 생성
