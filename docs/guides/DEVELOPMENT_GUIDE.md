@@ -516,29 +516,63 @@ async def generate_text(request, db):  # 타입 없음
 ### 4.1 브랜치 전략 (Git Flow 간소화)
 
 ```
-main (프로덕션)
-  ↑
-develop (개발 통합)
-  ↑
-feature/* (기능 개발)
-hotfix/*  (긴급 수정)
+main (프로덕션 — 안정 릴리스만)
+  ↑ PR (Squash Merge)
+develop (개발 통합 — 일상 개발의 기준 브랜치)
+  ↑ PR (Merge Commit)
+feature/* (기능 개발 — develop에서 분기, 완료 후 삭제)
+hotfix/*  (긴급 수정 — main에서 분기, main + develop 양쪽 병합)
 ```
+
+#### Phase별 브랜치 운영 정책
+
+| Phase | 정책 | 이유 |
+|-------|------|------|
+| **Phase 1** (현재) | develop 직접 push 허용, main ← develop PR 필수 | 1인 개발, 빠른 반복 |
+| **Phase 2** (AWS 배포 후) | feature/* → develop PR 필수, main ← develop PR 필수 | 프로덕션 안정성 확보 |
+
+#### Push 정책
+
+| 대상 브랜치 | 직접 push | PR 필수 | CI 통과 필수 |
+|-------------|-----------|---------|-------------|
+| `main` | ❌ 금지 | ✅ 필수 | ✅ 필수 |
+| `develop` | ⚠️ Phase 1만 허용 | Phase 2부터 필수 | ✅ 필수 |
+| `feature/*` | ✅ 허용 | — | — |
+| `hotfix/*` | ✅ 허용 | — | — |
 
 #### 브랜치 네이밍
 
 ```bash
-# Feature 브랜치
+# Feature 브랜치 (develop에서 분기)
 feature/user-authentication
 feature/post-crud
 feature/3d-landing-page
 feature/benchmark-api
 
-# Hotfix 브랜치
+# Hotfix 브랜치 (main에서 분기)
 hotfix/fix-login-error
 hotfix/fix-memory-leak
 
-# Release 브랜치 (선택적)
+# Release 브랜치 (선택적, develop에서 분기)
 release/v1.0.0
+```
+
+#### 브랜치 생명주기
+
+```bash
+# Feature 브랜치 워크플로우
+git checkout develop
+git pull origin develop
+git checkout -b feature/my-feature
+# ... 작업 ...
+git push origin feature/my-feature
+# PR 생성 → develop 병합 → feature 브랜치 삭제
+
+# Hotfix 워크플로우
+git checkout main
+git checkout -b hotfix/critical-fix
+# ... 수정 ...
+# PR → main 병합 + develop에도 병합
 ```
 
 ### 4.2 커밋 메시지 규칙
@@ -605,6 +639,42 @@ fix bug
 
 ## 관련 이슈
 Closes #이슈번호
+```
+
+### 4.4 개발 상태 추적
+
+#### GitHub Issues 활용
+
+| 라벨 | 색상 | 용도 |
+|------|------|------|
+| `bug` | 🔴 red | 버그 리포트 |
+| `feature` | 🟢 green | 신규 기능 요청 |
+| `docs` | 🔵 blue | 문서 작업 |
+| `refactor` | 🟡 yellow | 리팩토링 |
+| `priority:critical` | 🔴 red | 즉시 처리 필요 |
+| `priority:high` | 🟠 orange | 이번 Phase 내 처리 |
+| `priority:low` | ⚪ grey | 여유 시 처리 |
+
+#### 마일스톤 매핑
+
+```
+Milestone: Phase 1A — Portal Core
+  └─ Issues: Flyway V1~V6, JPA Entity, Auth API, Blog CRUD
+
+Milestone: Phase 1B — Service Integration
+  └─ Issues: Service Registry, AI Benchmark 연동, Nginx Gateway
+
+Milestone: Phase 2 — Production
+  └─ Issues: AWS 배포, CI/CD 고도화, 모니터링
+```
+
+#### 버전 태깅 (Semantic Versioning)
+
+```bash
+# 형식: v{major}.{minor}.{patch}
+v0.1.0  # Phase 1A 완료 (Portal Core)
+v0.2.0  # Phase 1B 완료 (Service Integration)
+v1.0.0  # Phase 2 프로덕션 첫 릴리스
 ```
 
 ---
