@@ -327,7 +327,7 @@ class PostControllerIntegrationTest {
             }
             """;
 
-        mockMvc.perform(post("/api/v1/posts")
+        mockMvc.perform(post("/api/portal/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
             .andExpect(status().isCreated())

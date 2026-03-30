@@ -1,7 +1,8 @@
 # ADR-001: 데이터베이스 통합 (PostgreSQL + TimescaleDB Extension)
 
-**Status**: Accepted
+**Status**: Superseded
 **Date**: 2026-01-07
+**Superseded By**: [ADR-006](ADR-006-microservice-architecture.md) — 서비스별 물리적 DB 분리로 전환
 **Deciders**: 프로젝트 오너, 아키텍처 리뷰 에이전트
 **Tags**: #database #architecture #mvp #simplification
 
@@ -137,7 +138,7 @@ TimescaleDB는 PostgreSQL의 확장(Extension)이므로:
 - [ ] 압축/삭제 정책 설정
 
 ### 영향받는 컴포넌트
-- Main API (Spring Boot): PostgreSQL 연결 1개로 통합
+- Portal API (Spring Boot): PostgreSQL 연결 1개로 통합
 - AI API (FastAPI): PostgreSQL 연결 1개로 통합
 - Infrastructure: docker-compose.yml 수정
 - Deployment: AWS RDS 인스턴스 1개로 계획 변경
@@ -169,9 +170,29 @@ TimescaleDB는 PostgreSQL의 확장(Extension)이므로:
 - API 캐시 → Phase 1에서는 불필요 (트래픽 낮음)
 - 세션 → Stateless JWT 사용 (세션 불필요)
 
+### ADR-006 이후 변경 사항 (2026-03-30)
+
+이 ADR의 "단일 DB 통합" 원칙은 **완전히 대체**되었습니다.
+[ADR-006](ADR-006-microservice-architecture.md)에 의해 **서비스별 물리적 DB 분리**가 적용됩니다:
+
+```
+Phase 1 (Docker Compose):
+  portal-db    (PostgreSQL)   ← Portal API 전용 컨테이너
+  ai-bench-db  (TimescaleDB)  ← AI Benchmark API 전용 컨테이너
+
+Phase 2 (AWS):
+  서비스별 개별 RDS 인스턴스
+  ├── portal-db     ← RDS PostgreSQL (blog, user, registry)
+  ├── ai-bench-db   ← RDS PostgreSQL + TimescaleDB (models, results, gpu_metrics)
+  └── {service}-db  ← 새 서비스 추가 시 별도 RDS 인스턴스
+
+규칙: 서비스 간 DB 교차 접근 원천 차단 (물리적 분리)
+      데이터 필요 시 REST API 호출
+```
+
 ---
 
 **Created**: 2026-01-07
-**Last Updated**: 2026-01-07
+**Last Updated**: 2026-03-30
 **Supersedes**: N/A
-**Superseded By**: N/A
+**Superseded By**: [ADR-006](ADR-006-microservice-architecture.md)

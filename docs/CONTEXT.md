@@ -3,89 +3,78 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-01-07 (세션 #1)
+**최종 업데이트**: 2026-03-30 (세션 #3)
 
 ---
 
 ## 🎯 현재 프로젝트 상태
 
 ### Phase
-**Phase 0: 설계 및 문서화** (완료 90%)
+**Phase 1: 백엔드 개발** (진행 중 ~30%)
 
-### 마지막 작업
-- 아키텍처 리뷰 완료 (평가 4.2/5.0)
-- PostgreSQL 통합 설계 완료
-- Observability 설계 완료
-- JWT 보안 강화 설계 완료
-- 테스트 전략 수립 완료
+### 마지막 작업 (세션 #2, 2026-03-26)
+- Pixel Office 아이디어 구체화 및 설계 문서 작성
+- ADR-005 (PixiJS 기술 선택) 작성
+- 문서 일관성 분석 → 7개 문제 중 4개 해결
+- 누락 ADR 3개 (002, 003, 004) 생성
+
+### 완료된 개발 (세션 #1, 2026-01-07)
+- Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈)
+- JPA 엔티티 전체 구현 (User, Blog, Benchmark 도메인)
+- Spring Security + JWT 인증 구현
+- 인증 API (회원가입, 로그인, 토큰 갱신, 로그아웃)
+- Docker Compose 설정 (PostgreSQL + TimescaleDB)
 
 ### 현재 상황
-모든 설계 문서가 작성되었고, 개발 환경 구축 직전 단계입니다.
+**아키텍처 전환 완료**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006).
+백엔드 인증 기능까지 구현 완료. Portal API 리네이밍 + Service Registry 구현 필요.
+프론트엔드/AI API 미착수.
 
 ---
 
 ## 📋 다음 할 일 (Next Actions)
 
 ### 즉시 (Immediate)
-1. **개발 환경 구축**
-   - [ ] Docker Compose 설정 (PostgreSQL + TimescaleDB)
-   - [ ] Spring Boot 멀티 모듈 프로젝트 생성
-   - [ ] Next.js 프로젝트 생성
-   - [ ] FastAPI 프로젝트 생성
+1. **아키텍처 전환 적용**
+   - [x] 아키텍처 문서 재작성 (blog-architecture-context.md, depth-2)
+   - [x] ADR-006 작성 (독립 서비스 전환 결정)
+   - [x] Portal API 리네이밍 (blog → portal) — 세션 #4에서 완료
+   - [ ] module-registry 신규 생성
+   - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
+   - [ ] Nginx API Gateway 설정
 
-2. **데이터베이스 초기화**
-   - [ ] Flyway 마이그레이션 파일 작성 (V1__init_schema.sql)
-   - [ ] TimescaleDB Extension 활성화
-   - [ ] Hypertable 생성 (gpu_metrics)
+2. **데이터베이스 분리 + 초기화**
+   - [x] portal_db / ai_bench_db 물리 분리 (서비스별 독립 PostgreSQL 컨테이너) — 세션 #4에서 완료
+   - [ ] Flyway 마이그레이션 (V1__init_portal_schema.sql)
+   - [ ] AI Benchmark DB 스키마 (Alembic)
 
 ### 다음 (Next)
 3. **기본 인프라**
    - [ ] Logback JSON 로깅 설정
    - [ ] Sentry 연동 (무료 티어)
-   - [ ] Health Check 엔드포인트
+   - [ ] Health Check 엔드포인트 + Service Contract 구현
 
-4. **인증 구현**
-   - [ ] JWT Provider 구현
-   - [ ] Refresh Token Rotation 구현
+4. **프론트엔드 + AI API**
+   - [ ] Next.js Shell App 프로젝트 생성
+   - [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
    - [ ] OAuth2 소셜 로그인 (Google, GitHub)
 
 ---
 
 ## 🔑 주요 의사결정 기록
 
-### 1. 데이터베이스 통합 결정
-- **결정일**: 2026-01-07
-- **결정**: PostgreSQL 3개 → 1개로 통합 (TimescaleDB extension 사용)
-- **이유**: MVP 단계에서 복잡도 과도, 운영 부담 감소
-- **근거**: `docs/review/architecture-review.md` 권장사항 #1
-- **관련 문서**: `docs/architecture/database-consolidation-design.md`
+> 상세 내용은 각 ADR 문서를 참조하세요. 여기는 빠른 참조용 요약입니다.
 
-### 2. State Management: Redux Toolkit 선택
-- **결정일**: 2026-01-07 (초기 설계)
-- **결정**: Redux Toolkit 사용 (Zustand 대신)
-- **이유**: 취업 포트폴리오 강화 목적, 기업에서 많이 사용
-- **대안**: Zustand (경량), Jotai (Atomic)
-- **사용자 강조**: "취업 포폴 강화 목적이라 redux toolkit으로 진행"
-
-### 3. Redis 도입 지연
-- **결정일**: 2026-01-07
-- **결정**: Phase 1에서는 Redis 제외, Phase 2로 지연
-- **이유**: 초기 트래픽 낮음, 복잡도 감소
-- **대안**: Refresh Token Blacklist는 PostgreSQL 테이블 사용
-- **관련 문서**: `docs/architecture/database-consolidation-design.md` > 6. Redis 제거
-
-### 4. Observability 조기 도입
-- **결정일**: 2026-01-07
-- **결정**: Phase 1부터 구조화된 로깅 + Sentry 필수
-- **이유**: 프로덕션 운영 시 디버깅 필수
-- **근거**: `docs/review/architecture-review.md` 권장사항 #2
-- **관련 문서**: `docs/architecture/observability-design.md`
-
-### 5. 테스트 커버리지 목표
-- **결정일**: 2026-01-07
-- **결정**: 전체 70% 커버리지 목표
-- **세부**: Service 80%, Controller 70%, Repository 60%
-- **관련 문서**: `docs/guides/TEST_STRATEGY.md`
+| # | 결정 | 결정일 | ADR |
+|---|------|--------|-----|
+| 1 | PostgreSQL 3개 → 1개 통합 (TimescaleDB) | 2026-01-07 | [ADR-001](decisions/ADR-001-database-consolidation.md) |
+| 2 | Redux Toolkit 선택 (취업 포폴 목적) | 2026-01-07 | — |
+| 3 | Redis 도입 Phase 2로 지연 | 2026-01-07 | — |
+| 4 | Observability 조기 도입 (Phase 1부터) | 2026-01-07 | [ADR-002](decisions/ADR-002-observability-first.md) |
+| 5 | 테스트 커버리지 70% 목표 | 2026-01-07 | [ADR-004](decisions/ADR-004-test-strategy.md) |
+| 6 | JWT Refresh Token Rotation | 2026-01-07 | [ADR-003](decisions/ADR-003-jwt-refresh-token-rotation.md) |
+| 7 | PixiJS + @pixi/react 채택 (Pixel Office) | 2026-03-26 | [ADR-005](decisions/ADR-005-pixel-office-tech-stack.md) |
+| 8 | **독립 서비스 아키텍처 전환** | 2026-03-30 | [ADR-006](decisions/ADR-006-microservice-architecture.md) |
 
 ---
 
@@ -140,8 +129,24 @@
 
 ## 🚧 진행 중인 이슈
 
-### 없음
-현재 설계 단계 완료, 개발 환경 구축 대기 중
+### 1. 미커밋 변경사항
+- `backend/api-server/build.gradle.kts` — JPA 설정 보완
+- `PortfolioPortalApplication.java` — 리네이밍 완료 (blog→portal)
+- `application.yml` — 수정됨
+- `SecurityConfig.java` — 수정됨
+
+### 2. 미추적 신규 문서
+- `docs/architecture/pixel-office-design.md`
+- `docs/decisions/ADR-002, 003, 004, 005, 006`
+- `docs/sessions/SESSION_2026-03-26.md`
+
+### 3. 아키텍처 전환 적용 작업
+- [x] 문서 재작성 (blog-architecture-context.md, depth-2, ADR-006)
+- [x] 코드 리네이밍 (blog → portal) — 세션 #4에서 완료
+- [ ] module-registry 생성
+- [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
+- [ ] Nginx Gateway 설정
+- [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
 
 ---
 
@@ -152,12 +157,14 @@
 2. **문서 없는 개발**: 설계 문서 없이 코드 작성
 3. **과도한 기술 스택**: MVP에 불필요한 기술 추가
 4. **Redis 도입**: Phase 1에서는 PostgreSQL만 사용
+5. **서비스 간 DB 교차 접근**: 각 서비스는 자기 DB만 접근 (ADR-006)
 
 ### 강조 사항
 1. **코드보다 문서**: 변경 사항은 문서부터 업데이트
 2. **보안 우선**: JWT Rotation, XSS 방지 필수
 3. **테스트 작성**: 핵심 로직은 70% 커버리지
 4. **구조화된 로깅**: 처음부터 JSON 로깅 설정
+5. **Service Contract 준수**: 새 서비스는 /health + /api/summary 필수
 
 ---
 
@@ -165,23 +172,44 @@
 
 ### 문서 현황
 - 헌법 문서: 4개
-- 아키텍처 설계: 5개
+- 아키텍처 설계: 7개 (database-erd.md 포함)
+- API 명세: 2개 (API_SPECIFICATION.md, openapi.yaml)
 - 가이드: 2개
 - 검토 보고서: 1개
-- 총 문서: 14개
+- ADR: 7개 (ADR-000 ~ ADR-006)
+- 세션 로그: 3개
+- 총 문서: ~29개
 
 ### 완료된 설계
-- [x] 전체 시스템 아키텍처 (Depth 1)
-- [x] 모듈 구조 (Depth 2)
-- [x] PostgreSQL 통합 설계
+- [x] 시스템 아키텍처 — 독립 서비스 + 중앙 포털 (Depth 1)
+- [x] 서비스별 모듈 구조 (Depth 2)
+- [x] Service Registry 패턴 + Service Contract
+- [x] DB 물리 분리 전략 (서비스별 독립 PostgreSQL 인스턴스)
 - [x] Observability 설계
 - [x] JWT 보안 강화 설계
 - [x] 테스트 전략
+- [x] Pixel Office 설계
+
+### 완료된 개발
+- [x] Spring Boot 멀티 모듈 프로젝트 (7개 모듈)
+- [x] Docker Compose (PostgreSQL + TimescaleDB)
+- [x] JPA 엔티티 전체 (User, Blog, Benchmark)
+- [x] Spring Security + JWT 인증
+- [x] 인증 API (회원가입/로그인/갱신/로그아웃)
 
 ### 미완료
-- [ ] DB 스키마 ERD
-- [ ] API 명세서 (OpenAPI)
-- [ ] Depth 3/4 상세 설계 (개발하면서 진행)
+- [x] Portal API 리네이밍 — 세션 #4에서 완료
+- [ ] module-registry 생성
+- [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
+- [ ] Nginx API Gateway 설정
+- [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
+- [ ] Flyway 마이그레이션 (V1__init_portal_schema.sql)
+- [ ] 구조화된 JSON 로깅 (Logback)
+- [ ] Sentry 연동
+- [ ] Health Check + Service Contract 구현
+- [ ] Next.js Shell App 프로젝트 생성
+- [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
+- [ ] OAuth2 소셜 로그인
 
 ---
 
@@ -206,31 +234,33 @@
 
 ## 📝 마지막 대화 요약
 
-### 주요 결정
-1. 문서 재구성 완료 (`docs/` 폴더 내 체계화)
-2. 아키텍처 리뷰 4가지 권장사항 모두 설계에 반영
-3. 과거 문서 관리를 위한 `docs/history/` 폴더 생성
-4. 세션 컨텍스트 관리를 위한 이 문서 작성
+### 세션 #2 (2026-03-26)
+- Pixel Office 설계 완료 (PixiJS + @pixi/react)
+- 문서 일관성 분석 → 7개 문제 중 4개 해결
+- 누락 ADR 3개 생성, 세션 로그 체계 복구
 
-### 사용자 마지막 요청
-"이제 클로드가 연결이 끊기고 다시 붙을때 과거의 중요 대화 등 대화흐름과 강조 사항이 문서에 반영되었는지 판단 및 대화 추적을 위한 고민이 필요해"
-
-→ 이 문서(`CONTEXT.md`)와 세션 로그 시스템으로 해결
+### 세션 #3 (2026-03-30)
+- CONTEXT.md 현행화
+- **아키텍처 전환**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006)
+- 3개 문서 전면 재작성 (blog-architecture-context.md, depth-2, ADR-006)
+- INDEX.md, CONTEXT.md, decisions/README.md 갱신
 
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### 개발 환경 구축 시작
-- Docker Compose 설정부터 시작
-- PostgreSQL + TimescaleDB 이미지 사용
-- Spring Boot 멀티 모듈 프로젝트 생성
+### 우선 작업: 아키텍처 전환 코드 적용
+1. Portal API 리네이밍 (blog → portal, 패키지명/프로젝트명)
+2. module-registry 신규 생성 (ServiceRegistryEntry, ServiceCacheEntry)
+3. module-benchmark 독립 서비스로 분리 → ai-benchmark-api/
+4. Nginx API Gateway 설정 (docker-compose에 추가)
+5. DB 분리: portal_db + ai_bench_db 생성
 
-### 우선 구현할 기능
-1. 데이터베이스 스키마 (Flyway)
-2. 구조화된 로깅 설정
-3. JWT Provider + Refresh Token Rotation
-4. Health Check 엔드포인트
+### 이후 우선순위
+1. Flyway 마이그레이션 (V1__init_portal_schema.sql)
+2. Service Contract 구현 (/health, /api/summary)
+3. 구조화된 JSON 로깅 설정 (Logback)
+4. Next.js Shell App 프로젝트 생성
 
 ---
 

@@ -110,7 +110,7 @@ Infrastructure (외부 시스템 연동)
 ```java
 // ✅ 올바른 계층 분리
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api/portal/posts")
 public class PostController {
     private final PostService postService;
 
@@ -353,7 +353,7 @@ API 스펙을 먼저 정의하고, 이를 기반으로 개발한다.
 ### 예시: Swagger 정의
 ```yaml
 paths:
-  /api/v1/posts:
+  /api/portal/posts:
     get:
       summary: 게시글 목록 조회
       parameters:

@@ -16,12 +16,14 @@
 아래 코드를 [dbdiagram.io](https://dbdiagram.io)에 붙여넣으면 시각화됩니다.
 
 ```dbml
-// 3D 포트폴리오 블로그 데이터베이스 ERD
-// Project: Portfolio Blog with 3D UI & AI Benchmark
-// Database: PostgreSQL 15 + TimescaleDB Extension
+// 포트폴리오 포털 데이터베이스 ERD
+// Project: Portfolio Portal (Independent Services Architecture)
+// Database: 서비스별 물리 분리
+//   - portal-db (PostgreSQL 15, :5432) — 섹션 1, 2
+//   - ai-bench-db (TimescaleDB + PG15, :5433) — 섹션 3, 4
 
 // ==========================================
-// 1. 사용자 및 인증
+// 1. 사용자 및 인증 [portal-db]
 // ==========================================
 
 Table users {
@@ -73,7 +75,7 @@ Table oauth_accounts {
 }
 
 // ==========================================
-// 2. 블로그 콘텐츠
+// 2. 블로그 콘텐츠 [portal-db]
 // ==========================================
 
 Table categories {
@@ -106,7 +108,7 @@ Table posts {
   title varchar(255) [not null]
   slug varchar(255) [not null, unique]
   content text [not null, note: 'Markdown 형식']
-  excerpt text [null, note: '요약문 (최대 200자)']
+  excerpt varchar(200) [null, note: '요약문, 미제공 시 앱에서 자동 생성']
   status varchar(20) [not null, default: 'DRAFT', note: 'DRAFT, PUBLISHED, ARCHIVED']
   view_count int [not null, default: 0]
   like_count int [not null, default: 0]
@@ -138,7 +140,7 @@ Table comments {
   id bigserial [pk, increment]
   post_id bigint [not null, ref: > posts.id]
   author_id bigint [not null, ref: > users.id]
-  parent_id bigint [null, ref: > comments.id, note: '답글인 경우']
+  parent_id bigint [null, ref: > comments.id, note: '답글인 경우, 최대 2단계']
   content text [not null]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
@@ -151,8 +153,53 @@ Table comments {
   }
 }
 
+Table likes {
+  user_id bigint [not null, ref: > users.id]
+  post_id bigint [not null, ref: > posts.id]
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    (user_id, post_id) [pk]
+  }
+  Note: '사용자당 게시글 1회 좋아요'
+}
+
 // ==========================================
-// 3. AI 벤치마크
+// 2B. Service Registry [portal-db]
+// ==========================================
+
+Table service_registry {
+  id bigserial [pk, increment]
+  service_name varchar(100) [not null, unique]
+  display_name varchar(200) [not null]
+  base_url varchar(500) [not null]
+  health_path varchar(200) [not null, default: '/health']
+  summary_path varchar(200) [not null, default: '/api/summary']
+  is_active boolean [not null, default: true]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
+}
+
+Table service_cache {
+  id bigserial [pk, increment]
+  service_name varchar(100) [not null, ref: > service_registry.service_name]
+  status varchar(20) [not null, default: 'UNKNOWN', note: 'UP, DOWN, DEGRADED, UNKNOWN']
+  summary_data jsonb [null, note: '/api/summary 응답 캐시']
+  last_checked_at timestamp [not null, default: `now()`]
+  response_time_ms int [null]
+  error_message text [null]
+  consecutive_failures int [not null, default: 0, note: '3회 연속 실패 시 is_active=false']
+  created_at timestamp [not null, default: `now()`]
+
+  indexes {
+    (service_name, last_checked_at) [name: 'idx_service_cache_name']
+  }
+}
+
+// ==========================================
+// 3. AI 벤치마크 [ai-bench-db]
+// ⚠️ 아래 테이블은 portal-db와 물리적으로 분리된 별도 DB
+// ⚠️ portal-db 테이블과의 FK는 불가 (cross-DB reference)
 // ==========================================
 
 Table ai_models {
@@ -174,7 +221,7 @@ Table ai_models {
 Table benchmark_results {
   id bigserial [pk, increment]
   model_id bigint [not null, ref: > ai_models.id]
-  user_id bigint [not null, ref: > users.id]
+  user_id bigint [not null, note: 'portal-db users.id 참조 (FK 불가, 물리 분리)']
   prompt_tokens int [not null]
   generated_tokens int [not null]
   total_duration numeric(10,3) [not null, note: 'seconds']
@@ -192,11 +239,11 @@ Table benchmark_results {
 }
 
 // ==========================================
-// 4. GPU 메트릭 (TimescaleDB Hypertable)
+// 4. GPU 메트릭 (TimescaleDB Hypertable) [ai-bench-db]
 // ==========================================
 
 Table gpu_metrics {
-  time timestamptz [not null, note: 'TimescaleDB time column']
+  time timestamptz [not null, note: 'TimescaleDB 파티션 키, UTC 저장']
   benchmark_id bigint [not null, ref: > benchmark_results.id]
   gpu_utilization numeric(5,2) [null, note: '0.00 ~ 100.00%']
   memory_used bigint [null, note: 'MB']
@@ -206,9 +253,9 @@ Table gpu_metrics {
   fan_speed numeric(5,2) [null, note: '0.00 ~ 100.00%']
 
   Note: '''
-  TimescaleDB Hypertable
-  - Partitioned by time (default 7 days)
-  - Compression policy: after 30 days
+  TimescaleDB Hypertable — PK 없음 (time 기반 파티셔닝)
+  - Partitioned by time (chunk_interval: 7 days)
+  - Compression policy: after 30 days (segmentby: benchmark_id)
   - Retention policy: delete after 180 days
   '''
 
@@ -221,25 +268,33 @@ Table gpu_metrics {
 // Relationships Summary
 // ==========================================
 
-// User relationships
+// --- portal-db 내부 관계 (FK 유효) ---
+
+// User relationships [portal-db]
 Ref: posts.author_id > users.id [delete: cascade]
 Ref: comments.author_id > users.id [delete: cascade]
-Ref: benchmark_results.user_id > users.id [delete: cascade]
+Ref: likes.user_id > users.id [delete: cascade]
 Ref: refresh_tokens.user_id > users.id [delete: cascade]
 Ref: oauth_accounts.user_id > users.id [delete: cascade]
 
-// Post relationships
+// Post relationships [portal-db]
 Ref: posts.category_id > categories.id [delete: set null]
 Ref: post_tags.post_id > posts.id [delete: cascade]
 Ref: post_tags.tag_id > tags.id [delete: cascade]
 Ref: comments.post_id > posts.id [delete: cascade]
+Ref: likes.post_id > posts.id [delete: cascade]
 
-// Comment relationships (self-referencing)
+// Comment relationships (self-referencing) [portal-db]
 Ref: comments.parent_id > comments.id [delete: cascade]
 
-// Benchmark relationships
+// --- ai-bench-db 내부 관계 (FK 유효) ---
+
+// Benchmark relationships [ai-bench-db]
 Ref: benchmark_results.model_id > ai_models.id [delete: cascade]
 Ref: gpu_metrics.benchmark_id > benchmark_results.id [delete: cascade]
+
+// --- cross-DB 참조 (FK 불가, 애플리케이션 레벨 검증) ---
+// benchmark_results.user_id → portal-db.users.id (물리 분리로 FK 불가)
 ```
 
 ---
@@ -248,12 +303,13 @@ Ref: gpu_metrics.benchmark_id > benchmark_results.id [delete: cascade]
 
 ### 2.1 Core Entities
 
-#### User (1:N)
+#### User (1:N) — portal-db
 - **users** 1---* **posts** (author_id)
 - **users** 1---* **comments** (author_id)
-- **users** 1---* **benchmark_results** (user_id)
+- **users** *---* **posts** (through likes, 좋아요)
 - **users** 1---* **refresh_tokens** (user_id)
 - **users** 1---* **oauth_accounts** (user_id)
+- ⚠️ **users** ···* **benchmark_results** (user_id) — cross-DB 참조, FK 불가
 
 #### Post (1:N, N:M)
 - **posts** *---1 **categories** (category_id)
@@ -263,10 +319,10 @@ Ref: gpu_metrics.benchmark_id > benchmark_results.id [delete: cascade]
 #### Comment (Self-Referencing)
 - **comments** *---1 **comments** (parent_id) - 답글 구조
 
-#### Benchmark
+#### Benchmark — ai-bench-db
 - **benchmark_results** *---1 **ai_models** (model_id)
-- **benchmark_results** *---1 **users** (user_id)
 - **benchmark_results** 1---* **gpu_metrics** (benchmark_id)
+- ⚠️ **benchmark_results**.user_id → **users**.id — cross-DB 참조 (FK 불가, 앱 레벨 검증)
 
 ---
 
@@ -274,12 +330,13 @@ Ref: gpu_metrics.benchmark_id > benchmark_results.id [delete: cascade]
 
 ### 3.1 Cascade Delete
 
-**사용자 삭제 시**:
-- ✅ posts, comments, benchmark_results 모두 삭제 (CASCADE)
+**사용자 삭제 시** (portal-db):
+- ✅ posts, comments, likes 삭제 (CASCADE)
 - ✅ refresh_tokens, oauth_accounts 삭제 (CASCADE)
+- ⚠️ ai-bench-db의 benchmark_results는 CASCADE 불가 (물리 분리) → 앱 레벨에서 처리
 
 **게시글 삭제 시**:
-- ✅ post_tags, comments 삭제 (CASCADE)
+- ✅ post_tags, comments, likes 삭제 (CASCADE)
 - ⚠️ category는 유지 (SET NULL)
 
 **댓글 삭제 시**:
@@ -469,26 +526,44 @@ ORDER BY bucket DESC;
 
 ## 9. 마이그레이션 순서
 
-### 9.1 Flyway 버전 순서
+### 9.1 Portal DB 마이그레이션 (Flyway)
 
 ```
-V1__init_schema.sql
-  → users, categories, tags, ai_models 생성 (독립 테이블)
+V1__init_portal_schema.sql
+  → users, categories, tags 생성 (독립 테이블)
 
 V2__create_posts_tables.sql
-  → posts, post_tags, comments 생성 (외래키 의존)
+  → posts, post_tags, comments, likes 생성 (외래키 의존)
 
 V3__create_auth_tables.sql
-  → refresh_tokens, oauth_accounts 생성
+  → refresh_tokens (token_family 포함), oauth_accounts 생성
 
-V4__create_benchmark_tables.sql
-  → benchmark_results, gpu_metrics 생성 (TimescaleDB Hypertable)
+V4__create_service_registry.sql
+  → service_registry, service_cache 생성
 
 V5__add_indexes.sql
-  → 모든 성능 최적화 인덱스 생성
+  → Portal DB 성능 최적화 인덱���
 
-V6__seed_data.sql (선택적)
-  → 초기 카테고리, 관리자 계정 생성
+V6__seed_data.sql
+  → 관리자 계정 (admin@example.com / Admin123!)
+  → 초기 카테고리 6개, 태그 10개
+  ��� AI Benchmark 서비스 등록
+```
+
+### 9.2 AI Bench DB 마이그레이션 (Alembic)
+
+```
+001_init_ai_bench_schema.py
+  → ai_models, benchmark_results 생성
+
+002_create_gpu_metrics_hypertable.py
+  → gpu_metrics + TimescaleDB Hypertable 변환
+
+003_add_compression_policy.py
+  → 자동 압축/삭제 정책 설정
+
+004_add_indexes.py
+  → AI Bench DB 성능 최적화 인덱스
 ```
 
 ---
@@ -571,17 +646,24 @@ public class Post {
 ### 11.1 주요 관계도
 
 ```
+[portal-db :5432]
 Users (중심)
-  ├─> Posts (1:N)
+  ├─> Posts (1:N, author)
   │     ├─> Comments (1:N)
   │     ├─> Categories (N:1)
-  │     └─> Tags (N:M via post_tags)
+  │     ├─> Tags (N:M via post_tags)
+  │     └─> Likes (N:M via likes)
   │
   ├─> Comments (1:N)
+  ├─> Likes (N:M with Posts)
   ├─> Refresh Tokens (1:N)
   ├─> OAuth Accounts (1:N)
+  └ ⚠️ user_id 참조 ···> (cross-DB, FK 불가)
+
+[ai-bench-db :5433]
+AI Models
   └─> Benchmark Results (1:N)
-        ├─> AI Models (N:1)
+        ├── user_id (portal users 참조, 앱 레벨 검증)
         └─> GPU Metrics (1:N, Hypertable)
 ```
 

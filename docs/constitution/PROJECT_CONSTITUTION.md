@@ -3,7 +3,7 @@
 > **이 문서는 프로젝트의 최상위 규칙입니다. 모든 개발자와 AI 에이전트는 이 원칙을 절대적으로 준수해야 합니다.**
 
 **제정일**: 2026-01-07
-**최종 수정**: 2026-01-07
+**최종 수정**: 2026-03-30
 **우선순위**: 🔴 **CRITICAL** (모든 문서 중 최우선)
 
 ---
@@ -40,9 +40,9 @@
 
 ---
 
-## 제2조: 모듈 독립성 원칙
+## 제2조: 모듈 및 서비스 독립성 원칙
 
-### 제1항: 모듈 간 직접 의존 금지
+### 제1항: 모듈 간 직접 의존 금지 (서비스 내부)
 ```
 ✅ 허용: module → shared/common
 ✅ 허용: module → domain/core
@@ -54,6 +54,20 @@
 - 각 모듈은 `index.ts` (Frontend) 또는 Public Interface (Backend)로만 외부 노출
 - 내부 구현은 외부에서 접근 불가
 - **위반 시**: 리팩토링 필요
+
+### 제3항: 독립 서비스 간 통신 규칙 (ADR-006)
+```
+✅ 허용: 서비스 → 서비스 (REST API 호출)
+✅ 허용: Portal → 서비스 (/health, /api/summary 조회)
+❌ 금지: 서비스 → 다른 서비스 DB 직접 접근
+❌ 금지: 서비스 간 코드/엔티티 공유 (복사는 허용)
+```
+- 모든 서비스는 **자기 DB에만** 접근 (물리적 분리로 교차 접근 원천 차단)
+- **Portal DB**: 인증(로그인) + 서비스 간 상호작용 데이터 (Service Registry 등)
+- **서비스별 DB**: 프로젝트 고유 데이터만 저장 (독립 PostgreSQL 인스턴스)
+- 서비스 간 데이터 필요 시 **REST API 호출**
+- 새 서비스 추가 시 **Service Contract** 준수 필수 (`/health` + `/api/summary`)
+- **위반 시**: 서비스 분리 재설계 필요
 
 ---
 
@@ -116,13 +130,13 @@ docs(readme): 설치 가이드 추가
 
 ### 제1항: RESTful 규칙
 ```
-✅ GET    /api/v1/posts
-✅ POST   /api/v1/posts
-✅ PUT    /api/v1/posts/{id}
-✅ DELETE /api/v1/posts/{id}
+✅ GET    /api/portal/posts
+✅ POST   /api/portal/posts
+✅ PUT    /api/portal/posts/{id}
+✅ DELETE /api/portal/posts/{id}
 
-❌ GET    /api/v1/getPost?id=1
-❌ POST   /api/v1/post/create
+❌ GET    /api/portal/getPost?id=1
+❌ POST   /api/portal/post/create
 ```
 
 ### 제2항: 응답 형식 표준
@@ -378,6 +392,7 @@ prod      ← 프로덕션 (AWS)
 | 날짜 | 조항 | 변경 내용 | 이유 |
 |------|------|-----------|------|
 | 2026-01-07 | - | 최초 제정 | 프로젝트 시작 |
+| 2026-03-30 | 제2조 | 제3항 추가: 독립 서비스 간 통신 규칙 | ADR-006 마이크로 아키텍처 전환 |
 
 ---
 
@@ -416,4 +431,4 @@ prod      ← 프로덕션 (AWS)
 
 **제정**: 2026-01-07
 **제정자**: 기원테크
-**프로젝트**: 3D 포트폴리오 블로그
+**프로젝트**: 포트폴리오 포털 (Portfolio Portal)

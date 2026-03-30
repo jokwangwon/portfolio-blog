@@ -2,7 +2,7 @@
 
 > **프로젝트 문서 전체 구조 및 읽는 순서**
 
-**최종 업데이트**: 2026-01-07
+**최종 업데이트**: 2026-03-30
 
 ---
 
@@ -17,19 +17,22 @@
 4. **[docs/architecture/depth-2-module-structure.md](architecture/depth-2-module-structure.md)** - 모듈 상세 구조 (Depth 2)
 5. **[docs/review/architecture-review.md](review/architecture-review.md)** - 아키텍처 검토 보고서 (평가 4.2/5.0)
 
-### 3. 개선된 설계 (아키텍처 리뷰 반영)
-6. **[docs/architecture/database-consolidation-design.md](architecture/database-consolidation-design.md)** 🔴 - PostgreSQL 통합 설계
-7. **[docs/architecture/observability-design.md](architecture/observability-design.md)** 🔴 - 로깅, 모니터링, 에러 추적
-8. **[docs/architecture/jwt-security-enhancement.md](architecture/jwt-security-enhancement.md)** 🟠 - JWT 보안 강화
+### 3. 기능 설계
+6. **[docs/architecture/pixel-office-design.md](architecture/pixel-office-design.md)** 🟠 - AI 픽셀 오피스 설계 (2D 가상 사무실 대시보드)
 
-### 4. 개발 가이드
-9. **[docs/guides/DEVELOPMENT_GUIDE.md](guides/DEVELOPMENT_GUIDE.md)** - 코딩 컨벤션, Git 규칙, API 설계
-10. **[docs/guides/TEST_STRATEGY.md](guides/TEST_STRATEGY.md)** 🟠 - 테스트 전략 (70% 커버리지 목표)
+### 4. 개선된 설계 (아키텍처 리뷰 반영)
+7. **[docs/architecture/database-consolidation-design.md](architecture/database-consolidation-design.md)** 🔴 - 서비스별 DB 물리 분리 설계
+8. **[docs/architecture/observability-design.md](architecture/observability-design.md)** 🔴 - 로깅, 모니터링, 에러 추적
+9. **[docs/architecture/jwt-security-enhancement.md](architecture/jwt-security-enhancement.md)** 🟠 - JWT 보안 강화
 
-### 5. 원칙 문서 (상세 규칙)
-11. **[docs/constitution/ARCHITECTURE_PRINCIPLES.md](constitution/ARCHITECTURE_PRINCIPLES.md)** - 아키텍처 10대 원칙
-12. **[docs/constitution/CODE_QUALITY_PRINCIPLES.md](constitution/CODE_QUALITY_PRINCIPLES.md)** - 코드 품질 원칙
-13. **[docs/constitution/SECURITY_PRINCIPLES.md](constitution/SECURITY_PRINCIPLES.md)** - 보안 원칙
+### 5. 개발 가이드
+10. **[docs/guides/DEVELOPMENT_GUIDE.md](guides/DEVELOPMENT_GUIDE.md)** - 코딩 컨벤션, Git 규칙, API 설계
+11. **[docs/guides/TEST_STRATEGY.md](guides/TEST_STRATEGY.md)** 🟠 - 테스트 전략 (70% 커버리지 목표)
+
+### 6. 원칙 문서 (상세 규칙)
+12. **[docs/constitution/ARCHITECTURE_PRINCIPLES.md](constitution/ARCHITECTURE_PRINCIPLES.md)** - 아키텍처 10대 원칙
+13. **[docs/constitution/CODE_QUALITY_PRINCIPLES.md](constitution/CODE_QUALITY_PRINCIPLES.md)** - 코드 품질 원칙
+14. **[docs/constitution/SECURITY_PRINCIPLES.md](constitution/SECURITY_PRINCIPLES.md)** - 보안 원칙
 
 ---
 
@@ -49,9 +52,15 @@ docs/
 ├── architecture/                     # 아키텍처 설계
 │   ├── blog-architecture-context.md  # 전체 시스템 아키텍처 (Depth 1)
 │   ├── depth-2-module-structure.md   # 모듈 구조 (Depth 2)
-│   ├── database-consolidation-design.md  # 🔴 PostgreSQL 통합 설계
+│   ├── database-consolidation-design.md  # 🔴 서비스별 DB 물리 분리 설계
+│   ├── database-erd.md               # ERD 다이어그램
 │   ├── observability-design.md       # 🔴 Observability 설계
-│   └── jwt-security-enhancement.md   # 🟠 JWT 보안 강화
+│   ├── jwt-security-enhancement.md   # 🟠 JWT 보안 강화
+│   └── pixel-office-design.md        # 🟠 AI 픽셀 오피스 설계
+│
+├── api/                              # API 명세
+│   ├── API_SPECIFICATION.md          # API 엔드포인트 상세 명세
+│   └── openapi.yaml                  # OpenAPI 스펙
 │
 ├── review/                           # 검토 및 분석
 │   └── architecture-review.md        # 아키텍처 검토 보고서
@@ -66,11 +75,15 @@ docs/
 │   ├── ADR-001-database-consolidation.md
 │   ├── ADR-002-observability-first.md
 │   ├── ADR-003-jwt-refresh-token-rotation.md
-│   └── ADR-004-test-strategy.md
+│   ├── ADR-004-test-strategy.md
+│   ├── ADR-005-pixel-office-tech-stack.md
+│   └── ADR-006-microservice-architecture.md
 │
 ├── sessions/                         # 세션별 작업 로그
 │   ├── README.md                     # 세션 로그 가이드
-│   └── SESSION_2026-01-07.md         # 세션 #1 로그
+│   ├── SESSION_2026-01-07.md         # 세션 #1 로그
+│   ├── SESSION_2026-03-26.md         # 세션 #2 로그
+│   └── SESSION_2026-03-30.md         # 세션 #3 로그
 │
 └── history/                          # 과거 문서 (참고용)
     └── README.md                     # 아카이브 설명
@@ -82,7 +95,7 @@ docs/
 
 ### 🔴 CRITICAL (반드시 읽어야 함)
 - `PROJECT_CONSTITUTION.md` - 프로젝트 헌법 (모든 개발의 기준)
-- `database-consolidation-design.md` - DB 통합 설계 (기존 3개 DB → 1개)
+- `database-consolidation-design.md` - 서비스별 DB 물리 분리 설계 (portal-db + ai-bench-db)
 - `observability-design.md` - 로깅/모니터링 (프로덕션 필수)
 
 ### 🟠 HIGH (Phase 1 완료 전)
@@ -112,9 +125,9 @@ blog-architecture-context.md (기본 아키텍처)
 architecture-review.md (검토 및 개선안)
     ↓
 개선 설계 문서들:
-    ├─→ database-consolidation-design.md
-    ├─→ observability-design.md
-    └─→ jwt-security-enhancement.md
+    ├─→ database-consolidation-design.md (DB 물리 분리)
+    ├─→ observability-design.md (분산 환경 Observability)
+    └─→ jwt-security-enhancement.md (Refresh Token Rotation)
 ```
 
 ---
@@ -129,6 +142,10 @@ architecture-review.md (검토 및 개선안)
 | 2026-01-07 | Observability 설계 추가 | `observability-design.md` |
 | 2026-01-07 | JWT 보안 강화 설계 | `jwt-security-enhancement.md` |
 | 2026-01-07 | 테스트 전략 수립 | `TEST_STRATEGY.md` |
+| 2026-03-26 | AI 픽셀 오피스 설계 추가 | `pixel-office-design.md`, `ADR-005` |
+| 2026-03-26 | 누락 ADR 생성 (002, 003, 004) | `ADR-002`, `ADR-003`, `ADR-004` |
+| 2026-03-30 | CONTEXT.md 현행화, INDEX.md 갱신 | `CONTEXT.md`, `INDEX.md` |
+| 2026-03-30 | **아키텍처 전환** — 독립 서비스 + 중앙 포털 | `blog-architecture-context.md`, `depth-2`, `ADR-006` |
 
 ---
 

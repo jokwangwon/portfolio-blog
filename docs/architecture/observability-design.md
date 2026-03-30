@@ -2,8 +2,11 @@
 
 > **아키텍처 리뷰 반영 문서**
 > 누락된 관찰성(Observability) 기능 추가 설계
+>
+> **참고**: 이 문서는 [ADR-006](../decisions/ADR-006-microservice-architecture.md) 이후 독립 서비스 + 중앙 포털 아키텍처에 맞게 갱신되었습니다. 각 서비스(Portal API, AI Benchmark API 등)별로 독립적인 Observability 스택을 구성하며, Nginx Gateway 계층의 모니터링도 포함합니다.
 
 **작성일**: 2026-01-07
+**최종 수정**: 2026-03-30
 **우선순위**: 🔴 **CRITICAL**
 **근거**: `docs/review/architecture-review.md` 권장사항 #2
 
@@ -30,7 +33,7 @@ Observability(관찰성)는 시스템의 내부 상태를 외부에서 파악할
 
 ### 2.1 구조화된 로깅 (Critical)
 
-#### Main API (Spring Boot)
+#### Portal API (Spring Boot)
 
 **의존성 추가**
 ```gradle
@@ -63,7 +66,7 @@ dependencies {
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <includeMdc>true</includeMdc>
                 <includeContext>false</includeContext>
-                <customFields>{"service":"main-api","environment":"${ENVIRONMENT}"}</customFields>
+                <customFields>{"service":"portal-api","environment":"${ENVIRONMENT}"}</customFields>
                 <fieldNames>
                     <timestamp>timestamp</timestamp>
                     <version>version</version>
@@ -78,10 +81,10 @@ dependencies {
 
         <!-- 파일 로그 (로컬 백업) -->
         <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/var/log/blog-api/application.log</file>
+            <file>/var/log/portal-api/application.log</file>
             <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/var/log/blog-api/application-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <fileNamePattern>/var/log/portal-api/application-%d{yyyy-MM-dd}.log</fileNamePattern>
                 <maxHistory>30</maxHistory>
             </rollingPolicy>
         </appender>
@@ -93,7 +96,7 @@ dependencies {
     </springProfile>
 
     <!-- 패키지별 레벨 설정 -->
-    <logger name="com.blog" level="DEBUG" />
+    <logger name="com.portfolio.portal" level="DEBUG" />
     <logger name="org.springframework" level="INFO" />
     <logger name="org.hibernate.SQL" level="DEBUG" />
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />
@@ -103,7 +106,7 @@ dependencies {
 **MDC (Mapped Diagnostic Context) 활용**
 ```java
 // common/src/main/java/com/blog/common/logging/RequestLoggingFilter.java
-package com.blog.common.logging;
+package com.portfolio.portal.common.logging;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -176,13 +179,13 @@ public class PostService {
 {
   "timestamp": "2026-01-07T10:30:45.123Z",
   "level": "INFO",
-  "service": "main-api",
+  "service": "portal-api",
   "environment": "prod",
-  "logger": "com.blog.module.blog.service.PostService",
+  "logger": "com.portfolio.portal.module.blog.service.PostService",
   "message": "Creating post: title=My First Post",
   "request_id": "a3f2c1d4-5678-90ab-cdef-1234567890ab",
   "method": "POST",
-  "path": "/api/v1/posts",
+  "path": "/api/portal/posts",
   "user_id": "123",
   "user_agent": "Mozilla/5.0...",
   "thread": "http-nio-8080-exec-1"
@@ -241,7 +244,7 @@ from app.core.logging import setup_logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
-@app.post("/api/v1/generate")
+@app.post("/api/ai/generate")
 async def generate(request: GenerateRequest):
     logger.info("Inference request received", extra={
         "model_id": request.model_id,
@@ -329,7 +332,7 @@ export const logger = new Logger();
 
 ### 2.2 에러 추적 (Sentry) - Critical
 
-#### Main API (Spring Boot)
+#### Portal API (Spring Boot)
 
 **의존성 추가**
 ```gradle
@@ -511,11 +514,11 @@ export default function Error({
 
 ### 2.3 Health Check 엔드포인트 (High)
 
-#### Main API
+#### Portal API
 
 ```java
-// api-server/src/main/java/com/blog/api/controller/HealthController.java
-package com.blog.api.controller;
+// api-server/src/main/java/com/portfolio/portal/api/controller/HealthController.java
+package com.portfolio.portal.api.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.health.Health;
@@ -541,7 +544,8 @@ public class HealthController {
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> health = new HashMap<>();
         health.put("status", "UP");
-        health.put("service", "main-api");
+        health.put("service", "portal-api");
+        health.put("version", "1.0.0");
         health.put("timestamp", System.currentTimeMillis());
 
         return ResponseEntity.ok(health);
@@ -610,7 +614,7 @@ async def health_database(db: Session = Depends(get_db)):
 
 #### Prometheus 메트릭 수집
 
-**Main API**
+**Portal API**
 ```gradle
 dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
@@ -691,13 +695,27 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'main-api'
+  # Portal API (Spring Boot Actuator)
+  - job_name: 'portal-api'
+    metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['main-api:8080']
+      - targets: ['portal-api:8080']
 
-  - job_name: 'ai-api'
+  # AI Benchmark API (FastAPI)
+  - job_name: 'ai-benchmark-api'
+    metrics_path: '/metrics'
     static_configs:
-      - targets: ['ai-api:8000']
+      - targets: ['ai-benchmark-api:8000']
+
+  # Nginx Gateway
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+
+  # 새 서비스 추가 시 아래 패턴 복사
+  # - job_name: '{service-name}'
+  #   static_configs:
+  #     - targets: ['{service-name}:{port}']
 ```
 
 ---
@@ -712,7 +730,7 @@ scrape_configs:
   "logConfiguration": {
     "logDriver": "awslogs",
     "options": {
-      "awslogs-group": "/ecs/blog-api",
+      "awslogs-group": "/ecs/portal-api",
       "awslogs-region": "ap-northeast-2",
       "awslogs-stream-prefix": "ecs"
     }
@@ -768,7 +786,7 @@ THEN send notification to Email
 ```hcl
 # terraform/cloudwatch_alarms.tf
 resource "aws_cloudwatch_metric_alarm" "api_high_error_rate" {
-  alarm_name          = "blog-api-high-error-rate"
+  alarm_name          = "portal-api-high-error-rate"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
   metric_name         = "5XXError"
@@ -783,27 +801,101 @@ resource "aws_cloudwatch_metric_alarm" "api_high_error_rate" {
 
 ---
 
-## 6. 구현 체크리스트
+## 6. 분산 환경 Observability (ADR-006 반영)
+
+> 독립 서비스 + 중앙 포털 아키텍처에서 추가로 고려할 사항
+
+### 6.1 서비스별 Health Check 통합
+
+Portal API의 Service Registry가 각 서비스의 `/health`를 주기적으로 폴링합니다.
+
+```
+Portal Registry ──(30초 간격)──→ Portal API      /health
+                ──(30초 간격)──→ AI Benchmark API /health
+                ──(30초 간격)──→ {새 서비스}      /health
+```
+
+각 서비스의 Health Check 응답은 **Service Contract**를 따릅니다:
+```json
+{
+  "status": "UP",
+  "service": "ai-benchmark-api",
+  "version": "1.0.0",
+  "timestamp": 1711785600000
+}
+```
+
+### 6.2 Nginx Gateway 메트릭
+
+Nginx는 모든 요청의 진입점이므로 별도 모니터링이 필요합니다.
+
+```nginx
+# nginx.conf — stub_status 활성화
+server {
+    listen 8081;
+    location /nginx_status {
+        stub_status on;
+        allow 172.16.0.0/12;  # Docker 내부 네트워크만 허용
+        deny all;
+    }
+}
+```
+
+수집 메트릭:
+- `nginx_connections_active` — 현재 활성 연결 수
+- `nginx_http_requests_total` — 총 요청 수
+- 서비스별 5xx 비율 (access log 파싱)
+
+### 6.3 분산 추적 (Distributed Tracing)
+
+서비스 간 요청 추적을 위해 `X-Request-ID` 헤더를 전파합니다.
+
+```
+Client → Nginx (X-Request-ID 생성) → Portal API (MDC에 기록)
+Client → Nginx (X-Request-ID 생성) → AI Benchmark API (로그에 기록)
+```
+
+```nginx
+# nginx.conf — 요청 ID 전파
+proxy_set_header X-Request-ID $request_id;
+```
+
+각 서비스는 이 헤더를 로그에 포함하여 서비스 간 요청을 추적할 수 있습니다.
+
+### 6.4 Grafana 대시보드 구성
+
+| 대시보드 | 데이터 소스 | 주요 패널 |
+|----------|------------|-----------|
+| **Gateway Overview** | Nginx Exporter | 요청 수, 에러율, 응답 시간 |
+| **Portal API** | Prometheus (Actuator) | JVM 메트릭, API 응답 시간, DB 풀 |
+| **AI Benchmark API** | Prometheus (FastAPI) | 추론 시간, GPU 사용률, 요청 수 |
+| **Service Health** | Service Registry | 서비스 상태, 마지막 응답 시간 |
+
+---
+
+## 7. 구현 체크리스트
 
 ### Phase 1 (MVP 필수)
-- [ ] Logback JSON 로깅 설정 (Main API)
-- [ ] Python JSON 로깅 설정 (AI API)
+- [ ] Logback JSON 로깅 설정 (Portal API)
+- [ ] Python JSON 로깅 설정 (AI Benchmark API)
 - [ ] MDC 필터 구현 (request_id, user_id)
-- [ ] Sentry 연동 (Frontend, Main API, AI API)
-- [ ] Health Check 엔드포인트 (/health, /health/db)
+- [ ] Sentry 연동 (Frontend, Portal API, AI Benchmark API)
+- [ ] Health Check 엔드포인트 (/health, /health/db) — 각 서비스별
 - [ ] Error Boundary (Frontend)
 - [ ] Sentry 알림 설정 (Slack 연동)
 
 ### Phase 2 (고도화)
-- [ ] Prometheus 메트릭 수집
-- [ ] Grafana 대시보드 구축
+- [ ] Prometheus 메트릭 수집 (서비스별 job 구성)
+- [ ] Nginx Exporter 연동
+- [ ] Grafana 대시보드 구축 (서비스별 4개 대시보드)
+- [ ] X-Request-ID 분산 추적 구현
 - [ ] CloudWatch Logs 연동
 - [ ] CloudWatch 알림 설정
 - [ ] APM 도입 (Sentry Performance 또는 Datadog)
 
 ---
 
-## 7. 비용 분석
+## 8. 비용 분석
 
 ### Sentry (무료 티어)
 - **이벤트**: 5,000 errors/월
@@ -820,12 +912,12 @@ resource "aws_cloudwatch_metric_alarm" "api_high_error_rate" {
 
 ---
 
-## 8. 결론
+## 9. 결론
 
 ### Phase 1 필수 구현
 1. **구조화된 JSON 로깅** → 디버깅 효율 80% 향상
 2. **Sentry 에러 추적** → 프로덕션 에러 발견 속도 10배 개선
-3. **Health Check** → 서비스 상태 모니터링
+3. **Health Check** → 서비스 상태 모니터링 (서비스별 독립 + 포털 통합)
 
 ### 예상 효과
 - ✅ 프로덕션 버그 추적 시간 80% 단축

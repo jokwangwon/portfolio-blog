@@ -63,7 +63,7 @@ Stateless JWT 특성:
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant A as Main API
+    participant A as Portal API
     participant D as PostgreSQL
 
     C->>A: POST /auth/login (username, password)
@@ -120,7 +120,7 @@ CREATE INDEX idx_refresh_tokens_family ON refresh_tokens(token_family);
 
 ```java
 // security/src/main/java/com/blog/security/jwt/JwtTokenProvider.java
-package com.blog.security.jwt;
+package com.portfolio.security.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -225,12 +225,12 @@ public class JwtTokenProvider {
 
 ```java
 // security/src/main/java/com/blog/security/service/RefreshTokenService.java
-package com.blog.security.service;
+package com.portfolio.security.service;
 
-import com.blog.domain.security.entity.RefreshToken;
-import com.blog.domain.security.repository.RefreshTokenRepository;
-import com.blog.security.jwt.JwtTokenProvider;
-import com.blog.security.jwt.RefreshTokenInfo;
+import com.portfolio.domain.security.entity.RefreshToken;
+import com.portfolio.domain.security.repository.RefreshTokenRepository;
+import com.portfolio.security.jwt.JwtTokenProvider;
+import com.portfolio.security.jwt.RefreshTokenInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -347,9 +347,9 @@ public class RefreshTokenService {
 
 ```java
 // domain/src/main/java/com/blog/domain/security/repository/RefreshTokenRepository.java
-package com.blog.domain.security.repository;
+package com.portfolio.domain.security.repository;
 
-import com.blog.domain.security.entity.RefreshToken;
+import com.portfolio.domain.security.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -383,10 +383,10 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
 ```java
 // api-server/src/main/java/com/blog/api/controller/AuthController.java
-package com.blog.api.controller;
+package com.portfolio.portal.api.controller;
 
-import com.blog.module.user.service.AuthService;
-import com.blog.security.jwt.RefreshTokenInfo;
+import com.portfolio.portal.user.service.AuthService;
+import com.portfolio.security.jwt.RefreshTokenInfo;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -396,7 +396,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/portal/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -482,7 +482,7 @@ public class AuthController {
         Cookie cookie = new Cookie("refresh_token", token);
         cookie.setHttpOnly(true);  // JavaScript 접근 불가 (XSS 방지)
         cookie.setSecure(true);    // HTTPS만 전송
-        cookie.setPath("/api/v1/auth/refresh");
+        cookie.setPath("/api/portal/auth/refresh");
         cookie.setMaxAge((int) (expiresAt.getEpochSecond() - Instant.now().getEpochSecond()));
         cookie.setSameSite("Strict");  // CSRF 방지
 
@@ -511,7 +511,7 @@ public class AuthController {
         Cookie cookie = new Cookie("refresh_token", null);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setPath("/api/v1/auth/refresh");
+        cookie.setPath("/api/portal/auth/refresh");
         cookie.setMaxAge(0);
 
         response.addCookie(cookie);
@@ -542,7 +542,7 @@ let refreshSubscribers: Array<(token: string) => void> = [];
 async function refreshAccessToken(): Promise<string | null> {
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/refresh`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/portal/auth/refresh`,
       {},
       { withCredentials: true }
     );

@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: 3D Portfolio Blog API
+  title: Portfolio Portal API
   description: |
-    REST API for 3D Interactive Portfolio Blog with AI Benchmark
+    REST API for Portfolio Portal (Blog, Auth, Service Registry) + AI Benchmark
 
     ## Features
     - JWT Authentication with Refresh Token Rotation
@@ -22,14 +22,16 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: http://localhost:8080/api/v1
-    description: Local Development (Main API)
-  - url: http://localhost:8000/api/v1
-    description: Local Development (AI API)
-  - url: https://api.yourdomain.com/api/v1
-    description: Production (Main API)
+  - url: http://localhost:8080/api/portal
+    description: Local Development (Portal API)
+  - url: http://localhost:8000/api/ai
+    description: Local Development (AI Benchmark API)
+  - url: https://api.yourdomain.com/api/portal
+    description: Production (Portal API)
 
 tags:
+  - name: Service Contract
+    description: Health check & summary (모든 서비스 필수 구현)
   - name: Auth
     description: Authentication & Authorization
   - name: Posts
@@ -48,6 +50,43 @@ tags:
     description: AI benchmark operations
 
 paths:
+  # ==========================================
+  # Service Contract (모든 서비스 필수)
+  # ==========================================
+  /health:
+    get:
+      tags: [Service Contract]
+      summary: 헬스 체크
+      description: 서비스 상태 확인 (DB 연결 포함)
+      operationId: healthCheck
+      responses:
+        '200':
+          description: 상태 반환 (status 값으로 판단)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/summary:
+    get:
+      tags: [Service Contract]
+      summary: 서비스 요약 데이터
+      description: 포털 대시보드용 서비스 요약 정보
+      operationId: getServiceSummary
+      responses:
+        '200':
+          description: 요약 데이터 반환
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceSummary'
+        '500':
+          description: 요약 데이터 조회 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   # ==========================================
   # Authentication
   # ==========================================
@@ -142,7 +181,7 @@ paths:
               description: Refresh Token (HttpOnly Cookie)
               schema:
                 type: string
-                example: refresh_token=abc123...; HttpOnly; Secure; SameSite=Strict; Max-Age=604800; Path=/api/v1/auth/refresh
+                example: refresh_token=abc123...; HttpOnly; Secure; SameSite=Strict; Max-Age=604800; Path=/api/portal/auth/refresh
           content:
             application/json:
               schema:
@@ -392,7 +431,90 @@ paths:
           $ref: '#/components/responses/NotFound'
 
   # ==========================================
-  # Categories
+  # Posts - Search & Like
+  # ==========================================
+  /posts/search:
+    get:
+      tags: [Posts]
+      summary: 게시글 검색
+      operationId: searchPosts
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: 검색어 (2자 이상)
+          schema:
+            type: string
+            minLength: 2
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: 검색 결과 (페이징)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedPostSummary'
+
+  /posts/{id}/like:
+    post:
+      tags: [Posts]
+      summary: 좋아요 추가
+      operationId: likePost
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 좋아요 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeResponse'
+        '409':
+          description: 이미 좋아요한 게시글
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Posts]
+      summary: 좋아요 취소
+      operationId: unlikePost
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 좋아요 취소 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeResponse'
+
+  # ==========================================
+  # Categories (CRUD)
   # ==========================================
   /categories:
     get:
@@ -408,9 +530,88 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Category'
+    post:
+      tags: [Categories]
+      summary: 카테고리 생성 (ADMIN)
+      operationId: createCategory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '201':
+          description: 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: 이름/slug 중복
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /categories/{id}:
+    put:
+      tags: [Categories]
+      summary: 카테고리 수정 (ADMIN)
+      operationId: updateCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '200':
+          description: 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Categories]
+      summary: 카테고리 삭제 (ADMIN)
+      operationId: deleteCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: 삭제 성공
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   # ==========================================
-  # Tags
+  # Tags (CRUD)
   # ==========================================
   /tags:
     get:
@@ -426,6 +627,71 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Tag'
+    post:
+      tags: [Tags]
+      summary: 태그 생성 (ADMIN)
+      operationId: createTag
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreateRequest'
+      responses:
+        '201':
+          description: 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tags/{id}:
+    put:
+      tags: [Tags]
+      summary: 태그 수정 (ADMIN)
+      operationId: updateTag
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagCreateRequest'
+      responses:
+        '200':
+          description: 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+    delete:
+      tags: [Tags]
+      summary: 태그 삭제 (ADMIN)
+      operationId: deleteTag
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: 삭제 성공
 
   # ==========================================
   # Comments
@@ -492,6 +758,76 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
+  /posts/{postId}/comments/{id}:
+    put:
+      tags: [Comments]
+      summary: 댓글 수정
+      operationId: updateComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+      responses:
+        '200':
+          description: 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Comments]
+      summary: 댓글 삭제
+      operationId: deleteComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: 삭제 성공
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
 # ==========================================
 # Components
@@ -697,10 +1033,129 @@ components:
           format: date-time
 
     # ==========================================
+    # Service Contract Schemas
+    # ==========================================
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+          example: UP
+        service:
+          type: string
+          example: portal-api
+        version:
+          type: string
+          example: "1.0.0"
+        timestamp:
+          type: string
+          format: date-time
+        error:
+          type: string
+          description: DOWN/DEGRADED 시 에러 메시지
+          nullable: true
+
+    ServiceSummary:
+      type: object
+      properties:
+        service:
+          type: string
+          example: portal-api
+        displayName:
+          type: string
+          example: "포트폴리오 포털"
+        description:
+          type: string
+        icon:
+          type: string
+          example: globe
+        stats:
+          type: object
+          additionalProperties: true
+        routes:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              label:
+                type: string
+
+    # ==========================================
+    # Paged Response
+    # ==========================================
+    PagedPostSummary:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostSummary'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    # ==========================================
+    # Like Response
+    # ==========================================
+    LikeResponse:
+      type: object
+      properties:
+        postId:
+          type: integer
+          format: int64
+        likeCount:
+          type: integer
+        liked:
+          type: boolean
+
+    # ==========================================
+    # Category & Tag CRUD Schemas
+    # ==========================================
+    CategoryCreateRequest:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: '^[a-z0-9-]+$'
+        description:
+          type: string
+          maxLength: 500
+
+    TagCreateRequest:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: '^[a-z0-9-]+$'
+
+    # ==========================================
     # Error Response
     # ==========================================
     ErrorResponse:
       type: object
+      required: [timestamp, status, error, message, errorCode]
       properties:
         timestamp:
           type: string
@@ -714,13 +1169,25 @@ components:
           example: "Bad Request"
         message:
           type: string
-          example: "Validation failed for field 'email'"
+          example: "Validation failed"
         errorCode:
           type: string
           example: "VALIDATION_ERROR"
         path:
           type: string
-          example: "/api/v1/posts"
+          example: "/api/portal/posts"
+        errors:
+          type: array
+          description: VALIDATION_ERROR 시 필드별 에러 목록
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "email"
+              message:
+                type: string
+                example: "이메일 형식이 올바르지 않습니다"
 
   responses:
     BadRequest:

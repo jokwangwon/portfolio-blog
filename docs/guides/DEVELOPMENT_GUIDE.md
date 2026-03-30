@@ -1,21 +1,24 @@
 # 개발 가이드라인
 
-> 3D 포트폴리오 블로그 프로젝트의 개발 규칙 및 컨벤션
+> 포트폴리오 포털 프로젝트의 개발 규칙 및 컨벤션
+
+**최종 수정**: 2026-03-30
 
 ---
 
 ## 📋 목차
 
 1. [프로젝트 구조](#1-프로젝트-구조)
-2. [코딩 컨벤션](#2-코딩-컨벤션)
-3. [Git 워크플로우](#3-git-워크플로우)
-4. [API 설계 규칙](#4-api-설계-규칙)
-5. [데이터베이스 규칙](#5-데이터베이스-규칙)
-6. [에러 처리 규칙](#6-에러-처리-규칙)
-7. [테스트 작성 규칙](#7-테스트-작성-규칙)
-8. [보안 규칙](#8-보안-규칙)
-9. [성능 최적화 규칙](#9-성능-최적화-규칙)
-10. [문서화 규칙](#10-문서화-규칙)
+2. [서비스 간 통신 규칙](#2-서비스-간-통신-규칙)
+3. [코딩 컨벤션](#3-코딩-컨벤션)
+4. [Git 워크플로우](#4-git-워크플로우)
+5. [API 설계 규칙](#5-api-설계-규칙)
+6. [데이터베이스 규칙](#6-데이터베이스-규칙)
+7. [에러 처리 규칙](#7-에러-처리-규칙)
+8. [테스트 작성 규칙](#8-테스트-작성-규칙)
+9. [보안 규칙](#9-보안-규칙)
+10. [성능 최적화 규칙](#10-성능-최적화-규칙)
+11. [문서화 규칙](#11-문서화-규칙)
 
 ---
 
@@ -24,16 +27,25 @@
 ### 1.1 저장소 구조
 
 ```
-portfolio-blog/
-├── backend/              # Spring Boot 멀티 모듈
-├── frontend/             # Next.js 애플리케이션
-├── ai-api/              # FastAPI 애플리케이션
-├── infrastructure/       # Docker, Nginx 설정
-├── docs/                # 프로젝트 문서
-└── scripts/             # 유틸리티 스크립트
+portfolio-portal/
+├── backend/                  # Portal API (Spring Boot 멀티 모듈)
+│   ├── api-server/           # 실행 모듈
+│   ├── module-blog/          # 블로그 기능
+│   ├── module-user/          # 사용자 관리
+│   ├── module-registry/      # 서비스 레지스트리
+│   ├── security/             # JWT, OAuth2
+│   ├── domain/               # 엔티티, 리포지토리
+│   └── common/               # 공통 유틸
+├── ai-benchmark-api/         # AI Benchmark API (FastAPI, 독립 서비스)
+├── frontend/                 # Next.js Shell App
+├── docker-compose.yml        # 전체 서비스 실행
+├── nginx/                    # API Gateway 설정
+│   └── nginx.conf
+├── docs/                     # 프로젝트 문서
+└── scripts/                  # 유틸리티 스크립트
 ```
 
-### 1.2 모듈 독립성 원칙
+### 1.2 모듈 독립성 원칙 (서비스 내부)
 
 **✅ 허용:**
 - `module` → `shared/common`
@@ -44,11 +56,109 @@ portfolio-blog/
 - `module` → `module` (모듈 간 직접 의존)
 - 순환 의존성
 
+### 1.3 서비스 독립성 원칙 (서비스 간)
+
+**✅ 허용:**
+- 서비스 → 서비스 (REST API 호출)
+- Portal → 서비스 (`/health`, `/api/summary` 조회)
+
+**❌ 금지:**
+- 서비스 → 다른 서비스 DB 직접 접근
+- 서비스 간 코드/엔티티 공유 (복사는 허용)
+
+> 상세: [ADR-006](../decisions/ADR-006-microservice-architecture.md), [헌법 제2조 제3항](../constitution/PROJECT_CONSTITUTION.md)
+
 ---
 
-## 2. 코딩 컨벤션
+## 2. 서비스 간 통신 규칙
 
-### 2.1 Java / Spring Boot
+### 2.1 Nginx API Gateway 라우팅
+
+```nginx
+# nginx/nginx.conf
+server {
+    listen 80;
+
+    # Frontend (Next.js)
+    location / {
+        proxy_pass http://frontend:3000;
+    }
+
+    # Portal API (Spring Boot)
+    location /api/portal/ {
+        proxy_pass http://api-server:8080/api/portal/;
+    }
+
+    # AI Benchmark API (FastAPI)
+    location /api/ai/ {
+        proxy_pass http://ai-api:8000/api/ai/;
+    }
+
+    # 새 서비스 추가 시 여기에 라우팅 추가
+    # location /api/{service}/ {
+    #     proxy_pass http://{service}:{port}/api/{service}/;
+    # }
+}
+```
+
+### 2.2 서비스별 API 프리픽스
+
+| 서비스 | 프리픽스 | 예시 |
+|--------|---------|------|
+| Portal API | `/api/portal/*` | `GET /api/portal/posts` |
+| AI Benchmark API | `/api/ai/*` | `GET /api/ai/models` |
+| 새 서비스 | `/api/{service}/*` | `GET /api/phototoon/photos` |
+
+### 2.3 Service Contract (필수 엔드포인트)
+
+모든 서비스는 다음 2개 엔드포인트를 반드시 구현합니다:
+
+```
+GET /health         → 생존 확인 (Portal이 주기적으로 호출)
+GET /api/summary    → 대시보드 요약 (Portal이 캐시)
+```
+
+> 상세 응답 형식: [blog-architecture-context.md > Service Contract](../architecture/blog-architecture-context.md)
+
+### 2.4 DB 역할 분리 (물리적 분리)
+
+각 서비스는 **독립 PostgreSQL 인스턴스**를 사용합니다 (Docker 컨테이너 분리).
+
+| DB | 역할 | 데이터 |
+|----|------|--------|
+| `portal-db` | 중앙 관리 | 인증(로그인), 사용자, 블로그, Service Registry |
+| `ai-bench-db` | AI 벤치마크 전용 | 모델, 벤치마크 결과, GPU 메트릭 |
+| `{service}-db` | 새 서비스 전용 | 프로젝트 고유 데이터 |
+
+물리적 분리이므로 **인프라 레벨에서 교차 접근이 원천 차단**됩니다.
+
+### 2.5 서비스 간 데이터 교환
+
+```
+✅ Portal이 AI Benchmark의 모델 목록이 필요할 때:
+   → GET http://ai-api:8000/api/ai/models (REST API 호출)
+
+❌ Portal이 ai-bench-db를 직접 쿼리
+   → 불가능 (물리적으로 다른 DB 인스턴스)
+```
+
+### 2.6 인증 전파
+
+```
+1. 사용자 → Portal API로 로그인 → JWT 발급
+2. Frontend → Authorization: Bearer {jwt} 헤더 포함
+3. Nginx → 각 서비스로 헤더 그대로 전달
+4. 각 서비스:
+   - Portal API: JWT 발급 + 검증
+   - AI Benchmark API: JWT 검증만 (발급 안 함)
+   - 새 서비스: JWT 검증 라이브러리 사용
+```
+
+---
+
+## 3. 코딩 컨벤션
+
+### 3.1 Java / Spring Boot
 
 #### 네이밍 규칙
 
@@ -75,8 +185,8 @@ public static final int MAX_PAGE_SIZE = 100;
 public static final String DEFAULT_ROLE = "USER";
 
 // 패키지명: lowercase
-com.portfolio.blog.service
-com.portfolio.blog.controller.api
+com.portfolio.portal.blog.service
+com.portfolio.portal.user.controller
 ```
 
 #### 레이어별 네이밍
@@ -154,7 +264,7 @@ public class Post extends BaseEntity {
 
 // Controller
 @RestController
-@RequestMapping("/api/v1/posts")
+@RequestMapping("/api/portal/posts")
 @RequiredArgsConstructor
 @Tag(name = "Post", description = "게시글 API")
 public class PostController {}
@@ -173,7 +283,7 @@ public class SecurityConfig {}
 
 ---
 
-### 2.2 TypeScript / React / Next.js
+### 3.2 TypeScript / React / Next.js
 
 #### 네이밍 규칙
 
@@ -327,7 +437,7 @@ export default function PostCard(props) {  // 타입 없음
 
 ---
 
-### 2.3 Python / FastAPI
+### 3.3 Python / FastAPI
 
 #### 네이밍 규칙
 
@@ -401,9 +511,9 @@ async def generate_text(request, db):  # 타입 없음
 
 ---
 
-## 3. Git 워크플로우
+## 4. Git 워크플로우
 
-### 3.1 브랜치 전략 (Git Flow 간소화)
+### 4.1 브랜치 전략 (Git Flow 간소화)
 
 ```
 main (프로덕션)
@@ -431,7 +541,7 @@ hotfix/fix-memory-leak
 release/v1.0.0
 ```
 
-### 3.2 커밋 메시지 규칙
+### 4.2 커밋 메시지 규칙
 
 #### 포맷
 
@@ -474,7 +584,7 @@ fix bug
 작업 완료
 ```
 
-### 3.3 Pull Request 규칙
+### 4.3 Pull Request 규칙
 
 #### PR 템플릿
 
@@ -499,35 +609,38 @@ Closes #이슈번호
 
 ---
 
-## 4. API 설계 규칙
+## 5. API 설계 규칙
 
-### 4.1 RESTful API 규칙
+### 5.1 RESTful API 규칙
 
 #### URL 규칙
 
 ```bash
-# ✅ 좋은 예
-GET    /api/v1/posts              # 목록 조회
-GET    /api/v1/posts/{id}         # 단건 조회
-POST   /api/v1/posts              # 생성
-PUT    /api/v1/posts/{id}         # 전체 수정
-PATCH  /api/v1/posts/{id}         # 부분 수정
-DELETE /api/v1/posts/{id}         # 삭제
+# ✅ 좋은 예 (서비스별 프리픽스 사용)
+# Portal API
+GET    /api/portal/posts              # 목록 조회
+GET    /api/portal/posts/{id}         # 단건 조회
+POST   /api/portal/posts              # 생성
+PUT    /api/portal/posts/{id}         # 전체 수정
+PATCH  /api/portal/posts/{id}         # 부분 수정
+DELETE /api/portal/posts/{id}         # 삭제
 
 # 중첩 리소스
-GET    /api/v1/posts/{id}/comments
-POST   /api/v1/posts/{id}/comments
+GET    /api/portal/posts/{id}/comments
+POST   /api/portal/posts/{id}/comments
 
-# 액션 (동사 허용)
-POST   /api/v1/posts/{id}/publish
-POST   /api/v1/posts/{id}/like
-POST   /api/v1/auth/login
-POST   /api/v1/auth/refresh
+# 인증 (Portal 전용)
+POST   /api/portal/auth/login
+POST   /api/portal/auth/refresh
+
+# AI Benchmark API
+GET    /api/ai/models
+POST   /api/ai/benchmark/run
 
 # ❌ 나쁜 예
-GET    /api/v1/getPost?id=1       # 동사 사용 금지
-POST   /api/v1/post/create        # create 불필요
-GET    /api/v1/posts/1/edit       # GET은 조회만
+GET    /api/portal/getPost?id=1    # 동사 사용 금지
+POST   /api/portal/post/create    # create 불필요
+GET    /api/portal/posts/1/edit   # GET은 조회만
 ```
 
 #### HTTP 상태 코드
@@ -544,7 +657,7 @@ GET    /api/v1/posts/1/edit       # GET은 조회만
 | 409 | Conflict | 충돌 (중복 등) |
 | 500 | Internal Server Error | 서버 오류 |
 
-### 4.2 응답 형식 표준
+### 5.2 응답 형식 표준
 
 #### 성공 응답
 
@@ -580,16 +693,16 @@ GET    /api/v1/posts/1/edit       # GET은 조회만
   "status": 404,
   "error": "Not Found",
   "message": "게시글을 찾을 수 없습니다.",
-  "path": "/api/v1/posts/999",
+  "path": "/api/portal/posts/999",
   "errorCode": "POST_NOT_FOUND"
 }
 ```
 
 ---
 
-## 5. 데이터베이스 규칙
+## 6. 데이터베이스 규칙
 
-### 5.1 테이블 네이밍
+### 6.1 테이블 네이밍
 
 ```sql
 -- 테이블: 복수형, snake_case
@@ -610,7 +723,7 @@ CREATE INDEX idx_users_email ON users(email);
 CONSTRAINT fk_posts_users FOREIGN KEY (user_id) REFERENCES users(id)
 ```
 
-### 5.2 필수 컬럼
+### 6.2 필수 컬럼
 
 모든 테이블에 다음 컬럼 필수:
 
@@ -623,7 +736,7 @@ CREATE TABLE example (
 );
 ```
 
-### 5.3 Soft Delete
+### 6.3 Soft Delete
 
 ```sql
 -- Hard Delete 대신 Soft Delete 사용
@@ -635,9 +748,9 @@ SELECT * FROM posts WHERE deleted_at IS NULL;
 
 ---
 
-## 6. 에러 처리 규칙
+## 7. 에러 처리 규칙
 
-### 6.1 Backend (Spring Boot)
+### 7.1 Backend (Spring Boot)
 
 ```java
 // 커스텀 예외
@@ -681,7 +794,7 @@ public class GlobalExceptionHandler {
 }
 ```
 
-### 6.2 Frontend (React)
+### 7.2 Frontend (React)
 
 ```typescript
 // API 에러 처리
@@ -732,16 +845,16 @@ apiClient.interceptors.response.use(
 
 ---
 
-## 7. 테스트 작성 규칙
+## 8. 테스트 작성 규칙
 
-### 7.1 테스트 구조
+### 8.1 테스트 구조
 
 ```
 테스트 파일명: {TargetClass}Test.java
 테스트 메서드명: {method}_{condition}_{expected}
 ```
 
-### 7.2 Spring Boot 테스트
+### 8.2 Spring Boot 테스트
 
 ```java
 @SpringBootTest
@@ -786,7 +899,7 @@ class PostServiceTest {
 }
 ```
 
-### 7.3 React 테스트 (Jest + Testing Library)
+### 8.3 React 테스트 (Jest + Testing Library)
 
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -821,9 +934,9 @@ describe('PostCard', () => {
 
 ---
 
-## 8. 보안 규칙
+## 9. 보안 규칙
 
-### 8.1 환경 변수 관리
+### 9.1 환경 변수 관리
 
 ```bash
 # ✅ 좋은 예
@@ -840,7 +953,7 @@ JWT_SECRET=your_secret_here
 const password = "secret123";  // 절대 금지!
 ```
 
-### 8.2 SQL Injection 방지
+### 9.2 SQL Injection 방지
 
 ```java
 // ✅ JPA/QueryDSL 사용 (안전)
@@ -853,7 +966,7 @@ List<Post> posts = queryFactory
 String sql = "SELECT * FROM posts WHERE title LIKE '%" + keyword + "%'";
 ```
 
-### 8.3 XSS 방지
+### 9.3 XSS 방지
 
 ```typescript
 // ✅ DOMPurify 사용
@@ -870,9 +983,9 @@ const SafeHTML = ({ html }: { html: string }) => {
 
 ---
 
-## 9. 성능 최적화 규칙
+## 10. 성능 최적화 규칙
 
-### 9.1 N+1 문제 방지
+### 10.1 N+1 문제 방지
 
 ```java
 // ✅ Fetch Join 사용
@@ -884,7 +997,7 @@ Post post = postRepository.findById(id);
 String authorName = post.getAuthor().getName();  // N번의 추가 쿼리
 ```
 
-### 9.2 캐싱 전략
+### 10.2 캐싱 전략
 
 ```java
 // Redis 캐싱
@@ -899,7 +1012,7 @@ public PostResponse createPost(PostCreateRequest request) {
 }
 ```
 
-### 9.3 React 최적화
+### 10.3 React 최적화
 
 ```typescript
 // useMemo로 비싼 계산 캐싱
@@ -916,9 +1029,9 @@ export const PostCard = React.memo<PostCardProps>(({ post }) => {
 
 ---
 
-## 10. 문서화 규칙
+## 11. 문서화 규칙
 
-### 10.1 코드 주석
+### 11.1 코드 주석
 
 ```java
 /**
@@ -934,7 +1047,7 @@ public PostResponse createPost(PostCreateRequest request) {
 }
 ```
 
-### 10.2 API 문서 (SpringDoc)
+### 11.2 API 문서 (SpringDoc)
 
 ```java
 @Operation(

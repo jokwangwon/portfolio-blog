@@ -27,6 +27,8 @@
 | [ADR-002](ADR-002-observability-first.md) | Observability 우선 도입 | 2026-01-07 | ✅ Accepted | #logging #monitoring |
 | [ADR-003](ADR-003-jwt-refresh-token-rotation.md) | JWT Refresh Token Rotation | 2026-01-07 | ✅ Accepted | #security #jwt |
 | [ADR-004](ADR-004-test-strategy.md) | 테스트 전략 수립 | 2026-01-07 | ✅ Accepted | #testing #quality |
+| [ADR-005](ADR-005-pixel-office-tech-stack.md) | Pixel Office 2D 렌더링 기술 선택 | 2026-03-26 | ✅ Accepted | #frontend #pixel-art #pixi |
+| [ADR-006](ADR-006-microservice-architecture.md) | 독립 서비스 아키텍처 전환 | 2026-03-30 | ✅ Accepted | #architecture #microservice #db-separation |
 
 ### 제안 중 (Proposed)
 없음
@@ -35,7 +37,9 @@
 없음
 
 ### 대체됨 (Superseded)
-없음
+| 번호 | 제목 | 대체한 ADR |
+|------|------|-----------|
+| [ADR-001](ADR-001-database-consolidation.md) | 데이터베이스 통합 | ADR-006에 의해 일부 대체 (서비스별 DB 분리) |
 
 ---
 
@@ -57,7 +61,7 @@
 ### 작성 프로세스
 
 1. **템플릿 복사**: `ADR-000-template.md` 복사
-2. **번호 부여**: 다음 번호 사용 (ADR-005, ADR-006...)
+2. **번호 부여**: 다음 번호 사용 (ADR-007, ADR-008...)
 3. **내용 작성**:
    - Context: 왜 이 결정이 필요했는가?
    - Decision: 무엇을 결정했는가?
@@ -105,6 +109,11 @@
 **결정**: 70% 커버리지 목표 (Unit 70%, Integration 20%, E2E 10%)
 **이유**: 리팩토링 안전성, 장기적 개발 속도 향상
 **영향**: 버그 발생률 80% 감소, 코드 품질 개선
+
+### ADR-005: Pixel Office 2D 렌더링 기술 선택
+**결정**: PixiJS + @pixi/react를 2D 렌더링 엔진으로 채택
+**이유**: React 아키텍처 일관성 (R3F와 동일 패턴), 번들 효율성, 적절한 추상화 수준
+**영향**: 기존 모듈 구조에 자연스럽게 삽입, 3D+2D WebGL 역량 동시 어필
 
 ---
 

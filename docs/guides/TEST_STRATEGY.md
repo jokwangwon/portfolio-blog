@@ -42,7 +42,7 @@
 
 ---
 
-## 2. Backend 테스트 (Main API - Spring Boot)
+## 2. Backend 테스트 (Portal API - Spring Boot)
 
 ### 2.1 Unit Tests (Service Layer)
 
@@ -55,16 +55,16 @@
 
 ```java
 // module-blog/src/test/java/com/blog/module/blog/service/PostServiceTest.java
-package com.blog.module.blog.service;
+package com.portfolio.portal.blog.service;
 
-import com.blog.domain.blog.entity.Post;
-import com.blog.domain.blog.entity.User;
-import com.blog.domain.blog.repository.PostRepository;
-import com.blog.domain.blog.repository.UserRepository;
-import com.blog.module.blog.dto.PostCreateRequest;
-import com.blog.module.blog.dto.PostResponse;
-import com.blog.module.blog.exception.PostNotFoundException;
-import com.blog.module.blog.exception.UserNotFoundException;
+import com.portfolio.domain.blog.entity.Post;
+import com.portfolio.domain.blog.entity.User;
+import com.portfolio.domain.blog.repository.PostRepository;
+import com.portfolio.domain.blog.repository.UserRepository;
+import com.portfolio.portal.blog.dto.PostCreateRequest;
+import com.portfolio.portal.blog.dto.PostResponse;
+import com.portfolio.portal.blog.exception.PostNotFoundException;
+import com.portfolio.portal.blog.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -216,7 +216,7 @@ dependencies {
 #### Testcontainers 설정
 ```java
 // api-server/src/test/java/com/blog/api/IntegrationTestBase.java
-package com.blog.api;
+package com.portfolio.portal.api;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -247,10 +247,10 @@ public abstract class IntegrationTestBase {
 #### 예시: Controller 통합 테스트
 ```java
 // api-server/src/test/java/com/blog/api/controller/PostControllerTest.java
-package com.blog.api.controller;
+package com.portfolio.portal.api.controller;
 
-import com.blog.api.IntegrationTestBase;
-import com.blog.module.blog.dto.PostCreateRequest;
+import com.portfolio.portal.api.IntegrationTestBase;
+import com.portfolio.portal.blog.dto.PostCreateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -285,7 +285,7 @@ class PostControllerTest extends IntegrationTestBase {
         String requestBody = objectMapper.writeValueAsString(request);
 
         // When & Then
-        mockMvc.perform(post("/api/v1/posts")
+        mockMvc.perform(post("/api/portal/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isCreated())
@@ -298,7 +298,7 @@ class PostControllerTest extends IntegrationTestBase {
     @DisplayName("게시글 조회 API - 존재하지 않는 ID → 404")
     void getPost_nonExistentId_returns404() throws Exception {
         // When & Then
-        mockMvc.perform(get("/api/v1/posts/999"))
+        mockMvc.perform(get("/api/portal/posts/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("POST_NOT_FOUND"));
     }
@@ -311,11 +311,11 @@ class PostControllerTest extends IntegrationTestBase {
 
 ```java
 // domain/src/test/java/com/blog/domain/blog/repository/PostRepositoryTest.java
-package com.blog.domain.blog.repository;
+package com.portfolio.domain.blog.repository;
 
-import com.blog.domain.blog.entity.Category;
-import com.blog.domain.blog.entity.Post;
-import com.blog.domain.blog.entity.User;
+import com.portfolio.domain.blog.entity.Category;
+import com.portfolio.domain.blog.entity.Post;
+import com.portfolio.domain.blog.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -472,7 +472,7 @@ def test_generate_endpoint_success():
     }
 
     # When
-    response = client.post("/api/v1/generate", json=request_data)
+    response = client.post("/api/ai/generate", json=request_data)
 
     # Then
     assert response.status_code == 200
@@ -491,7 +491,7 @@ def test_generate_endpoint_invalid_model():
     }
 
     # When
-    response = client.post("/api/v1/generate", json=request_data)
+    response = client.post("/api/ai/generate", json=request_data)
 
     # Then
     assert response.status_code == 404
@@ -507,7 +507,7 @@ def test_generate_endpoint_validation_error():
     }
 
     # When
-    response = client.post("/api/v1/generate", json=request_data)
+    response = client.post("/api/ai/generate", json=request_data)
 
     # Then
     assert response.status_code == 422
@@ -582,14 +582,14 @@ describe('PostCard', () => {
 import { http, HttpResponse } from 'msw';
 
 export const handlers = [
-  http.get('/api/v1/posts', () => {
+  http.get('/api/portal/posts', () => {
     return HttpResponse.json([
       { id: 1, title: 'Post 1', content: 'Content 1' },
       { id: 2, title: 'Post 2', content: 'Content 2' },
     ]);
   }),
 
-  http.post('/api/v1/posts', async ({ request }) => {
+  http.post('/api/portal/posts', async ({ request }) => {
     const body = await request.json();
     return HttpResponse.json(
       { id: 3, ...body },
