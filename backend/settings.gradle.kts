@@ -7,6 +7,7 @@ include(
     "security",
     "module-blog",
     "module-user",
+    "module-registry",
     "module-benchmark",
     "api-server"
 )
