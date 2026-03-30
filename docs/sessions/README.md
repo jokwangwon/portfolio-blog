@@ -28,8 +28,9 @@
 | 2026-03-30 | #5 | Git 워크플로우 보완, CI 구축, 멀티 에이전트 시스템 설계 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #6 | CLAUDE.md 생성, 서비스 레이어 단위 테스트 69개, Health Check, JSON 로깅 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #7 | module-registry 생성, Controller 테스트, 총 90개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
+| 2026-03-30 | #8 | ServiceHealthChecker, Nginx Gateway, Sentry 연동, 총 95개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 
-**총 세션**: 7개
+**총 세션**: 8개
 
 ---
 
@@ -182,6 +183,20 @@
 - Controller 테스트는 @WebMvcTest 대신 순수 유닛 테스트 (모듈 독립성 유지)
 
 **다음 작업**: Nginx Gateway, Sentry, ServiceHealthChecker, Integration Test
+
+### 세션 #8 (2026-03-30)
+**Phase**: 인프라 완성
+**주요 성과**:
+- ServiceHealthChecker 구현 (@Scheduled 폴링, RestTemplate 5초 timeout)
+- Nginx API Gateway 설정 (URL 패턴 라우팅, WebSocket 지원)
+- Sentry 에러 트래킹 연동 (Spring Boot + Logback appender)
+- 전체 테스트 95개 달성 (12개 파일)
+
+**주요 결정**:
+- Sentry는 prod 프로필에서만 활성화 (WARN 이상만 이벤트 전송)
+- Nginx는 docker-compose gateway 프로필로 분리
+
+**다음 작업**: @EnableScheduling, Integration Test, module-benchmark 제거
 
 ---
 
