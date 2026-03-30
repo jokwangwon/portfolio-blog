@@ -30,6 +30,10 @@ dependencies {
     // Structured JSON Logging
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
+    // Error Tracking (Sentry)
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:6.34.0")
+    implementation("io.sentry:sentry-logback:6.34.0")
+
     // Development Tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
