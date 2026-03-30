@@ -26,8 +26,9 @@
 | 2026-03-30 | #3 | 아키텍처 전환 (독립 서비스 + 중앙 포털), 전체 문서 일관성 갱신 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #4 | Portal 리네이밍, DB 물리 분리, SDD 명세 완성 (18개 CRITICAL 해결) | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #5 | Git 워크플로우 보완, CI 구축, 멀티 에이전트 시스템 설계 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
+| 2026-03-30 | #6 | CLAUDE.md 생성, 서비스 레이어 단위 테스트 69개, Health Check, JSON 로깅 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 
-**총 세션**: 5개
+**총 세션**: 6개
 
 ---
 
@@ -153,6 +154,20 @@
 - 3-에이전트 합의 프로토콜을 아키텍처/SDD/보안 결정에 필수 적용
 
 **다음 작업**: Phase 1A SDD 코딩 (Flyway V1~V6 → Portal API Core → Auth)
+
+### 세션 #6 (2026-03-30)
+**Phase**: TDD 보완 + 인프라 구현
+**주요 성과**:
+- CLAUDE.md 생성 (SDD+TDD, 에이전트 프로토콜, 세션 규칙)
+- 서비스 레이어 전체 단위 테스트 작성 (69개 메서드, 8개 파일)
+- Health Check + Service Contract (/health, /api/summary)
+- Logback JSON 구조화 로깅 + MDC 필터 (request_id 추적)
+
+**주요 결정**:
+- SDD+TDD 방법론 항시 적용 (CLAUDE.md에 명시)
+- dev: human-readable 로그, prod: JSON 로그
+
+**다음 작업**: module-registry, Nginx Gateway, Sentry, Controller API 테스트
 
 ---
 
