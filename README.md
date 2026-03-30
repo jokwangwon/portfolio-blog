@@ -1,6 +1,6 @@
-# 3D 포트폴리오 블로그
+# 포트폴리오 포털 (Portfolio Portal)
 
-> Dell Pro Max GB10 기반 로컬 AI 벤치마크를 포함한 3D 인터랙티브 개인 블로그
+> Dell Pro Max GB10 기반 로컬 AI 벤치마크를 포함한 3D 인터랙티브 포트폴리오 플랫폼
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
@@ -25,7 +25,7 @@
 
 ## 프로젝트 소개
 
-2026년 포트폴리오용 개인 블로그 프로젝트입니다.
+2026년 포트폴리오용 플랫폼 프로젝트입니다. 중앙 포털에서 블로그, AI 벤치마크 등 독립 서비스들을 통합 관리합니다.
 
 ### 핵심 차별화 요소
 
@@ -81,20 +81,20 @@
 - **Styling**: TailwindCSS
 - **Language**: TypeScript
 
-### Main API (Backend)
+### Portal API (Backend)
 - **Language**: Java 17+
 - **Framework**: Spring Boot 3.x
 - **Security**: Spring Security + JWT + OAuth2
 - **ORM**: JPA + QueryDSL
-- **Database**: PostgreSQL 15 + TimescaleDB Extension
+- **Database**: PostgreSQL 15 (`portal-db` 독립 인스턴스)
 - **Build**: Gradle
 
-### AI API
+### AI Benchmark API
 - **Language**: Python 3.11+
 - **Framework**: FastAPI
 - **LLM**: llama.cpp, Transformers
 - **GPU**: CUDA 12+ (NVIDIA RTX 4060 Ti)
-- **Database**: PostgreSQL 15 + TimescaleDB Extension
+- **Database**: TimescaleDB (`ai-bench-db` 독립 인스턴스)
 - **Server**: Uvicorn
 
 ### Infrastructure
@@ -111,37 +111,42 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         Client Layer                             │
-│              Desktop / Mobile / Tablet (반응형)                  │
+│                         Client (Browser)                         │
 └─────────────────────────────┬───────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      Frontend Server                             │
-│                   Next.js + React + R3F                          │
-└─────────────────────────────┬───────────────────────────────────┘
-                              │
-            ┌─────────────────┴─────────────────┐
-            ▼                                   ▼
-┌───────────────────────┐           ┌───────────────────────┐
-│     Main API Server   │           │     AI API Server     │
-│     (Spring Boot)     │◄─────────►│     (FastAPI)         │
-│   • 블로그 CRUD       │           │   • 모델 추론         │
-│   • 인증/인가         │           │   • 벤치마크          │
-└───────────┬───────────┘           └───────────┬───────────┘
-            │                                   │
-            └───────────────┬───────────────────┘
-                            ▼
-            ┌───────────────────────────────────┐
-            │  PostgreSQL + TimescaleDB         │
-            │  (통합 데이터베이스)              │
-            └───────────────────────────────────┘
+│                    Nginx API Gateway                             │
+│           /api/portal/* → Portal API                            │
+│           /api/ai/*     → AI Benchmark API                      │
+│           /*            → Frontend (Next.js)                    │
+└──────┬──────────────────────┬──────────────────────┬────────────┘
+       │                      │                      │
+       ▼                      ▼                      ▼
+┌──────────────┐   ┌──────────────────┐   ┌─────────────────┐
+│ Frontend     │   │  Portal API      │   │ AI Benchmark API│
+│ (Next.js)    │   │  (Spring Boot)   │   │ (FastAPI)       │
+│ • 3D UI      │   │  • 블로그 CRUD   │   │ • 모델 추론     │
+│ • Pixel Office│   │  • 인증/인가     │   │ • 벤치마크      │
+│              │   │  • Service Registry│   │ • GPU 메트릭   │
+└──────────────┘   └────────┬─────────┘   └────────┬────────┘
+                            │                      │
+                     ┌──────┘                      └──────┐
+                     ▼                                    ▼
+              ┌─────────────┐                     ┌──────────────┐
+              │  portal-db  │                     │ ai-bench-db  │
+              │ (PostgreSQL)│                     │ (TimescaleDB)│
+              │  독립 컨테이너│                     │  독립 컨테이너│
+              └─────────────┘                     └──────────────┘
 ```
 
+> 각 서비스는 독립 실행 가능하며, 자기 DB에만 접근합니다. 서비스 간 데이터가 필요하면 REST API를 호출합니다.
+> 자세한 아키텍처: [ADR-006](docs/decisions/ADR-006-microservice-architecture.md)
+
 ### 주요 디자인 패턴
-- **Frontend**: 모듈러 아키텍처 + 게이트웨이 패턴
-- **Backend**: 멀티 모듈 + 계층형 아키텍처 (Controller-Service-Repository)
-- **AI API**: 3계층 (Router-Service-Infrastructure) + 싱글톤 모델 매니저
+- **Frontend**: Shell App + Feature Modules (서비스별 라우트)
+- **Portal API**: 멀티 모듈 + 계층형 아키텍처 + Service Registry
+- **AI Benchmark API**: 3계층 (Router-Service-Infrastructure) + 독립 서비스
 
 자세한 아키텍처 문서: [docs/architecture/](docs/)
 
@@ -166,8 +171,8 @@
 #### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/yourusername/portfolio-blog.git
-cd portfolio-blog
+git clone https://github.com/yourusername/portfolio-portal.git
+cd portfolio-portal
 ```
 
 #### 2. 환경 변수 설정
@@ -206,8 +211,8 @@ docker-compose --profile frontend up -d   # Frontend만
 
 서비스 URL:
 - **Frontend**: http://localhost:3000
-- **Main API**: http://localhost:8080
-- **AI API**: http://localhost:8000
+- **Portal API**: http://localhost:8080
+- **AI Benchmark API**: http://localhost:8000
 - **pgAdmin**: http://localhost:5050 (tools 프로필 사용 시)
 
 ---
@@ -246,7 +251,7 @@ npm run dev
 #### 4. AI API 실행 (선택)
 
 ```bash
-cd backend/ai-api-server
+cd ai-benchmark-api
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -277,36 +282,35 @@ cd backend/api-server
 ## 프로젝트 구조
 
 ```
-portfolio-blog/
-├── backend/              # Spring Boot 멀티 모듈
+portfolio-portal/
+├── backend/              # Portal API (Spring Boot 멀티 모듈)
 │   ├── common/          # 공통 모듈
 │   ├── domain/          # 엔티티 + 리포지토리
-│   ├── security/        # 인증/인가
+│   ├── security/        # 인증/인가 (JWT 발급)
 │   ├── module-blog/     # 블로그 비즈니스 로직
 │   ├── module-user/     # 사용자 관리
-│   ├── module-benchmark/# 벤치마크 메타데이터
+│   ├── module-registry/ # Service Registry (서비스 등록/상태 관리)
 │   └── api-server/      # 실행 가능한 메인 앱
 │
-├── frontend/            # Next.js 애플리케이션
-│   ├── src/
-│   │   ├── app/        # App Router (라우팅)
-│   │   ├── modules/    # 독립 모듈 (auth, blog, three 등)
-│   │   ├── shared/     # 공유 컴포넌트/훅/유틸
-│   │   └── gateway/    # 모듈 통합 게이트웨이
-│   └── public/         # 정적 파일
-│
-├── ai-api/              # FastAPI 애플리케이션
+├── ai-benchmark-api/    # AI Benchmark API (FastAPI, 독립 서비스)
 │   ├── app/
 │   │   ├── api/        # API 라우터
 │   │   ├── services/   # 비즈니스 로직
 │   │   ├── core/       # 공통 인프라
+│   │   ├── contract/   # Service Contract (/health, /api/summary)
 │   │   └── infrastructure/  # LLM, GPU 모니터링
 │   └── tests/          # 테스트
 │
-├── infrastructure/      # Docker, Nginx 설정
-│   ├── docker-compose.yml
-│   ├── nginx/
-│   └── scripts/
+├── frontend/            # Next.js Shell App
+│   ├── src/
+│   │   ├── app/        # App Router (라우팅)
+│   │   ├── shell/      # Shell 레이아웃, 인증, Registry 연동
+│   │   ├── modules/    # Feature Modules (blog, benchmark, three 등)
+│   │   └── shared/     # 공유 컴포넌트/훅/유틸
+│   └── public/         # 정적 파일
+│
+├── nginx/               # API Gateway 설정
+│   └── nginx.conf
 │
 └── docs/               # 프로젝트 문서
     ├── architecture/
@@ -360,32 +364,32 @@ docs(readme): 설치 가이드 추가
 
 개발 서버 실행 후 다음 URL에서 API 문서 확인:
 
-- **Main API**: http://localhost:8080/swagger-ui.html
-- **AI API**: http://localhost:8000/docs
+- **Portal API**: http://localhost:8080/swagger-ui.html
+- **AI Benchmark API**: http://localhost:8000/docs
 
 ### 주요 엔드포인트
 
-#### 인증
+#### 인증 (Portal API)
 ```
-POST   /api/v1/auth/login
-POST   /api/v1/auth/signup
-POST   /api/v1/auth/refresh
-```
-
-#### 게시글
-```
-GET    /api/v1/posts
-GET    /api/v1/posts/{id}
-POST   /api/v1/posts
-PUT    /api/v1/posts/{id}
-DELETE /api/v1/posts/{id}
+POST   /api/portal/auth/login
+POST   /api/portal/auth/signup
+POST   /api/portal/auth/refresh
 ```
 
-#### AI 추론
+#### 게시글 (Portal API)
 ```
-POST   /api/v1/inference/generate
-POST   /api/v1/inference/generate/stream
-POST   /api/v1/benchmark/run
+GET    /api/portal/posts
+GET    /api/portal/posts/{id}
+POST   /api/portal/posts
+PUT    /api/portal/posts/{id}
+DELETE /api/portal/posts/{id}
+```
+
+#### AI 추론 (AI Benchmark API)
+```
+POST   /api/ai/inference/generate
+POST   /api/ai/inference/generate/stream
+POST   /api/ai/benchmark/run
 ```
 
 ---
@@ -421,7 +425,7 @@ npm run test:e2e
 ### AI API
 
 ```bash
-cd ai-api
+cd ai-benchmark-api
 pytest
 
 # 커버리지
@@ -448,8 +452,8 @@ cloudflared tunnel --url http://localhost:3000
 | 서비스 | AWS 리소스 |
 |--------|-----------|
 | Frontend | Vercel 또는 S3 + CloudFront |
-| Main API | ECS 또는 EC2 |
-| AI API | EC2 GPU 인스턴스 (g4dn.xlarge) |
+| Portal API | ECS 또는 EC2 |
+| AI Benchmark API | EC2 GPU 인스턴스 (g4dn.xlarge) |
 | PostgreSQL + TimescaleDB | RDS PostgreSQL (TimescaleDB Extension) |
 
 CI/CD: GitHub Actions

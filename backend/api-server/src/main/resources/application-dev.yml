@@ -1,9 +1,9 @@
 spring:
   # DataSource
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:portfolio_blog}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    url: jdbc:postgresql://${PORTAL_DB_HOST:localhost}:${PORTAL_DB_PORT:5432}/${PORTAL_DB_NAME:portal_db}
+    username: ${PORTAL_DB_USER:postgres}
+    password: ${PORTAL_DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10

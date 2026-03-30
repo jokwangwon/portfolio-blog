@@ -1,9 +1,11 @@
 package com.portfolio.security.config;
 
 import com.portfolio.security.jwt.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -15,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,19 +48,21 @@ public class SecurityConfig {
 
                 // 요청 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 공개 엔드포인트
-                        .requestMatchers(
-                                "/api/v1/auth/**",
-                                "/api/v1/posts/**",
-                                "/api/v1/categories/**",
-                                "/api/v1/tags/**",
-                                "/swagger-ui/**",
-                                "/api-docs/**",
-                                "/actuator/health"
-                        ).permitAll()
+                        // 공개 엔드포인트 - 각각 개별적으로 허용
+                        .requestMatchers("/api/portal/auth/signup").permitAll()
+                        .requestMatchers("/api/portal/auth/login").permitAll()
+                        .requestMatchers("/api/portal/auth/refresh").permitAll()
+                        .requestMatchers("/api/portal/auth/logout").permitAll()
+                        .requestMatchers("/api/portal/posts/**").permitAll()
+                        .requestMatchers("/api/portal/categories/**").permitAll()
+                        .requestMatchers("/api/portal/tags/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/api-docs/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
 
                         // ADMIN 전용 엔드포인트
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/portal/admin/**").hasRole("ADMIN")
 
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()

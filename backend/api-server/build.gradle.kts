@@ -17,6 +17,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     // Database Migration
     implementation("org.flywaydb:flyway-core:9.22.3")
@@ -36,7 +37,7 @@ dependencies {
 
 tasks.bootJar {
     enabled = true
-    archiveFileName.set("portfolio-blog-api.jar")
+    archiveFileName.set("portfolio-portal-api.jar")
 }
 
 tasks.jar {

@@ -1,4 +1,4 @@
-rootProject.name = "portfolio-blog-backend"
+rootProject.name = "portfolio-portal-backend"
 
 // 모듈 선언
 include(

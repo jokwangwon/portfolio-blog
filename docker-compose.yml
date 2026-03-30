@@ -1,30 +1,58 @@
 version: '3.8'
 
 services:
-  # PostgreSQL with TimescaleDB Extension
-  postgres:
-    image: timescale/timescaledb:latest-pg15
-    container_name: portfolio-postgres
+  # ==========================================
+  # Portal DB (PostgreSQL) - 인증, 블로그, Service Registry
+  # ==========================================
+  portal-db:
+    image: postgres:15-alpine
+    container_name: portal-db
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-portfolio_blog}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${PORTAL_DB_NAME:-portal_db}
+      POSTGRES_USER: ${PORTAL_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${PORTAL_DB_PASSWORD:-postgres}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${PORTAL_DB_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - portal_db_data:/var/lib/postgresql/data
       - ./backend/api-server/src/main/resources/db/migration:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-portfolio_blog}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PORTAL_DB_USER:-postgres} -d ${PORTAL_DB_NAME:-portal_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - portfolio-network
+      - portal-network
     restart: unless-stopped
 
+  # ==========================================
+  # AI Benchmark DB (TimescaleDB) - AI 벤치마크 전용
+  # ==========================================
+  ai-bench-db:
+    image: timescale/timescaledb:latest-pg15
+    container_name: ai-bench-db
+    environment:
+      POSTGRES_DB: ${AI_BENCH_DB_NAME:-ai_bench_db}
+      POSTGRES_USER: ${AI_BENCH_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${AI_BENCH_DB_PASSWORD:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${AI_BENCH_DB_PORT:-5433}:5432"
+    volumes:
+      - ai_bench_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AI_BENCH_DB_USER:-postgres} -d ${AI_BENCH_DB_NAME:-ai_bench_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - portal-network
+    restart: unless-stopped
+
+  # ==========================================
   # pgAdmin (Optional - Database Management UI)
+  # ==========================================
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: portfolio-pgadmin
@@ -37,15 +65,19 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
-      postgres:
+      portal-db:
+        condition: service_healthy
+      ai-bench-db:
         condition: service_healthy
     networks:
-      - portfolio-network
+      - portal-network
     restart: unless-stopped
     profiles:
       - tools
 
-  # Backend API Server (Spring Boot)
+  # ==========================================
+  # Portal API Server (Spring Boot)
+  # ==========================================
   api-server:
     build:
       context: ./backend/api-server
@@ -53,45 +85,49 @@ services:
     container_name: portfolio-api-server
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-portfolio_blog}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://portal-db:5432/${PORTAL_DB_NAME:-portal_db}
+      SPRING_DATASOURCE_USERNAME: ${PORTAL_DB_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${PORTAL_DB_PASSWORD:-postgres}
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-900000}
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
     ports:
       - "${API_SERVER_PORT:-8080}:8080"
     depends_on:
-      postgres:
+      portal-db:
         condition: service_healthy
     networks:
-      - portfolio-network
+      - portal-network
     restart: unless-stopped
     profiles:
       - backend
 
-  # AI API Server (FastAPI)
+  # ==========================================
+  # AI Benchmark API Server (FastAPI)
+  # ==========================================
   ai-api-server:
     build:
-      context: ./backend/ai-api-server
+      context: ./ai-benchmark-api
       dockerfile: Dockerfile
     container_name: portfolio-ai-api
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-portfolio_blog}
+      DATABASE_URL: postgresql://${AI_BENCH_DB_USER:-postgres}:${AI_BENCH_DB_PASSWORD:-postgres}@ai-bench-db:5432/${AI_BENCH_DB_NAME:-ai_bench_db}
       OLLAMA_HOST: ${OLLAMA_HOST:-host.docker.internal:11434}
       LOG_LEVEL: ${AI_API_LOG_LEVEL:-INFO}
     ports:
       - "${AI_API_PORT:-8000}:8000"
     depends_on:
-      postgres:
+      ai-bench-db:
         condition: service_healthy
     networks:
-      - portfolio-network
+      - portal-network
     restart: unless-stopped
     profiles:
       - backend
 
-  # Frontend (React + Three.js + Vite)
+  # ==========================================
+  # Frontend (Next.js)
+  # ==========================================
   frontend:
     build:
       context: ./frontend
@@ -107,17 +143,19 @@ services:
       - ./frontend:/app
       - /app/node_modules
     networks:
-      - portfolio-network
+      - portal-network
     restart: unless-stopped
     profiles:
       - frontend
 
 volumes:
-  postgres_data:
+  portal_db_data:
+    driver: local
+  ai_bench_db_data:
     driver: local
   pgadmin_data:
     driver: local
 
 networks:
-  portfolio-network:
+  portal-network:
     driver: bridge
