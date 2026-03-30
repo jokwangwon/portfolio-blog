@@ -32,8 +32,15 @@
             </encoder>
         </appender>
 
+        <!-- Sentry Appender -->
+        <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+            <minimumEventLevel>WARN</minimumEventLevel>
+            <minimumBreadcrumbLevel>INFO</minimumBreadcrumbLevel>
+        </appender>
+
         <root level="INFO">
             <appender-ref ref="JSON_CONSOLE" />
+            <appender-ref ref="SENTRY" />
         </root>
 
         <logger name="com.portfolio" level="INFO" />
