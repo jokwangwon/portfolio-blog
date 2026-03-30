@@ -27,8 +27,9 @@
 | 2026-03-30 | #4 | Portal 리네이밍, DB 물리 분리, SDD 명세 완성 (18개 CRITICAL 해결) | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #5 | Git 워크플로우 보완, CI 구축, 멀티 에이전트 시스템 설계 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #6 | CLAUDE.md 생성, 서비스 레이어 단위 테스트 69개, Health Check, JSON 로깅 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
+| 2026-03-30 | #7 | module-registry 생성, Controller 테스트, 총 90개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 
-**총 세션**: 6개
+**총 세션**: 7개
 
 ---
 
@@ -168,6 +169,19 @@
 - dev: human-readable 로그, prod: JSON 로그
 
 **다음 작업**: module-registry, Nginx Gateway, Sentry, Controller API 테스트
+
+### 세션 #7 (2026-03-30)
+**Phase**: module-registry + Controller 테스트
+**주요 성과**:
+- module-registry 모듈 생성 (ServiceRegistryService, Controller, DTO)
+- Controller 단위 테스트 (CategoryController 4개, PostController 9개)
+- 전체 테스트 90개 달성 (11개 파일)
+
+**주요 결정**:
+- module-registry는 domain 엔티티/Repository 재사용 (별도 엔티티 불필요)
+- Controller 테스트는 @WebMvcTest 대신 순수 유닛 테스트 (모듈 독립성 유지)
+
+**다음 작업**: Nginx Gateway, Sentry, ServiceHealthChecker, Integration Test
 
 ---
 

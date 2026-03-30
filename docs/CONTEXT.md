@@ -3,20 +3,19 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-30 (세션 #6)
+**최종 업데이트**: 2026-03-30 (세션 #7)
 
 ---
 
 ## 🎯 현재 프로젝트 상태
 
 ### Phase
-**Phase 1: 백엔드 개발** (진행 중 ~45%)
+**Phase 1: 백엔드 개발** (진행 중 ~50%)
 
-### 마지막 작업 (세션 #6, 2026-03-30)
-- CLAUDE.md 프로젝트 지시 파일 생성 (SDD+TDD, 에이전트 프로토콜)
-- 서비스 레이어 전체 단위 테스트 69개 작성 (8개 파일)
-- Health Check + Service Contract (/health, /api/summary)
-- Logback JSON 구조화 로깅 + MDC 필터 (request_id 추적)
+### 마지막 작업 (세션 #7, 2026-03-30)
+- module-registry 모듈 생성 (Service Registry CRUD + Controller)
+- Controller 레이어 단위 테스트 (CategoryController, PostController)
+- 전체 테스트 90개 달성 (11개 파일, 전부 통과)
 
 ### 완료된 개발
 - Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈) — 세션 #1
@@ -27,6 +26,8 @@
 - Blog CRUD, Auth Cookie 리팩토링, Flyway V2-V5 — 세션 #5
 - 서비스 레이어 단위 테스트 69개 (8 파일) — 세션 #6
 - Health Check + Service Contract + JSON 로깅 — 세션 #6
+- module-registry (Service Registry CRUD) — 세션 #7
+- Controller 테스트 + 총 90개 테스트 — 세션 #7
 
 ### 현재 상황
 **아키텍처 전환 완료**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006).
@@ -42,7 +43,7 @@
    - [x] 아키텍처 문서 재작성 (blog-architecture-context.md, depth-2)
    - [x] ADR-006 작성 (독립 서비스 전환 결정)
    - [x] Portal API 리네이밍 (blog → portal) — 세션 #4에서 완료
-   - [ ] module-registry 신규 생성
+   - [x] module-registry 신규 생성 — 세션 #7에서 완료
    - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
    - [ ] Nginx API Gateway 설정
 
@@ -147,7 +148,7 @@
 ### 3. 아키텍처 전환 적용 작업
 - [x] 문서 재작성 (blog-architecture-context.md, depth-2, ADR-006)
 - [x] 코드 리네이밍 (blog → portal) — 세션 #4에서 완료
-- [ ] module-registry 생성
+- [x] module-registry 생성 — 세션 #7에서 완료
 - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
 - [ ] Nginx Gateway 설정
 - [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
@@ -203,7 +204,7 @@
 
 ### 미완료
 - [x] Portal API 리네이밍 — 세션 #4에서 완료
-- [ ] module-registry 생성
+- [x] module-registry 생성 — 세션 #7에서 완료
 - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
 - [ ] Nginx API Gateway 설정
 - [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
