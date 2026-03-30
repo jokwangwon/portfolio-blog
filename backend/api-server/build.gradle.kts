@@ -26,6 +26,9 @@ dependencies {
     // API Documentation
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
+    // Structured JSON Logging
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+
     // Development Tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
