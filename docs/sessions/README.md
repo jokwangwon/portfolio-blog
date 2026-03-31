@@ -29,8 +29,9 @@
 | 2026-03-30 | #6 | CLAUDE.md 생성, 서비스 레이어 단위 테스트 69개, Health Check, JSON 로깅 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #7 | module-registry 생성, Controller 테스트, 총 90개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #8 | ServiceHealthChecker, Nginx Gateway, Sentry 연동, 총 95개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
+| 2026-03-31 | #9 | 통합 테스트 28개 (Testcontainers), module-benchmark 제거, @EnableScheduling | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 
-**총 세션**: 8개
+**총 세션**: 9개
 
 ---
 
@@ -197,6 +198,22 @@
 - Nginx는 docker-compose gateway 프로필로 분리
 
 **다음 작업**: @EnableScheduling, Integration Test, module-benchmark 제거
+
+### 세션 #9 (2026-03-31)
+**Phase**: 통합 테스트 + 정리
+**주요 성과**:
+- Testcontainers PostgreSQL 기반 통합 테스트 28개 작성 (Auth 11 + Blog 17)
+- module-benchmark 빈 모듈 제거 (독립 서비스 분리 완료)
+- @EnableScheduling + module-registry 스캔 설정
+- AccessDeniedException 핸들러 추가 (403 반환 버그 수정)
+- `-parameters` 컴파일러 플래그 추가
+- 전체 테스트 123개 달성 (14개 파일)
+
+**주요 결정**:
+- Singleton Testcontainer로 테스트 클래스 간 DB 공유
+- Flyway 비활성화 + JPA create-drop으로 테스트 스키마 관리
+
+**다음 작업**: JWT jti claim, Flyway 마이그레이션, Nginx 실제 테스트, Dockerfile
 
 ---
 

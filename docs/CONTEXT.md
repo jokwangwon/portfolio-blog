@@ -3,20 +3,21 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-30 (세션 #8)
+**최종 업데이트**: 2026-03-31 (세션 #9)
 
 ---
 
 ## 🎯 현재 프로젝트 상태
 
 ### Phase
-**Phase 1: 백엔드 개발** (진행 중 ~55%)
+**Phase 1: 백엔드 개발** (진행 중 ~60%)
 
-### 마지막 작업 (세션 #8, 2026-03-30)
-- ServiceHealthChecker 구현 (@Scheduled 폴링, RestTemplate 5초 timeout)
-- Nginx API Gateway 설정 (URL 패턴 라우팅, WebSocket 지원)
-- Sentry 에러 트래킹 연동 (Spring Boot + Logback appender)
-- 전체 테스트 95개 달성 (12개 파일, 전부 통과)
+### 마지막 작업 (세션 #9, 2026-03-31)
+- Testcontainers PostgreSQL 기반 통합 테스트 28개 작성 (Auth 11 + Blog 17)
+- module-benchmark 빈 모듈 제거 (독립 서비스 분리 완료)
+- @EnableScheduling + module-registry 스캔 설정 보완
+- AccessDeniedException 핸들러 버그 수정 (500→403)
+- 전체 테스트 123개 달성 (14개 파일, 전부 통과)
 
 ### 완료된 개발
 - Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈) — 세션 #1
@@ -30,7 +31,8 @@
 - module-registry (Service Registry CRUD) — 세션 #7
 - Controller 테스트 + 총 90개 테스트 — 세션 #7
 - ServiceHealthChecker + Nginx Gateway + Sentry 연동 — 세션 #8
-- 전체 테스트 95개 (12개 파일) — 세션 #8
+- 통합 테스트 28개 (Testcontainers), module-benchmark 제거 — 세션 #9
+- 전체 테스트 123개 (14개 파일) — 세션 #9
 
 ### 현재 상황
 **아키텍처 전환 완료**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006).
@@ -47,7 +49,7 @@
    - [x] ADR-006 작성 (독립 서비스 전환 결정)
    - [x] Portal API 리네이밍 (blog → portal) — 세션 #4에서 완료
    - [x] module-registry 신규 생성 — 세션 #7에서 완료
-   - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
+   - [x] module-benchmark 제거 — 세션 #9에서 완료
    - [x] Nginx API Gateway 설정 — 세션 #8에서 완료
 
 2. **데이터베이스 분리 + 초기화**
@@ -152,7 +154,7 @@
 - [x] 문서 재작성 (blog-architecture-context.md, depth-2, ADR-006)
 - [x] 코드 리네이밍 (blog → portal) — 세션 #4에서 완료
 - [x] module-registry 생성 — 세션 #7에서 완료
-- [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
+- [x] module-benchmark 제거 — 세션 #9에서 완료
 - [x] Nginx Gateway 설정 — 세션 #8에서 완료
 - [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
 
@@ -208,7 +210,7 @@
 ### 미완료
 - [x] Portal API 리네이밍 — 세션 #4에서 완료
 - [x] module-registry 생성 — 세션 #7에서 완료
-- [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
+- [x] module-benchmark 제거 — 세션 #9에서 완료
 - [x] Nginx API Gateway 설정 — 세션 #8에서 완료
 - [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
 - [ ] Flyway 마이그레이션 (V1__init_portal_schema.sql)
@@ -242,32 +244,30 @@
 
 ## 📝 마지막 대화 요약
 
-### 세션 #7 (2026-03-30)
-- module-registry 모듈 생성 (Service Registry CRUD + Controller)
-- Controller 단위 테스트 (CategoryController, PostController)
-- 전체 테스트 90개 달성
-
 ### 세션 #8 (2026-03-30)
-- ServiceHealthChecker 구현 (@Scheduled 폴링)
-- Nginx API Gateway 설정 (URL 패턴 라우팅, WebSocket 지원)
-- Sentry 에러 트래킹 연동 (Spring Boot + Logback appender)
+- ServiceHealthChecker, Nginx Gateway, Sentry 연동
 - 전체 테스트 95개 달성 (12개 파일)
+
+### 세션 #9 (2026-03-31)
+- 통합 테스트 28개 (Testcontainers PostgreSQL)
+- module-benchmark 제거, @EnableScheduling 설정
+- AccessDeniedException 핸들러 버그 수정
+- 전체 테스트 123개 달성 (14개 파일)
 
 ---
 
 ## 💡 다음 세션을 위한 메모
 
 ### 우선 작업: Phase 1A 잔여
-1. @EnableScheduling 설정 (api-server Application 클래스)
-2. Integration Test (Testcontainers PostgreSQL)
-3. module-benchmark 제거 (ai-benchmark-api 독립 서비스 분리)
-4. Nginx Gateway 실제 테스트 (docker-compose 기동)
+1. JwtTokenProvider에 jti(UUID) claim 추가 (토큰 중복 근본 해결)
+2. Flyway 마이그레이션 (V1__init_portal_schema.sql)
+3. Nginx Gateway 실제 테스트 (docker-compose 기동)
+4. API 서버 Dockerfile 생성
 
 ### 이후 우선순위
-1. Flyway 마이그레이션 (V1__init_portal_schema.sql)
-2. Next.js Shell App 프로젝트 생성
-3. AI Benchmark API (FastAPI) 독립 프로젝트 생성
-4. OAuth2 소셜 로그인 (Google, GitHub)
+1. Next.js Shell App 프로젝트 생성
+2. AI Benchmark API (FastAPI) 독립 프로젝트 생성
+3. OAuth2 소셜 로그인 (Google, GitHub)
 
 ---
 
