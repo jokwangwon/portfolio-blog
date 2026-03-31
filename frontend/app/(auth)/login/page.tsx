@@ -3,9 +3,19 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/src/shell/auth/useAuth";
-import Button from "@/src/shared/components/Button";
 import { AxiosError } from "axios";
 import type { ApiError } from "@/src/types/api";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -35,69 +45,59 @@ export default function LoginPage() {
 
   return (
     <div className="flex justify-center py-12">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          로그인
-        </h1>
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">로그인</CardTitle>
+          <CardDescription>계정에 로그인하세요</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              {error}
+            </Alert>
+          )}
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-            {error}
-          </div>
-        )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">사용자명</Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                placeholder="username"
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700 mb-1"
+            <div className="space-y-2">
+              <Label htmlFor="password">비밀번호</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="********"
+              />
+            </div>
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? "로그인 중..." : "로그인"}
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            계정이 없으신가요?{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-foreground hover:underline"
             >
-              사용자명
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="username"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              비밀번호
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="********"
-            />
-          </div>
-
-          <Button type="submit" loading={loading} className="w-full">
-            로그인
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          계정이 없으신가요?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-gray-900 hover:underline"
-          >
-            회원가입
-          </Link>
-        </p>
-      </div>
+              회원가입
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

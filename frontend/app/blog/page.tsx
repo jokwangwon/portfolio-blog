@@ -1,15 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { usePosts, useCategories } from "@/src/modules/blog/hooks/usePosts";
+import { useAuth } from "@/src/shell/auth/useAuth";
 import PostCard from "@/src/modules/blog/components/PostCard";
 import CategoryFilter from "@/src/modules/blog/components/CategoryFilter";
 import Pagination from "@/src/modules/blog/components/Pagination";
 import Loading from "@/src/shared/components/Loading";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function BlogPage() {
   const [page, setPage] = useState(0);
   const [categoryId, setCategoryId] = useState<number | undefined>();
+  const { isAuthenticated } = useAuth();
 
   const { data: postsData, isLoading: postsLoading } = usePosts({
     page,
@@ -24,7 +28,14 @@ export default function BlogPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">블로그</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-foreground">블로그</h1>
+        {isAuthenticated && (
+          <Link href="/blog/editor" className={buttonVariants()}>
+            글쓰기
+          </Link>
+        )}
+      </div>
 
       {categories && (
         <CategoryFilter
@@ -37,7 +48,7 @@ export default function BlogPage() {
       {postsLoading ? (
         <Loading />
       ) : postsData?.empty ? (
-        <div className="text-center py-20 text-gray-500">
+        <div className="text-center py-20 text-muted-foreground">
           아직 게시글이 없습니다.
         </div>
       ) : (

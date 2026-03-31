@@ -1,7 +1,9 @@
 import apiClient from "@/src/shell/api/client";
 import type {
   PostResponse,
+  PostRequest,
   CategoryResponse,
+  TagResponse,
   PageResponse,
 } from "@/src/types/api";
 
@@ -34,4 +36,28 @@ export async function fetchPostById(id: number): Promise<PostResponse> {
 export async function fetchCategories(): Promise<CategoryResponse[]> {
   const { data } = await apiClient.get<CategoryResponse[]>("/categories");
   return data;
+}
+
+export async function fetchTags(): Promise<TagResponse[]> {
+  const { data } = await apiClient.get<TagResponse[]>("/tags");
+  return data;
+}
+
+export async function createPost(
+  request: PostRequest
+): Promise<PostResponse> {
+  const { data } = await apiClient.post<PostResponse>("/posts", request);
+  return data;
+}
+
+export async function updatePost(
+  id: number,
+  request: PostRequest
+): Promise<PostResponse> {
+  const { data } = await apiClient.put<PostResponse>(`/posts/${id}`, request);
+  return data;
+}
+
+export async function deletePost(id: number): Promise<void> {
+  await apiClient.delete(`/posts/${id}`);
 }
