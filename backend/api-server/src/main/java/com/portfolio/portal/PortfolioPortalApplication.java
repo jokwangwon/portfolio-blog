@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(
     scanBasePackages = {
@@ -14,16 +15,19 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.portfolio.security",
         "com.portfolio.module.user",
         "com.portfolio.module.blog",
-        "com.portfolio.module.benchmark"
+        "com.portfolio.module.registry"
     }
 )
+@EnableScheduling
 @EnableJpaRepositories(basePackages = {
     "com.portfolio.domain.user.repository",
-    "com.portfolio.domain.blog.repository"
+    "com.portfolio.domain.blog.repository",
+    "com.portfolio.domain.service.repository"
 })
 @EntityScan(basePackages = {
     "com.portfolio.domain.user",
     "com.portfolio.domain.blog",
+    "com.portfolio.domain.service",
     "com.portfolio.domain.common"
 })
 @EnableJpaAuditing

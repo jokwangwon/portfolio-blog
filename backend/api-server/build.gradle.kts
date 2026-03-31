@@ -12,7 +12,6 @@ dependencies {
     implementation(project(":module-blog"))
     implementation(project(":module-user"))
     implementation(project(":module-registry"))
-    implementation(project(":module-benchmark"))
 
     // Spring Boot Starters
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -51,4 +50,13 @@ tasks.bootJar {
 
 tasks.jar {
     enabled = false
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
