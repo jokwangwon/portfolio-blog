@@ -75,6 +75,17 @@ export interface PageResponse<T> {
   empty: boolean;
 }
 
+// === Blog Requests ===
+
+export interface PostRequest {
+  title: string;
+  content: string;
+  excerpt?: string;
+  categoryId?: number;
+  tagIds?: number[];
+  status?: "DRAFT" | "PUBLISHED";
+}
+
 // === Error ===
 
 export interface ApiError {

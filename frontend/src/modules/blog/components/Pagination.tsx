@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -22,36 +24,35 @@ export default function Pagination({
   }
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
-      <button
+    <div className="flex items-center justify-center gap-1 mt-8">
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 0}
-        className="px-3 py-1.5 text-sm rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
       >
         이전
-      </button>
+      </Button>
 
       {pages.map((page) => (
-        <button
+        <Button
           key={page}
+          variant={page === currentPage ? "default" : "outline"}
+          size="sm"
           onClick={() => onPageChange(page)}
-          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-            page === currentPage
-              ? "bg-gray-900 text-white"
-              : "border border-gray-300 hover:bg-gray-50"
-          }`}
         >
           {page + 1}
-        </button>
+        </Button>
       ))}
 
-      <button
+      <Button
+        variant="outline"
+        size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages - 1}
-        className="px-3 py-1.5 text-sm rounded-md border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
       >
         다음
-      </button>
+      </Button>
     </div>
   );
 }

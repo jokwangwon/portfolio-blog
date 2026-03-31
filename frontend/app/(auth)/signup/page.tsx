@@ -3,9 +3,19 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useAuth } from "@/src/shell/auth/useAuth";
-import Button from "@/src/shared/components/Button";
 import { AxiosError } from "axios";
 import type { ApiError } from "@/src/types/api";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 
 export default function SignupPage() {
   const { signup } = useAuth();
@@ -65,123 +75,105 @@ export default function SignupPage() {
 
   return (
     <div className="flex justify-center py-12">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          회원가입
-        </h1>
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">회원가입</CardTitle>
+          <CardDescription>새 계정을 만드세요</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              {error}
+            </Alert>
+          )}
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-            {error}
-          </div>
-        )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">이메일</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="user@example.com"
+                aria-invalid={!!fieldErrors.email}
+              />
+              {fieldErrors.email && (
+                <p className="text-sm text-destructive">{fieldErrors.email}</p>
+              )}
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
+            <div className="space-y-2">
+              <Label htmlFor="username">사용자명</Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                placeholder="username"
+                aria-invalid={!!fieldErrors.username}
+              />
+              {fieldErrors.username && (
+                <p className="text-sm text-destructive">
+                  {fieldErrors.username}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">비밀번호</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="8자 이상"
+                aria-invalid={!!fieldErrors.password}
+              />
+              {fieldErrors.password && (
+                <p className="text-sm text-destructive">
+                  {fieldErrors.password}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                placeholder="비밀번호 재입력"
+                aria-invalid={!!fieldErrors.confirmPassword}
+              />
+              {fieldErrors.confirmPassword && (
+                <p className="text-sm text-destructive">
+                  {fieldErrors.confirmPassword}
+                </p>
+              )}
+            </div>
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? "가입 중..." : "회원가입"}
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            이미 계정이 있으신가요?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-foreground hover:underline"
             >
-              이메일
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="user@example.com"
-            />
-            {fieldErrors.email && (
-              <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              사용자명
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="username"
-            />
-            {fieldErrors.username && (
-              <p className="mt-1 text-sm text-red-600">
-                {fieldErrors.username}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              비밀번호
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="8자 이상"
-            />
-            {fieldErrors.password && (
-              <p className="mt-1 text-sm text-red-600">
-                {fieldErrors.password}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              비밀번호 확인
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              placeholder="비밀번호 재입력"
-            />
-            {fieldErrors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">
-                {fieldErrors.confirmPassword}
-              </p>
-            )}
-          </div>
-
-          <Button type="submit" loading={loading} className="w-full">
-            회원가입
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          이미 계정이 있으신가요?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-gray-900 hover:underline"
-          >
-            로그인
-          </Link>
-        </p>
-      </div>
+              로그인
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }
