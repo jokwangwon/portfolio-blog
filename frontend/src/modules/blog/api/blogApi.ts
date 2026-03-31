@@ -4,6 +4,9 @@ import type {
   PostRequest,
   CategoryResponse,
   TagResponse,
+  LikeResponse,
+  CommentResponse,
+  CommentRequest,
   PageResponse,
 } from "@/src/types/api";
 
@@ -60,4 +63,97 @@ export async function updatePost(
 
 export async function deletePost(id: number): Promise<void> {
   await apiClient.delete(`/posts/${id}`);
+}
+
+// === Like ===
+
+export async function likePost(postId: number): Promise<LikeResponse> {
+  const { data } = await apiClient.post<LikeResponse>(
+    `/posts/${postId}/like`
+  );
+  return data;
+}
+
+export async function unlikePost(postId: number): Promise<LikeResponse> {
+  const { data } = await apiClient.delete<LikeResponse>(
+    `/posts/${postId}/like`
+  );
+  return data;
+}
+
+// === Comment ===
+
+export interface CommentListParams {
+  postId: number;
+  page?: number;
+  size?: number;
+}
+
+export async function fetchComments(
+  params: CommentListParams
+): Promise<PageResponse<CommentResponse>> {
+  const { data } = await apiClient.get<PageResponse<CommentResponse>>(
+    `/posts/${params.postId}/comments`,
+    {
+      params: {
+        page: params.page ?? 0,
+        size: params.size ?? 20,
+      },
+    }
+  );
+  return data;
+}
+
+export async function createComment(
+  postId: number,
+  request: CommentRequest
+): Promise<CommentResponse> {
+  const { data } = await apiClient.post<CommentResponse>(
+    `/posts/${postId}/comments`,
+    request
+  );
+  return data;
+}
+
+export async function updateComment(
+  postId: number,
+  commentId: number,
+  request: CommentRequest
+): Promise<CommentResponse> {
+  const { data } = await apiClient.put<CommentResponse>(
+    `/posts/${postId}/comments/${commentId}`,
+    request
+  );
+  return data;
+}
+
+export async function deleteComment(
+  postId: number,
+  commentId: number
+): Promise<void> {
+  await apiClient.delete(`/posts/${postId}/comments/${commentId}`);
+}
+
+// === Search ===
+
+export interface SearchParams {
+  keyword: string;
+  page?: number;
+  size?: number;
+}
+
+export async function searchPosts(
+  params: SearchParams
+): Promise<PageResponse<PostResponse>> {
+  const { data } = await apiClient.get<PageResponse<PostResponse>>(
+    "/posts/search",
+    {
+      params: {
+        keyword: params.keyword,
+        page: params.page ?? 0,
+        size: params.size ?? 10,
+      },
+    }
+  );
+  return data;
 }

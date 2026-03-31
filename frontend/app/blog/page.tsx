@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
-import { usePosts, useCategories } from "@/src/modules/blog/hooks/usePosts";
+import {
+  usePosts,
+  useSearchPosts,
+  useCategories,
+} from "@/src/modules/blog/hooks/usePosts";
 import { useAuth } from "@/src/shell/auth/useAuth";
 import PostCard from "@/src/modules/blog/components/PostCard";
 import CategoryFilter from "@/src/modules/blog/components/CategoryFilter";
+import SearchBar from "@/src/modules/blog/components/SearchBar";
 import Pagination from "@/src/modules/blog/components/Pagination";
 import Loading from "@/src/shared/components/Loading";
 import { buttonVariants } from "@/components/ui/button";
@@ -13,18 +18,36 @@ import { buttonVariants } from "@/components/ui/button";
 export default function BlogPage() {
   const [page, setPage] = useState(0);
   const [categoryId, setCategoryId] = useState<number | undefined>();
+  const [searchKeyword, setSearchKeyword] = useState("");
   const { isAuthenticated } = useAuth();
+
+  const isSearching = searchKeyword.trim().length > 0;
 
   const { data: postsData, isLoading: postsLoading } = usePosts({
     page,
     categoryId,
   });
+
+  const { data: searchData, isLoading: searchLoading } = useSearchPosts({
+    keyword: searchKeyword,
+    page,
+  });
+
   const { data: categories } = useCategories();
+
+  const displayData = isSearching ? searchData : postsData;
+  const isLoading = isSearching ? searchLoading : postsLoading;
 
   function handleCategorySelect(id?: number) {
     setCategoryId(id);
     setPage(0);
+    setSearchKeyword("");
   }
+
+  const handleSearch = useCallback((keyword: string) => {
+    setSearchKeyword(keyword);
+    setPage(0);
+  }, []);
 
   return (
     <div>
@@ -37,7 +60,11 @@ export default function BlogPage() {
         )}
       </div>
 
-      {categories && (
+      <div className="flex items-center gap-4 mb-6">
+        <SearchBar onSearch={handleSearch} />
+      </div>
+
+      {!isSearching && categories && (
         <CategoryFilter
           categories={categories}
           selectedId={categoryId}
@@ -45,24 +72,32 @@ export default function BlogPage() {
         />
       )}
 
-      {postsLoading ? (
+      {isLoading ? (
         <Loading />
-      ) : postsData?.empty ? (
+      ) : displayData?.empty ? (
         <div className="text-center py-20 text-muted-foreground">
-          아직 게시글이 없습니다.
+          {isSearching
+            ? `"${searchKeyword}"에 대한 검색 결과가 없습니다.`
+            : "아직 게시글이 없습니다."}
         </div>
       ) : (
         <>
+          {isSearching && (
+            <p className="text-sm text-muted-foreground mb-4">
+              &quot;{searchKeyword}&quot; 검색 결과 ({displayData?.totalElements}건)
+            </p>
+          )}
+
           <div className="grid gap-4">
-            {postsData?.content.map((post) => (
+            {displayData?.content.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>
 
-          {postsData && (
+          {displayData && (
             <Pagination
-              currentPage={postsData.number}
-              totalPages={postsData.totalPages}
+              currentPage={displayData.number}
+              totalPages={displayData.totalPages}
               onPageChange={setPage}
             />
           )}

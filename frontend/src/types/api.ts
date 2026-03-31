@@ -86,6 +86,29 @@ export interface PostRequest {
   status?: "DRAFT" | "PUBLISHED";
 }
 
+export interface LikeResponse {
+  liked: boolean;
+  postId: number;
+}
+
+// === Comment ===
+
+export interface CommentRequest {
+  content: string;
+  parentId?: number;
+}
+
+export interface CommentResponse {
+  id: number;
+  content: string;
+  deleted: boolean;
+  author: Author;
+  parentId?: number;
+  replies: CommentResponse[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 // === Error ===
 
 export interface ApiError {
