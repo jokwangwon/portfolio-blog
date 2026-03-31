@@ -1,6 +1,6 @@
 # CI Pipeline — Portfolio Portal
 # 트리거: develop/main PR 및 push
-# Phase 1: 백엔드 빌드 + 테스트만 (프론트엔드/AI API는 프로젝트 생성 후 추가)
+# Backend (Spring Boot + Testcontainers) + Frontend (Next.js)
 
 name: CI
 
@@ -12,6 +12,7 @@ on:
 
 env:
   JAVA_VERSION: '17'
+  NODE_VERSION: '20'
   GRADLE_OPTS: '-Dorg.gradle.daemon=false'
 
 jobs:
@@ -24,21 +25,6 @@ jobs:
     defaults:
       run:
         working-directory: ./backend
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: portal_test
-          POSTGRES_USER: portal
-          POSTGRES_PASSWORD: portal_test_pass
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout
@@ -66,10 +52,6 @@ jobs:
         run: ./gradlew build -x test
 
       - name: Run tests
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/portal_test
-          SPRING_DATASOURCE_USERNAME: portal
-          SPRING_DATASOURCE_PASSWORD: portal_test_pass
         run: ./gradlew test
 
       - name: Upload test results
@@ -80,10 +62,43 @@ jobs:
           path: backend/api-server/build/reports/tests/
 
   # ──────────────────────────────────────────
-  # 2. Lint & Format Check
+  # 2. Frontend (Next.js)
+  # ──────────────────────────────────────────
+  frontend-build:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test -- --run
+
+  # ──────────────────────────────────────────
+  # 3. Backend Lint & Format Check
   # ──────────────────────────────────────────
   lint:
-    name: Code Style Check
+    name: Backend Code Style Check
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -115,12 +130,12 @@ jobs:
         run: ./gradlew checkstyleMain 2>/dev/null || echo "Checkstyle not configured yet — skipping"
 
   # ──────────────────────────────────────────
-  # 3. PR Gate (main 보호)
+  # 4. PR Gate (main 보호)
   # ──────────────────────────────────────────
   pr-gate:
     name: PR Gate
     if: github.event_name == 'pull_request' && github.base_ref == 'main'
-    needs: [backend-build, lint]
+    needs: [backend-build, frontend-build, lint]
     runs-on: ubuntu-latest
     steps:
       - name: All checks passed

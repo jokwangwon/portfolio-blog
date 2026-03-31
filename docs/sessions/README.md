@@ -31,9 +31,10 @@
 | 2026-03-30 | #8 | ServiceHealthChecker, Nginx Gateway, Sentry 연동, 총 95개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-31 | #9 | 통합 테스트 28개 (Testcontainers), module-benchmark 제거, @EnableScheduling | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-31 | #10 | JWT jti claim, Flyway 통합, Dockerfile, docker-compose 기동 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
-| 2026-03-31 | #11 | shadcn/ui 도입, Blog 에디터 CRUD 완성, 디자인 문서 작성 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
+| 2026-03-31 | #11 | shadcn/ui 도입, Blog 에디터 CRUD 완성, 디자인 문서 작성 | [SESSION_2026-03-31.md](SESSION_2026-03-31.md) |
+| 2026-03-31 | #12 | Blog 고도화(좋아요/댓글/검색), 프론트엔드 테스트 57개, OAuth2 소셜 로그인 | [SESSION_2026-03-31.md](SESSION_2026-03-31.md) |
 
-**총 세션**: 11개
+**총 세션**: 12개
 
 ---
 
@@ -240,6 +241,22 @@
 - `asChild` 대신 `buttonVariants()` + Link className 패턴
 
 **다음 작업**: Blog 고도화 (검색, 댓글, 좋아요), OAuth2, AI Benchmark API
+
+### 세션 #12 (2026-03-31)
+**Phase**: Phase 1B (프론트엔드 고도화 + OAuth2)
+**주요 성과**:
+- Blog 고도화 완성: 좋아요(LikeButton), 댓글(CommentSection), 검색(SearchBar)
+- Vitest + RTL + MSW 프론트엔드 테스트 인프라 구축 (57개 테스트)
+- OAuth2 소셜 로그인 구현 — Google, GitHub (백엔드 TDD 5개 + 프론트엔드 UI)
+- 모노레포 정리 (frontend/.git 제거)
+- 시스템 분석 에이전트: 종합 8.3/10
+
+**주요 결정**:
+- OAuth2 accessToken URL 파라미터 전달 방식
+- PasswordEncoder 별도 Config 분리 (순환 참조 해결)
+- 프론트엔드 테스트에서 fireEvent.change 사용 (fakeTimers 호환)
+
+**다음 작업**: 요구사항 vs MVP 비교 분석, UI 시각적 점검, "진짜 구현" 단계 계획
 
 ---
 

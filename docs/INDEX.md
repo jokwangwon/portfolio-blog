@@ -87,7 +87,8 @@ docs/
 │   ├── README.md                     # 세션 로그 가이드
 │   ├── SESSION_2026-01-07.md         # 세션 #1 로그
 │   ├── SESSION_2026-03-26.md         # 세션 #2 로그
-│   └── SESSION_2026-03-30.md         # 세션 #3 로그
+│   ├── SESSION_2026-03-30.md         # 세션 #3~#8 로그
+│   └── SESSION_2026-03-31.md         # 세션 #9~#12 로그
 │
 └── history/                          # 과거 문서 (참고용)
     └── README.md                     # 아카이브 설명
@@ -153,6 +154,7 @@ architecture-review.md (검토 및 개선안)
 | 2026-03-30 | Git 워크플로우 보완 + 멀티 에이전트 시스템 설계 | `DEVELOPMENT_GUIDE.md`, `multi-agent-system-design.md`, `ADR-007` |
 | 2026-03-31 | 프론트엔드 Phase 1B 진행, shadcn/ui 도입, Blog CRUD 완성 | `CONTEXT.md`, 세션 #10~#11 |
 | 2026-03-31 | Blog UI 디자인 명세 문서 작성 | `blog-ui-design.md` |
+| 2026-03-31 | Blog 고도화, 프론트엔드 테스트, OAuth2 소셜 로그인 | `SESSION_2026-03-31.md` |
 
 ---
 
