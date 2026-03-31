@@ -2,7 +2,7 @@
 
 > **프로젝트 문서 전체 구조 및 읽는 순서**
 
-**최종 업데이트**: 2026-03-30
+**최종 업데이트**: 2026-03-31
 
 ---
 
@@ -19,6 +19,7 @@
 
 ### 3. 기능 설계
 6. **[docs/architecture/pixel-office-design.md](architecture/pixel-office-design.md)** 🟠 - AI 픽셀 오피스 설계 (2D 가상 사무실 대시보드)
+7. **[docs/architecture/blog-ui-design.md](architecture/blog-ui-design.md)** 🟠 - Blog UI 디자인 명세 (컴포넌트, 레이아웃, 디자인 토큰)
 
 ### 4. 개선된 설계 (아키텍처 리뷰 반영)
 7. **[docs/architecture/database-consolidation-design.md](architecture/database-consolidation-design.md)** 🔴 - 서비스별 DB 물리 분리 설계
@@ -57,6 +58,7 @@ docs/
 │   ├── observability-design.md       # 🔴 Observability 설계
 │   ├── jwt-security-enhancement.md   # 🟠 JWT 보안 강화
 │   ├── pixel-office-design.md        # 🟠 AI 픽셀 오피스 설계
+│   ├── blog-ui-design.md             # 🟠 Blog UI 디자인 명세
 │   └── multi-agent-system-design.md  # 🟠 멀티 에이전트 합의 시스템 설계
 │
 ├── api/                              # API 명세
@@ -149,6 +151,8 @@ architecture-review.md (검토 및 개선안)
 | 2026-03-30 | CONTEXT.md 현행화, INDEX.md 갱신 | `CONTEXT.md`, `INDEX.md` |
 | 2026-03-30 | **아키텍처 전환** — 독립 서비스 + 중앙 포털 | `blog-architecture-context.md`, `depth-2`, `ADR-006` |
 | 2026-03-30 | Git 워크플로우 보완 + 멀티 에이전트 시스템 설계 | `DEVELOPMENT_GUIDE.md`, `multi-agent-system-design.md`, `ADR-007` |
+| 2026-03-31 | 프론트엔드 Phase 1B 진행, shadcn/ui 도입, Blog CRUD 완성 | `CONTEXT.md`, 세션 #10~#11 |
+| 2026-03-31 | Blog UI 디자인 명세 문서 작성 | `blog-ui-design.md` |
 
 ---
 

@@ -31,8 +31,9 @@
 | 2026-03-30 | #8 | ServiceHealthChecker, Nginx Gateway, Sentry 연동, 총 95개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-31 | #9 | 통합 테스트 28개 (Testcontainers), module-benchmark 제거, @EnableScheduling | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-31 | #10 | JWT jti claim, Flyway 통합, Dockerfile, docker-compose 기동 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
+| 2026-03-31 | #11 | shadcn/ui 도입, Blog 에디터 CRUD 완성, 디자인 문서 작성 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 
-**총 세션**: 10개
+**총 세션**: 11개
 
 ---
 
@@ -217,19 +218,28 @@
 **다음 작업**: Phase 1B (Next.js, FastAPI, OAuth2)
 
 ### 세션 #10 (2026-03-31)
-**Phase**: Phase 1A 완료
+**Phase**: Phase 1A 완료 + Phase 1B 시작
 **주요 성과**:
-- JwtTokenProvider에 jti(UUID) claim 추가 (토큰 중복 근본 해결)
-- Flyway V1~V5 → 단일 V1__init_portal_schema.sql 통합 (TimescaleDB 제거)
-- 멀티 스테이지 Dockerfile 생성 (eclipse-temurin:17-jammy)
-- docker-compose 전체 스택 기동 테스트 성공 (DB + API + Nginx)
-- Nginx upstream 동적 resolve 적용 (미기동 서비스 허용)
+- JWT jti claim, Flyway 통합, Dockerfile, docker-compose 기동 성공
+- Next.js Shell App MVP 구현 (Auth + Blog 조회)
+
+**다음 작업**: shadcn/ui 도입, Blog 에디터
+
+### 세션 #11 (2026-03-31)
+**Phase**: Phase 1B (프론트엔드 고도화)
+**주요 성과**:
+- shadcn/ui v4 (base-nova) 디자인 시스템 도입 — 11개 컴포넌트
+- 기존 전체 컴포넌트 shadcn/ui 리팩토링 (14개 파일 수정)
+- Blog 에디터 완성 (PostEditor + 생성/수정/삭제 + Dialog 확인)
+- Blog CRUD 전체 완성 (API 함수 + Mutation hooks)
+- 블로그 UI 디자인 세분화 문서 작성 (blog-ui-design.md)
+- 프로젝트 문서 전면 업데이트
 
 **주요 결정**:
-- Portal DB 스키마를 표준 PostgreSQL로 통합 (TimescaleDB는 AI Bench DB에만 사용)
-- Nginx resolver 패턴으로 선택적 서비스 기동 지원
+- shadcn/ui base-nova 스타일 채택 (Base UI 기반, oklch 색상 체계)
+- `asChild` 대신 `buttonVariants()` + Link className 패턴
 
-**다음 작업**: Phase 1B (Next.js Shell App, AI Benchmark API, OAuth2)
+**다음 작업**: Blog 고도화 (검색, 댓글, 좋아요), OAuth2, AI Benchmark API
 
 ---
 

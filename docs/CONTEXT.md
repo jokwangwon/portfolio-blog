@@ -3,51 +3,54 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-31 (세션 #10)
+**최종 업데이트**: 2026-03-31 (세션 #11)
 
 ---
 
 ## 🎯 현재 프로젝트 상태
 
 ### Phase
-**Phase 1A: 백엔드 개발** (완료!)
+**Phase 1B: 프론트엔드 개발** (진행 중)
 
-### 마지막 작업 (세션 #10, 2026-03-31)
-- JwtTokenProvider에 jti(UUID) claim 추가 (토큰 중복 근본 해결)
-- Flyway V1~V5 → 단일 V1__init_portal_schema.sql 통합 (TimescaleDB 제거)
-- API 서버 멀티 스테이지 Dockerfile 생성
-- docker-compose 전체 스택 기동 테스트 성공 (DB + API + Nginx)
-- Nginx upstream 동적 resolve 적용
-- 전체 테스트 123개 유지 (14개 파일, 전부 통과)
+### 마지막 작업 (세션 #11, 2026-03-31)
+- shadcn/ui v4 (base-nova) 디자인 시스템 도입 — 11개 컴포넌트 설치
+- 기존 전체 컴포넌트를 shadcn/ui 기반으로 리팩토링 (Header, Footer, Auth 페이지, Blog 컴포넌트)
+- 블로그 에디터 구현 — PostEditor 컴포넌트, 생성/수정 라우트, 삭제 Dialog
+- Blog CRUD 완성 (createPost, updatePost, deletePost, fetchTags API + Mutation hooks)
+- 블로그 UI/디자인 세분화 문서 작성 (blog-ui-design.md)
 
 ### 완료된 개발
-- Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈) — 세션 #1
-- JPA 엔티티 전체 구현 (User, Blog, Benchmark 도메인) — 세션 #1
-- Spring Security + JWT 인증 구현 — 세션 #1
-- 인증 API (회원가입, 로그인, 토큰 갱신, 로그아웃) — 세션 #1
-- Docker Compose 설정 (PostgreSQL + TimescaleDB) — 세션 #1
+
+#### Phase 1A (백엔드) — 완료 ✅
+- Spring Boot 멀티 모듈 프로젝트 (7개 모듈), JPA 엔티티, Security+JWT, Auth API — 세션 #1
 - Blog CRUD, Auth Cookie 리팩토링, Flyway V2-V5 — 세션 #5
-- 서비스 레이어 단위 테스트 69개 (8 파일) — 세션 #6
-- Health Check + Service Contract + JSON 로깅 — 세션 #6
-- module-registry (Service Registry CRUD) — 세션 #7
-- Controller 테스트 + 총 90개 테스트 — 세션 #7
-- ServiceHealthChecker + Nginx Gateway + Sentry 연동 — 세션 #8
-- 통합 테스트 28개 (Testcontainers), module-benchmark 제거 — 세션 #9
-- 전체 테스트 123개 (14개 파일) — 세션 #9
+- 서비스 레이어 단위 테스트 69개 + Health Check + JSON 로깅 — 세션 #6
+- module-registry + Controller 테스트 (총 90개) — 세션 #7
+- ServiceHealthChecker + Nginx Gateway + Sentry (총 95개) — 세션 #8
+- 통합 테스트 28개 (Testcontainers), 전체 123개 — 세션 #9
 - JWT jti claim, Flyway 통합, Dockerfile, docker-compose 기동 테스트 — 세션 #10
 
+#### Phase 1B (프론트엔드) — 진행 중
+- Next.js 16.2.1 Shell App + TailwindCSS v4 + Redux Toolkit + TanStack Query — 세션 #10
+- Shell: Header, Footer, ShellLayout, AuthProvider, Providers, API Client — 세션 #10
+- Auth: 로그인, 회원가입 페이지 — 세션 #10
+- Blog: 목록, 상세(마크다운 렌더링), 카테고리 필터, 페이지네이션 — 세션 #10
+- **shadcn/ui v4 (base-nova) 디자인 시스템 도입 — 세션 #11**
+- **블로그 에디터 (생성/수정/삭제) CRUD 완성 — 세션 #11**
+- **블로그 UI 디자인 세분화 문서 작성 — 세션 #11**
+
 ### 현재 상황
-**Phase 1A 완료**: 백엔드 핵심 기능 (인증, 블로그 CRUD, Service Registry, Observability, 테스트 123개) + 인프라 (Dockerfile, Flyway, docker-compose, Nginx Gateway) 모두 완성.
-프론트엔드/AI API 미착수. Phase 1B 진입 준비 완료.
+**Phase 1B 진행 중**: 프론트엔드 Shell App + Blog 모듈이 기본 구현됨. shadcn/ui 디자인 시스템 도입 완료, Blog CRUD(생성/수정/삭제) 기능 완성. 댓글/좋아요/검색 등 Blog 고도화, OAuth2, AI Benchmark API 미착수.
 
 ---
 
 ## 📋 다음 할 일 (Next Actions)
 
-### Phase 1B (Next)
-1. **프론트엔드**
-   - [ ] Next.js Shell App 프로젝트 생성
-   - [ ] 기본 레이아웃 + 라우팅 설정
+### Phase 1B 잔여 (프론트엔드 고도화)
+1. **Blog 고도화**
+   - [ ] 검색 (SearchBar, 백엔드 /posts/search 연결)
+   - [ ] 댓글 (Comment CRUD, 대댓글 2단계)
+   - [ ] 좋아요 (like/unlike 토글)
 
 2. **AI Benchmark API**
    - [ ] FastAPI 독립 프로젝트 생성
@@ -55,6 +58,9 @@
 
 3. **인증 확장**
    - [ ] OAuth2 소셜 로그인 (Google, GitHub)
+
+4. **Service Registry UI**
+   - [ ] 등록된 서비스 목록 대시보드
 
 ---
 
@@ -127,14 +133,17 @@
 
 ## 🚧 진행 중인 이슈
 
-### 1. 미커밋 변경사항 (세션 #10)
-- JWT jti claim 추가
-- Flyway V1~V5 통합, 기존 파일 삭제
-- API 서버 Dockerfile + .dockerignore
-- docker-compose.yml 수정 (name, build context, initdb 제거)
-- nginx.conf 동적 resolve 적용
-- application.yml 환경변수 바인딩 추가
-- 통합 테스트에서 Thread.sleep 워크어라운드 제거
+### 1. 미커밋 변경사항 (세션 #11)
+- shadcn/ui 초기화 + 11개 컴포넌트 (components/ui/)
+- 기존 컴포넌트 shadcn 리팩토링 (Header, Footer, Auth, Blog 전체)
+- 커스텀 Button.tsx 삭제 → shadcn Button으로 대체
+- PostEditor.tsx 신규 생성 (마크다운 에디터 + 미리보기)
+- /blog/editor, /blog/editor/[id] 라우트 페이지 신규
+- blogApi.ts에 createPost, updatePost, deletePost, fetchTags 추가
+- usePosts.ts에 useCreatePost, useUpdatePost, useDeletePost, useTags 추가
+- PostRequest 타입 추가 (api.ts)
+- 게시글 상세에 수정/삭제 버튼 + Dialog 확인 모달
+- globals.css shadcn 테마 적용
 
 ---
 
@@ -185,20 +194,22 @@
 - [x] Spring Security + JWT 인증
 - [x] 인증 API (회원가입/로그인/갱신/로그아웃)
 
-### Phase 1A (완료)
+### Phase 1A (완료) ✅
 - [x] Spring Boot 멀티 모듈, JPA 엔티티, Security+JWT, Auth API, Blog CRUD
 - [x] module-registry, ServiceHealthChecker, Health Check, Service Contract
 - [x] Logback JSON 로깅, Sentry 연동
-- [x] Flyway V1 통합 마이그레이션 — 세션 #10에서 완료
-- [x] API 서버 Dockerfile — 세션 #10에서 완료
-- [x] docker-compose 전체 스택 기동 검증 — 세션 #10에서 완료
-- [x] JWT jti claim — 세션 #10에서 완료
+- [x] Flyway V1 통합, Dockerfile, docker-compose 기동, JWT jti
 - [x] 123개 테스트 (단위 95 + 통합 28)
 
-### Phase 1B (미착수)
-- [ ] Next.js Shell App 프로젝트 생성
+### Phase 1B (진행 중)
+- [x] Next.js Shell App 프로젝트 생성 + 기본 레이아웃 — 세션 #10
+- [x] Auth 페이지 (로그인, 회원가입) — 세션 #10
+- [x] Blog 조회 (목록, 상세, 카테고리 필터, 페이지네이션) — 세션 #10
+- [x] shadcn/ui 디자인 시스템 도입 (11개 컴포넌트) — 세션 #11
+- [x] Blog 에디터 (생성/수정/삭제, PostEditor 컴포넌트) — 세션 #11
+- [ ] Blog 고도화 (검색, 댓글, 좋아요)
 - [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
-- [ ] OAuth2 소셜 로그인
+- [ ] OAuth2 소셜 로그인 (Google, GitHub)
 
 ---
 
@@ -231,19 +242,26 @@
 
 ### 세션 #10 (2026-03-31)
 - JWT jti(UUID) claim 추가 (토큰 중복 근본 해결)
-- Flyway V1~V5 통합 → V1__init_portal_schema.sql (TimescaleDB 제거)
-- API 서버 Dockerfile 생성 (멀티 스테이지)
-- docker-compose 전체 스택 기동 성공 (DB + API + Nginx)
-- **Phase 1A 완료!**
+- Flyway V1~V5 통합, Dockerfile, docker-compose 기동 성공
+- Next.js Shell App MVP 구현 (Auth + Blog 조회)
+- **Phase 1A 완료, Phase 1B 시작**
+
+### 세션 #11 (2026-03-31)
+- shadcn/ui v4 (base-nova) 디자인 시스템 도입 (11개 컴포넌트)
+- 기존 전체 컴포넌트 shadcn/ui 리팩토링
+- Blog 에디터 (PostEditor + 생성/수정 라우트 + 삭제 Dialog)
+- Blog CRUD 완성 (API 함수 + Mutation hooks)
+- 프로젝트 문서 업데이트 + 블로그 디자인 세분화 문서 작성
 
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### Phase 1B 우선순위
-1. Next.js Shell App 프로젝트 생성 + 기본 레이아웃
-2. AI Benchmark API (FastAPI) 독립 프로젝트 생성
-3. OAuth2 소셜 로그인 (Google, GitHub)
+### Phase 1B 남은 우선순위
+1. Blog 고도화 (검색, 댓글, 좋아요) — 백엔드 API 이미 존재
+2. OAuth2 소셜 로그인 (Google, GitHub) — 백엔드 + 프론트
+3. AI Benchmark API (FastAPI) 독립 프로젝트 생성
+4. Service Registry UI 대시보드
 
 ---
 
