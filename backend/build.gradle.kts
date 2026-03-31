@@ -43,6 +43,7 @@ subprojects {
         sourceCompatibility = "17"
         targetCompatibility = "17"
         options.encoding = "UTF-8"
+        options.compilerArgs.add("-parameters")
     }
 
     tasks.withType<Test> {

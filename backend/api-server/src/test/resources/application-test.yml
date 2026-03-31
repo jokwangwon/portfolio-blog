@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: Asia/Seoul
+    default-property-inclusion: non_null
+
+server:
+  port: 0
+
+jwt:
+  secret: test-secret-key-minimum-256-bits-for-hs256-algorithm-this-is-for-testing-only
+  access-expiration: 900000
+  refresh-expiration: 604800000
+
+cors:
+  allowed-origins: http://localhost:3000
+
+logging:
+  level:
+    root: WARN
+    com.portfolio: INFO
