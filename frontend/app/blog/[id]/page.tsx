@@ -9,6 +9,8 @@ import { usePostDetail, useDeletePost } from "@/src/modules/blog/hooks/usePosts"
 import { useAuth } from "@/src/shell/auth/useAuth";
 import { formatDateTime } from "@/src/shared/utils/format";
 import Loading from "@/src/shared/components/Loading";
+import LikeButton from "@/src/modules/blog/components/LikeButton";
+import CommentSection from "@/src/modules/blog/components/CommentSection";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -91,7 +93,7 @@ export default function PostDetailPage({
           <span>{post.author.username}</span>
           <span>{formatDateTime(post.publishedAt || post.createdAt)}</span>
           <span>조회 {post.viewCount}</span>
-          <span>좋아요 {post.likeCount}</span>
+          <LikeButton postId={post.id} likeCount={post.likeCount} />
         </div>
 
         {isAuthor && (
@@ -141,6 +143,8 @@ export default function PostDetailPage({
       <div className="prose prose-neutral max-w-none">
         <Markdown remarkPlugins={[remarkGfm]}>{post.content}</Markdown>
       </div>
+
+      <CommentSection postId={post.id} />
     </article>
   );
 }

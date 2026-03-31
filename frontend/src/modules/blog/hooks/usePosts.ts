@@ -7,9 +7,20 @@ import {
   createPost,
   updatePost,
   deletePost,
+  likePost,
+  unlikePost,
+  fetchComments,
+  createComment,
+  updateComment,
+  deleteComment,
+  searchPosts,
   PostListParams,
+  CommentListParams,
+  SearchParams,
 } from "@modules/blog/api/blogApi";
-import type { PostRequest } from "@/src/types/api";
+import type { PostRequest, CommentRequest } from "@/src/types/api";
+
+// === Posts ===
 
 export function usePosts(params: PostListParams = {}) {
   return useQuery({
@@ -23,6 +34,14 @@ export function usePostDetail(id: number) {
     queryKey: ["posts", id],
     queryFn: () => fetchPostById(id),
     enabled: id > 0,
+  });
+}
+
+export function useSearchPosts(params: SearchParams) {
+  return useQuery({
+    queryKey: ["posts", "search", params],
+    queryFn: () => searchPosts(params),
+    enabled: params.keyword.trim().length > 0,
   });
 }
 
@@ -68,6 +87,94 @@ export function useDeletePost() {
     mutationFn: (id: number) => deletePost(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+}
+
+// === Like ===
+
+export function useLikePost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (postId: number) => likePost(postId),
+    onSuccess: (_data, postId) => {
+      queryClient.invalidateQueries({ queryKey: ["posts", postId] });
+    },
+  });
+}
+
+export function useUnlikePost() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (postId: number) => unlikePost(postId),
+    onSuccess: (_data, postId) => {
+      queryClient.invalidateQueries({ queryKey: ["posts", postId] });
+    },
+  });
+}
+
+// === Comments ===
+
+export function useComments(params: CommentListParams) {
+  return useQuery({
+    queryKey: ["comments", params.postId, params.page],
+    queryFn: () => fetchComments(params),
+    enabled: params.postId > 0,
+  });
+}
+
+export function useCreateComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      postId,
+      request,
+    }: {
+      postId: number;
+      request: CommentRequest;
+    }) => createComment(postId, request),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["comments", variables.postId],
+      });
+    },
+  });
+}
+
+export function useUpdateComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      postId,
+      commentId,
+      request,
+    }: {
+      postId: number;
+      commentId: number;
+      request: CommentRequest;
+    }) => updateComment(postId, commentId, request),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["comments", variables.postId],
+      });
+    },
+  });
+}
+
+export function useDeleteComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      postId,
+      commentId,
+    }: {
+      postId: number;
+      commentId: number;
+    }) => deleteComment(postId, commentId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["comments", variables.postId],
+      });
     },
   });
 }
