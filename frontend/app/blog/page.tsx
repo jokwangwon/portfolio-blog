@@ -12,7 +12,7 @@ import PostCard from "@/src/modules/blog/components/PostCard";
 import CategoryFilter from "@/src/modules/blog/components/CategoryFilter";
 import SearchBar from "@/src/modules/blog/components/SearchBar";
 import Pagination from "@/src/modules/blog/components/Pagination";
-import Loading from "@/src/shared/components/Loading";
+import PostCardSkeleton from "@/src/modules/blog/components/PostCardSkeleton";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function BlogPage() {
@@ -52,7 +52,7 @@ export default function BlogPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">블로그</h1>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">블로그</h1>
         {isAuthenticated && (
           <Link href="/blog/editor" className={buttonVariants()}>
             글쓰기
@@ -73,7 +73,11 @@ export default function BlogPage() {
       )}
 
       {isLoading ? (
-        <Loading />
+        <div className="grid gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <PostCardSkeleton key={i} />
+          ))}
+        </div>
       ) : displayData?.empty ? (
         <div className="text-center py-20 text-muted-foreground">
           {isSearching

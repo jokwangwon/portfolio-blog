@@ -13,6 +13,7 @@ import PostEditor from "@/src/modules/blog/components/PostEditor";
 import Loading from "@/src/shared/components/Loading";
 import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function EditPostPage({
   params,
@@ -79,7 +80,11 @@ export default function EditPostPage({
             { id: postId, request: data },
             {
               onSuccess: () => {
+                toast.success("게시글이 수정되었습니다.");
                 router.push(`/blog/${postId}`);
+              },
+              onError: () => {
+                toast.error("게시글 수정에 실패했습니다.");
               },
             }
           );

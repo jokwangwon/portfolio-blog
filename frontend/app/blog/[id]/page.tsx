@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export default function PostDetailPage({
   params,
@@ -44,7 +45,11 @@ export default function PostDetailPage({
     deletePost.mutate(postId, {
       onSuccess: () => {
         setDeleteOpen(false);
+        toast.success("게시글이 삭제되었습니다.");
         router.push("/blog");
+      },
+      onError: () => {
+        toast.error("게시글 삭제에 실패했습니다.");
       },
     });
   }
@@ -85,7 +90,7 @@ export default function PostDetailPage({
           ))}
         </div>
 
-        <h1 className="text-3xl font-bold text-foreground mb-4">
+        <h1 className="text-3xl font-bold text-foreground mb-4 tracking-tight">
           {post.title}
         </h1>
 
