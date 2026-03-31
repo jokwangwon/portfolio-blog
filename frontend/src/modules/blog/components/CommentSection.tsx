@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useAuth } from "@/src/shell/auth/useAuth";
 import {
   useComments,
@@ -9,6 +10,7 @@ import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 interface CommentSectionProps {
   postId: number;
@@ -20,7 +22,12 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const createComment = useCreateComment();
 
   function handleCreate(content: string) {
-    createComment.mutate({ postId, request: { content } });
+    createComment.mutate(
+      { postId, request: { content } },
+      {
+        onSuccess: () => toast.success("댓글이 작성되었습니다."),
+      }
+    );
   }
 
   return (
@@ -30,13 +37,21 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         댓글 {commentsData ? `(${commentsData.totalElements})` : ""}
       </h2>
 
-      {isAuthenticated && (
+      {isAuthenticated ? (
         <div className="mb-6">
           <CommentForm
             onSubmit={handleCreate}
             isPending={createComment.isPending}
           />
         </div>
+      ) : (
+        <p className="text-sm text-muted-foreground mb-6">
+          댓글을 작성하려면{" "}
+          <Link href="/login" className="font-medium text-foreground hover:underline">
+            로그인
+          </Link>
+          하세요.
+        </p>
       )}
 
       {isLoading ? (

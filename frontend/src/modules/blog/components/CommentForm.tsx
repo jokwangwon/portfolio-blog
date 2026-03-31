@@ -9,6 +9,7 @@ interface CommentFormProps {
   isPending: boolean;
   placeholder?: string;
   submitLabel?: string;
+  initialContent?: string;
   onCancel?: () => void;
 }
 
@@ -17,9 +18,10 @@ export default function CommentForm({
   isPending,
   placeholder = "댓글을 작성하세요...",
   submitLabel = "댓글 작성",
+  initialContent = "",
   onCancel,
 }: CommentFormProps) {
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(initialContent);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
