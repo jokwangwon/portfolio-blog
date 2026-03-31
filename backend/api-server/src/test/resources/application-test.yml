@@ -15,6 +15,22 @@ spring:
   flyway:
     enabled: false
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-google-client-id
+            client-secret: test-google-client-secret
+            scope: email,profile
+          github:
+            client-id: test-github-client-id
+            client-secret: test-github-client-secret
+            scope: user:email,read:user
+
+app:
+  frontend-url: http://localhost:3000
+
   jackson:
     serialization:
       write-dates-as-timestamps: false

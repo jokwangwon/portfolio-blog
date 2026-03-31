@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import SocialLoginButtons from "@/src/shell/auth/SocialLoginButtons";
 
 export default function SignupPage() {
   const { signup } = useAuth();
@@ -162,6 +164,15 @@ export default function SignupPage() {
               {loading ? "가입 중..." : "회원가입"}
             </Button>
           </form>
+
+          <div className="relative my-6">
+            <Separator />
+            <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
+              또는
+            </span>
+          </div>
+
+          <SocialLoginButtons />
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             이미 계정이 있으신가요?{" "}
