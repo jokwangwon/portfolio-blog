@@ -1,4 +1,4 @@
-version: '3.8'
+name: portfolio
 
 services:
   # ==========================================
@@ -16,7 +16,6 @@ services:
       - "${PORTAL_DB_PORT:-5432}:5432"
     volumes:
       - portal_db_data:/var/lib/postgresql/data
-      - ./backend/api-server/src/main/resources/db/migration:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${PORTAL_DB_USER:-postgres} -d ${PORTAL_DB_NAME:-portal_db}"]
       interval: 10s
@@ -80,7 +79,7 @@ services:
   # ==========================================
   api-server:
     build:
-      context: ./backend/api-server
+      context: ./backend
       dockerfile: Dockerfile
     container_name: portfolio-api-server
     environment:

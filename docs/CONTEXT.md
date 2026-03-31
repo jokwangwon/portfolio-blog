@@ -3,21 +3,22 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-31 (세션 #9)
+**최종 업데이트**: 2026-03-31 (세션 #10)
 
 ---
 
 ## 🎯 현재 프로젝트 상태
 
 ### Phase
-**Phase 1: 백엔드 개발** (진행 중 ~60%)
+**Phase 1A: 백엔드 개발** (완료!)
 
-### 마지막 작업 (세션 #9, 2026-03-31)
-- Testcontainers PostgreSQL 기반 통합 테스트 28개 작성 (Auth 11 + Blog 17)
-- module-benchmark 빈 모듈 제거 (독립 서비스 분리 완료)
-- @EnableScheduling + module-registry 스캔 설정 보완
-- AccessDeniedException 핸들러 버그 수정 (500→403)
-- 전체 테스트 123개 달성 (14개 파일, 전부 통과)
+### 마지막 작업 (세션 #10, 2026-03-31)
+- JwtTokenProvider에 jti(UUID) claim 추가 (토큰 중복 근본 해결)
+- Flyway V1~V5 → 단일 V1__init_portal_schema.sql 통합 (TimescaleDB 제거)
+- API 서버 멀티 스테이지 Dockerfile 생성
+- docker-compose 전체 스택 기동 테스트 성공 (DB + API + Nginx)
+- Nginx upstream 동적 resolve 적용
+- 전체 테스트 123개 유지 (14개 파일, 전부 통과)
 
 ### 완료된 개발
 - Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈) — 세션 #1
@@ -33,39 +34,26 @@
 - ServiceHealthChecker + Nginx Gateway + Sentry 연동 — 세션 #8
 - 통합 테스트 28개 (Testcontainers), module-benchmark 제거 — 세션 #9
 - 전체 테스트 123개 (14개 파일) — 세션 #9
+- JWT jti claim, Flyway 통합, Dockerfile, docker-compose 기동 테스트 — 세션 #10
 
 ### 현재 상황
-**아키텍처 전환 완료**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006).
-백엔드 인증 기능까지 구현 완료. Portal API 리네이밍 + Service Registry 구현 필요.
-프론트엔드/AI API 미착수.
+**Phase 1A 완료**: 백엔드 핵심 기능 (인증, 블로그 CRUD, Service Registry, Observability, 테스트 123개) + 인프라 (Dockerfile, Flyway, docker-compose, Nginx Gateway) 모두 완성.
+프론트엔드/AI API 미착수. Phase 1B 진입 준비 완료.
 
 ---
 
 ## 📋 다음 할 일 (Next Actions)
 
-### 즉시 (Immediate)
-1. **아키텍처 전환 적용**
-   - [x] 아키텍처 문서 재작성 (blog-architecture-context.md, depth-2)
-   - [x] ADR-006 작성 (독립 서비스 전환 결정)
-   - [x] Portal API 리네이밍 (blog → portal) — 세션 #4에서 완료
-   - [x] module-registry 신규 생성 — 세션 #7에서 완료
-   - [x] module-benchmark 제거 — 세션 #9에서 완료
-   - [x] Nginx API Gateway 설정 — 세션 #8에서 완료
+### Phase 1B (Next)
+1. **프론트엔드**
+   - [ ] Next.js Shell App 프로젝트 생성
+   - [ ] 기본 레이아웃 + 라우팅 설정
 
-2. **데이터베이스 분리 + 초기화**
-   - [x] portal_db / ai_bench_db 물리 분리 (서비스별 독립 PostgreSQL 컨테이너) — 세션 #4에서 완료
-   - [ ] Flyway 마이그레이션 (V1__init_portal_schema.sql)
+2. **AI Benchmark API**
+   - [ ] FastAPI 독립 프로젝트 생성
    - [ ] AI Benchmark DB 스키마 (Alembic)
 
-### 다음 (Next)
-3. **기본 인프라**
-   - [x] Logback JSON 로깅 설정 — 세션 #6에서 완료
-   - [x] Sentry 연동 (무료 티어) — 세션 #8에서 완료
-   - [x] Health Check 엔드포인트 + Service Contract 구현 — 세션 #6에서 완료
-
-4. **프론트엔드 + AI API**
-   - [ ] Next.js Shell App 프로젝트 생성
-   - [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
+3. **인증 확장**
    - [ ] OAuth2 소셜 로그인 (Google, GitHub)
 
 ---
@@ -139,24 +127,14 @@
 
 ## 🚧 진행 중인 이슈
 
-### 1. 미커밋 변경사항
-- `backend/api-server/build.gradle.kts` — JPA 설정 보완
-- `PortfolioPortalApplication.java` — 리네이밍 완료 (blog→portal)
-- `application.yml` — 수정됨
-- `SecurityConfig.java` — 수정됨
-
-### 2. 미추적 신규 문서
-- `docs/architecture/pixel-office-design.md`
-- `docs/decisions/ADR-002, 003, 004, 005, 006`
-- `docs/sessions/SESSION_2026-03-26.md`
-
-### 3. 아키텍처 전환 적용 작업
-- [x] 문서 재작성 (blog-architecture-context.md, depth-2, ADR-006)
-- [x] 코드 리네이밍 (blog → portal) — 세션 #4에서 완료
-- [x] module-registry 생성 — 세션 #7에서 완료
-- [x] module-benchmark 제거 — 세션 #9에서 완료
-- [x] Nginx Gateway 설정 — 세션 #8에서 완료
-- [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
+### 1. 미커밋 변경사항 (세션 #10)
+- JWT jti claim 추가
+- Flyway V1~V5 통합, 기존 파일 삭제
+- API 서버 Dockerfile + .dockerignore
+- docker-compose.yml 수정 (name, build context, initdb 제거)
+- nginx.conf 동적 resolve 적용
+- application.yml 환경변수 바인딩 추가
+- 통합 테스트에서 Thread.sleep 워크어라운드 제거
 
 ---
 
@@ -207,16 +185,17 @@
 - [x] Spring Security + JWT 인증
 - [x] 인증 API (회원가입/로그인/갱신/로그아웃)
 
-### 미완료
-- [x] Portal API 리네이밍 — 세션 #4에서 완료
-- [x] module-registry 생성 — 세션 #7에서 완료
-- [x] module-benchmark 제거 — 세션 #9에서 완료
-- [x] Nginx API Gateway 설정 — 세션 #8에서 완료
-- [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
-- [ ] Flyway 마이그레이션 (V1__init_portal_schema.sql)
-- [x] 구조화된 JSON 로깅 (Logback) — 세션 #6에서 완료
-- [x] Sentry 연동 — 세션 #8에서 완료
-- [x] Health Check + Service Contract 구현 — 세션 #6에서 완료
+### Phase 1A (완료)
+- [x] Spring Boot 멀티 모듈, JPA 엔티티, Security+JWT, Auth API, Blog CRUD
+- [x] module-registry, ServiceHealthChecker, Health Check, Service Contract
+- [x] Logback JSON 로깅, Sentry 연동
+- [x] Flyway V1 통합 마이그레이션 — 세션 #10에서 완료
+- [x] API 서버 Dockerfile — 세션 #10에서 완료
+- [x] docker-compose 전체 스택 기동 검증 — 세션 #10에서 완료
+- [x] JWT jti claim — 세션 #10에서 완료
+- [x] 123개 테스트 (단위 95 + 통합 28)
+
+### Phase 1B (미착수)
 - [ ] Next.js Shell App 프로젝트 생성
 - [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
 - [ ] OAuth2 소셜 로그인
@@ -244,28 +223,25 @@
 
 ## 📝 마지막 대화 요약
 
-### 세션 #8 (2026-03-30)
-- ServiceHealthChecker, Nginx Gateway, Sentry 연동
-- 전체 테스트 95개 달성 (12개 파일)
-
 ### 세션 #9 (2026-03-31)
 - 통합 테스트 28개 (Testcontainers PostgreSQL)
 - module-benchmark 제거, @EnableScheduling 설정
 - AccessDeniedException 핸들러 버그 수정
 - 전체 테스트 123개 달성 (14개 파일)
 
+### 세션 #10 (2026-03-31)
+- JWT jti(UUID) claim 추가 (토큰 중복 근본 해결)
+- Flyway V1~V5 통합 → V1__init_portal_schema.sql (TimescaleDB 제거)
+- API 서버 Dockerfile 생성 (멀티 스테이지)
+- docker-compose 전체 스택 기동 성공 (DB + API + Nginx)
+- **Phase 1A 완료!**
+
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### 우선 작업: Phase 1A 잔여
-1. JwtTokenProvider에 jti(UUID) claim 추가 (토큰 중복 근본 해결)
-2. Flyway 마이그레이션 (V1__init_portal_schema.sql)
-3. Nginx Gateway 실제 테스트 (docker-compose 기동)
-4. API 서버 Dockerfile 생성
-
-### 이후 우선순위
-1. Next.js Shell App 프로젝트 생성
+### Phase 1B 우선순위
+1. Next.js Shell App 프로젝트 생성 + 기본 레이아웃
 2. AI Benchmark API (FastAPI) 독립 프로젝트 생성
 3. OAuth2 소셜 로그인 (Google, GitHub)
 

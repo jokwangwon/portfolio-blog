@@ -5,6 +5,13 @@ spring:
   application:
     name: portfolio-portal-api
 
+  # DataSource (환경변수로 주입, dev 프로필에서 오버라이드)
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/portal_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
   # JPA / Hibernate
   jpa:
     open-in-view: false
@@ -58,6 +65,16 @@ sentry:
   environment: ${SENTRY_ENVIRONMENT:development}
   send-default-pii: false
   exception-resolver-order: -2147483647
+
+# JWT (dev 프로필에서 오버라이드)
+jwt:
+  secret: ${JWT_SECRET:change-this-in-production-minimum-256-bits}
+  access-expiration: ${JWT_ACCESS_EXPIRATION:900000}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+# CORS
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
 
 # Logging
 logging:
