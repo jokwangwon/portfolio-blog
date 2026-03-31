@@ -3,7 +3,7 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-31 (세션 #11)
+**최종 업데이트**: 2026-03-31 (세션 #12)
 
 ---
 
@@ -12,12 +12,12 @@
 ### Phase
 **Phase 1B: 프론트엔드 개발** (진행 중)
 
-### 마지막 작업 (세션 #11, 2026-03-31)
-- shadcn/ui v4 (base-nova) 디자인 시스템 도입 — 11개 컴포넌트 설치
-- 기존 전체 컴포넌트를 shadcn/ui 기반으로 리팩토링 (Header, Footer, Auth 페이지, Blog 컴포넌트)
-- 블로그 에디터 구현 — PostEditor 컴포넌트, 생성/수정 라우트, 삭제 Dialog
-- Blog CRUD 완성 (createPost, updatePost, deletePost, fetchTags API + Mutation hooks)
-- 블로그 UI/디자인 세분화 문서 작성 (blog-ui-design.md)
+### 마지막 작업 (세션 #12, 2026-03-31)
+- Blog 고도화 완성: 좋아요(LikeButton), 댓글(CommentSection/CommentForm), 검색(SearchBar)
+- Vitest + RTL + MSW 프론트엔드 테스트 인프라 구축 (8개 파일, 57개 테스트)
+- OAuth2 소셜 로그인 — Google, GitHub (백엔드 TDD 5개 + 프론트엔드 UI)
+- 모노레포 정리 (frontend/.git 제거 → 부모 레포 통합)
+- 시스템 분석 에이전트 실행: 종합 8.3/10
 
 ### 완료된 개발
 
@@ -38,29 +38,33 @@
 - **shadcn/ui v4 (base-nova) 디자인 시스템 도입 — 세션 #11**
 - **블로그 에디터 (생성/수정/삭제) CRUD 완성 — 세션 #11**
 - **블로그 UI 디자인 세분화 문서 작성 — 세션 #11**
+- **Blog 고도화: 좋아요/댓글/검색 — 세션 #12**
+- **프론트엔드 테스트 57개 (Vitest + RTL + MSW) — 세션 #12**
+- **OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD + 프론트 UI) — 세션 #12**
 
 ### 현재 상황
-**Phase 1B 진행 중**: 프론트엔드 Shell App + Blog 모듈이 기본 구현됨. shadcn/ui 디자인 시스템 도입 완료, Blog CRUD(생성/수정/삭제) 기능 완성. 댓글/좋아요/검색 등 Blog 고도화, OAuth2, AI Benchmark API 미착수.
+**Phase 1B 마무리 단계**: 프론트엔드 Blog 기능 전체 완성 (CRUD + 좋아요 + 댓글 + 검색). OAuth2 소셜 로그인(Google/GitHub) 구현 완료. 프론트엔드 테스트 57개 구축. AI Benchmark API(FastAPI), Service Registry UI 미착수. 요구사항 vs MVP 비교 분석 후 "진짜 구현" 단계 진입 예정.
 
 ---
 
 ## 📋 다음 할 일 (Next Actions)
 
-### Phase 1B 잔여 (프론트엔드 고도화)
-1. **Blog 고도화**
-   - [ ] 검색 (SearchBar, 백엔드 /posts/search 연결)
-   - [ ] 댓글 (Comment CRUD, 대댓글 2단계)
-   - [ ] 좋아요 (like/unlike 토글)
+### 즉시 진행 (MVP → "진짜 구현" 전환)
+1. **요구사항 vs MVP 비교 분석** — SDD 명세 대비 현재 구현 상태 매트릭스
+2. **UI 시각적 점검** — dev 서버 기동 후 화면 확인
+3. **"진짜 구현" 단계 계획** — MVP 이후 강화 로드맵 수립
 
-2. **AI Benchmark API**
+### Phase 1B 잔여
+1. **AI Benchmark API**
    - [ ] FastAPI 독립 프로젝트 생성
    - [ ] AI Benchmark DB 스키마 (Alembic)
 
-3. **인증 확장**
-   - [ ] OAuth2 소셜 로그인 (Google, GitHub)
-
-4. **Service Registry UI**
+2. **Service Registry UI**
    - [ ] 등록된 서비스 목록 대시보드
+
+3. **프론트엔드 테스트 강화**
+   - [ ] 커버리지 향상 (현재 57개 → 목표 70%+)
+   - [ ] E2E 테스트 도입 검토
 
 ---
 
@@ -133,17 +137,11 @@
 
 ## 🚧 진행 중인 이슈
 
-### 1. 미커밋 변경사항 (세션 #11)
-- shadcn/ui 초기화 + 11개 컴포넌트 (components/ui/)
-- 기존 컴포넌트 shadcn 리팩토링 (Header, Footer, Auth, Blog 전체)
-- 커스텀 Button.tsx 삭제 → shadcn Button으로 대체
-- PostEditor.tsx 신규 생성 (마크다운 에디터 + 미리보기)
-- /blog/editor, /blog/editor/[id] 라우트 페이지 신규
-- blogApi.ts에 createPost, updatePost, deletePost, fetchTags 추가
-- usePosts.ts에 useCreatePost, useUpdatePost, useDeletePost, useTags 추가
-- PostRequest 타입 추가 (api.ts)
-- 게시글 상세에 수정/삭제 버튼 + Dialog 확인 모달
-- globals.css shadcn 테마 적용
+### 없음
+세션 #12 작업은 모두 커밋 완료 (develop 브랜치, origin에 push 됨):
+- `3a853cb` feat: Add blog likes, comments, and search features
+- `e71f7ae` test: Add frontend test suite with Vitest + RTL + MSW
+- `ef52a35` feat: Add OAuth2 social login (Google, GitHub)
 
 ---
 
@@ -207,9 +205,11 @@
 - [x] Blog 조회 (목록, 상세, 카테고리 필터, 페이지네이션) — 세션 #10
 - [x] shadcn/ui 디자인 시스템 도입 (11개 컴포넌트) — 세션 #11
 - [x] Blog 에디터 (생성/수정/삭제, PostEditor 컴포넌트) — 세션 #11
-- [ ] Blog 고도화 (검색, 댓글, 좋아요)
+- [x] Blog 고도화 (좋아요/댓글/검색) — 세션 #12
+- [x] 프론트엔드 테스트 57개 (Vitest + RTL + MSW) — 세션 #12
+- [x] OAuth2 소셜 로그인 Google/GitHub — 세션 #12
 - [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
-- [ ] OAuth2 소셜 로그인 (Google, GitHub)
+- [ ] Service Registry UI 대시보드
 
 ---
 
@@ -234,34 +234,27 @@
 
 ## 📝 마지막 대화 요약
 
-### 세션 #9 (2026-03-31)
-- 통합 테스트 28개 (Testcontainers PostgreSQL)
-- module-benchmark 제거, @EnableScheduling 설정
-- AccessDeniedException 핸들러 버그 수정
-- 전체 테스트 123개 달성 (14개 파일)
-
-### 세션 #10 (2026-03-31)
-- JWT jti(UUID) claim 추가 (토큰 중복 근본 해결)
-- Flyway V1~V5 통합, Dockerfile, docker-compose 기동 성공
-- Next.js Shell App MVP 구현 (Auth + Blog 조회)
-- **Phase 1A 완료, Phase 1B 시작**
-
 ### 세션 #11 (2026-03-31)
 - shadcn/ui v4 (base-nova) 디자인 시스템 도입 (11개 컴포넌트)
-- 기존 전체 컴포넌트 shadcn/ui 리팩토링
 - Blog 에디터 (PostEditor + 생성/수정 라우트 + 삭제 Dialog)
 - Blog CRUD 완성 (API 함수 + Mutation hooks)
-- 프로젝트 문서 업데이트 + 블로그 디자인 세분화 문서 작성
+
+### 세션 #12 (2026-03-31)
+- Blog 고도화: 좋아요/댓글/검색 (LikeButton, CommentSection, SearchBar)
+- Vitest + RTL + MSW 프론트엔드 테스트 57개
+- OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD 5개 + 프론트 UI)
+- 모노레포 정리, 시스템 분석 8.3/10
 
 ---
 
 ## 💡 다음 세션을 위한 메모
 
 ### Phase 1B 남은 우선순위
-1. Blog 고도화 (검색, 댓글, 좋아요) — 백엔드 API 이미 존재
-2. OAuth2 소셜 로그인 (Google, GitHub) — 백엔드 + 프론트
-3. AI Benchmark API (FastAPI) 독립 프로젝트 생성
-4. Service Registry UI 대시보드
+1. ~~Blog 고도화 (검색, 댓글, 좋아요)~~ ✅ 완료
+2. ~~OAuth2 소셜 로그인 (Google, GitHub)~~ ✅ 완료
+3. 요구사항 vs MVP 비교 분석 → "진짜 구현" 단계 전환
+4. AI Benchmark API (FastAPI) 독립 프로젝트 생성
+5. Service Registry UI 대시보드
 
 ---
 
