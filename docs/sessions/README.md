@@ -30,8 +30,9 @@
 | 2026-03-30 | #7 | module-registry 생성, Controller 테스트, 총 90개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-30 | #8 | ServiceHealthChecker, Nginx Gateway, Sentry 연동, 총 95개 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-31 | #9 | 통합 테스트 28개 (Testcontainers), module-benchmark 제거, @EnableScheduling | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
+| 2026-03-31 | #10 | JWT jti claim, Flyway 통합, Dockerfile, docker-compose 기동 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 
-**총 세션**: 9개
+**총 세션**: 10개
 
 ---
 
@@ -213,7 +214,22 @@
 - Singleton Testcontainer로 테스트 클래스 간 DB 공유
 - Flyway 비활성화 + JPA create-drop으로 테스트 스키마 관리
 
-**다음 작업**: JWT jti claim, Flyway 마이그레이션, Nginx 실제 테스트, Dockerfile
+**다음 작업**: Phase 1B (Next.js, FastAPI, OAuth2)
+
+### 세션 #10 (2026-03-31)
+**Phase**: Phase 1A 완료
+**주요 성과**:
+- JwtTokenProvider에 jti(UUID) claim 추가 (토큰 중복 근본 해결)
+- Flyway V1~V5 → 단일 V1__init_portal_schema.sql 통합 (TimescaleDB 제거)
+- 멀티 스테이지 Dockerfile 생성 (eclipse-temurin:17-jammy)
+- docker-compose 전체 스택 기동 테스트 성공 (DB + API + Nginx)
+- Nginx upstream 동적 resolve 적용 (미기동 서비스 허용)
+
+**주요 결정**:
+- Portal DB 스키마를 표준 PostgreSQL로 통합 (TimescaleDB는 AI Bench DB에만 사용)
+- Nginx resolver 패턴으로 선택적 서비스 기동 지원
+
+**다음 작업**: Phase 1B (Next.js Shell App, AI Benchmark API, OAuth2)
 
 ---
 

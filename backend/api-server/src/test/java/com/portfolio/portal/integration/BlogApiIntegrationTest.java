@@ -40,10 +40,6 @@ class BlogApiIntegrationTest extends IntegrationTestBase {
     void setUpTokens() throws Exception {
         // IntegrationTestBase.cleanDatabase()가 먼저 실행됨
         adminAccessToken = createAdminAndGetToken();
-
-        // JWT iat 중복 방지 (같은 초에 생성 시 동일 토큰)
-        Thread.sleep(1100);
-
         userAccessToken = createUserAndGetToken();
     }
 

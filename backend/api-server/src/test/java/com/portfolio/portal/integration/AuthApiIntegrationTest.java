@@ -1,7 +1,6 @@
 package com.portfolio.portal.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.portfolio.domain.user.repository.RefreshTokenRepository;
 import com.portfolio.domain.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
@@ -25,9 +24,6 @@ class AuthApiIntegrationTest extends IntegrationTestBase {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
 
     @Test
     @Order(1)
@@ -81,10 +77,6 @@ class AuthApiIntegrationTest extends IntegrationTestBase {
     @DisplayName("로그인 성공 → 200 + accessToken + refresh_token 쿠키")
     void login_success() throws Exception {
         signupTestUser();
-
-        // 회원가입에서 생성된 refresh token 삭제 (같은 초에 생성 시 JWT 토큰 중복 방지)
-        refreshTokenRepository.deleteAll();
-        Thread.sleep(1000);
 
         MvcResult result = mockMvc.perform(post("/api/portal/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
