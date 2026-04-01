@@ -48,16 +48,15 @@
 
 | 요소 | Dark (Cool Glass) | Light (Warm Glass) |
 |------|-------------------|---------------------|
-| 배경 | 거의 검정 `oklch(0.145 0 0)` | 따뜻한 크림 `oklch(0.98 0.015 85)` |
+| 배경 | 거의 검정 `oklch(0.145 0 0)` | 따뜻한 크림 `oklch(0.985 0.01 85)` |
 | 메쉬 색상 | Blue/Cyan/Deep Blue | Amber/Gold/Warm Rose |
-| 메쉬 투명도 | **65%** (선명하게) | **45-50%** (확실히 보이게) |
-| 메쉬 채도 | 높은 채도 (chroma 0.15-0.25) | 높은 채도 (chroma 0.12-0.18) |
-| 카드 배경 | 흰색 **8%** 투명 | 흰색 **55%** 투명 |
-| 카드 보더 | 흰색 **15%** | 앰버 **15%** + 흰색 40% |
-| 카드 blur | **16px** | **12px** |
-| 카드 hover glow | Blue glow (**20% 강도**) | Amber/Gold glow (**18% 강도**) |
+| 메쉬 투명도 | 50% | 25-30% (더 은은하게) |
+| 카드 배경 | 흰색 5% 투명 | 흰색 60-70% 투명 |
+| 카드 보더 | 흰색 10% | 앰버 8% + 흰색 50% |
+| 카드 blur | 12px | 8-10px (과하지 않게) |
+| 카드 hover glow | Blue glow | Amber/Gold glow |
 | 텍스트 | 밝은 회색 | 진한 회색 (기존 유지) |
-| 그림자 | 검정 **30%** | 앰버 **18%** |
+| 그림자 | 검정 20% | 앰버 10% |
 
 ---
 
@@ -67,51 +66,36 @@
 
 | 이름 | oklch | hex 근사 | 용도 |
 |------|-------|----------|------|
-| Warm Amber | `oklch(0.78 0.18 75)` | `#f59e0b` | 메쉬 주 색상, hover glow — **고채도** |
-| Soft Gold | `oklch(0.85 0.14 85)` | `#fbbf24` | 메쉬 보조, 포커스 힌트 — **채도 증가** |
-| Warm Rose | `oklch(0.72 0.14 25)` | `#fb923c` | 메쉬 악센트 — **채도 증가** |
-| Cream | `oklch(0.96 0.03 85)` | `#fffbeb` | 배경 톤 — 미세 틴트 |
-| Light Gold | `oklch(0.90 0.08 85)` | `#fef3c7` | hover 힌트, 강조 |
+| Warm Amber | `oklch(0.80 0.12 75)` | `#f59e0b` | 메쉬 주 색상, hover glow |
+| Soft Gold | `oklch(0.88 0.08 85)` | `#fbbf24` | 메쉬 보조, 포커스 힌트 |
+| Warm Rose | `oklch(0.75 0.08 25)` | `#fb923c` | 메쉬 악센트 (미세) |
+| Cream | `oklch(0.96 0.02 85)` | `#fffbeb` | 배경 톤 |
+| Light Gold | `oklch(0.92 0.04 85)` | `#fef3c7` | hover 힌트, 미세 강조 |
 
 ### 3.2 라이트 모드 Glassmorphism 토큰
 
 | 토큰 | 값 | 용도 |
 |------|-----|------|
-| `--glass-bg-light` | `oklch(1 0 0 / 55%)` | Glass 카드 배경 — **메쉬 비침 강화** |
-| `--glass-bg-light-hover` | `oklch(1 0 0 / 70%)` | Glass 카드 hover |
-| `--glass-border-light` | `oklch(0.78 0.12 75 / 25%)` | 앰버 틴트 보더 — **채도+투명도 증가** |
-| `--glass-border-light-hover` | `oklch(0.78 0.12 75 / 45%)` | hover 보더 — **선명하게** |
-| `--glass-blur-light` | `12px` | `backdrop-blur-md` — **blur 강화** |
-| `--glass-shadow-light` | `0 4px 30px oklch(0.78 0.14 75 / 18%)` | 앰버 그림자 — **강화** |
-| `--glass-glow-light` | `0 0 25px oklch(0.78 0.18 75 / 20%)` | hover 앰버 glow — **강화** |
+| `--glass-bg-light` | `oklch(1 0 0 / 65%)` | Glass 카드 배경 (흰색 65%) |
+| `--glass-bg-light-hover` | `oklch(1 0 0 / 80%)` | Glass 카드 hover |
+| `--glass-border-light` | `oklch(0.80 0.06 75 / 20%)` | 앰버 틴트 보더 |
+| `--glass-border-light-hover` | `oklch(0.80 0.06 75 / 35%)` | hover 보더 강화 |
+| `--glass-blur-light` | `8px` | `backdrop-blur-sm` |
+| `--glass-shadow-light` | `0 4px 24px oklch(0.80 0.08 75 / 10%)` | 따뜻한 앰버 그림자 |
+| `--glass-glow-light` | `0 0 20px oklch(0.80 0.12 75 / 12%)` | hover 시 앰버 glow |
 
 ### 3.3 라이트 모드 메쉬 그라데이션
 
 ```css
-/* Light mode mesh gradient - Warm Sunlit (선명한 버전) */
+/* Light mode mesh gradient - Warm Sunlit */
 body::before {
   background:
     radial-gradient(ellipse 80% 60% at 20% 30%,
-      oklch(0.85 0.14 85 / 50%) 0%, transparent 65%),    /* Soft Gold — 강한 존재감 */
+      oklch(0.92 0.06 85 / 30%) 0%, transparent 70%),    /* Soft Gold */
     radial-gradient(ellipse 60% 80% at 80% 20%,
-      oklch(0.78 0.18 75 / 45%) 0%, transparent 55%),    /* Warm Amber — 메인 포인트 */
+      oklch(0.88 0.08 75 / 25%) 0%, transparent 60%),    /* Warm Amber */
     radial-gradient(ellipse 50% 50% at 60% 80%,
-      oklch(0.72 0.14 25 / 30%) 0%, transparent 50%);    /* Warm Rose — 확실한 악센트 */
-}
-```
-
-> **다크 모드 메쉬 그라데이션도 동시에 강화** (기존 blog-ui-design.md 업데이트 대상):
-
-```css
-/* Dark mode mesh gradient - Cool Glass (강화 버전) */
-body::before {
-  background:
-    radial-gradient(ellipse 80% 50% at 30% 20%,
-      oklch(0.25 0.15 262 / 65%) 0%, transparent 60%),   /* Deep Blue — 투명도 상향 */
-    radial-gradient(ellipse 60% 60% at 70% 60%,
-      oklch(0.30 0.18 230 / 55%) 0%, transparent 55%),   /* Mid Blue — 채도+투명도 증가 */
-    radial-gradient(ellipse 50% 50% at 50% 90%,
-      oklch(0.40 0.15 215 / 45%) 0%, transparent 50%);   /* Cyan Glow — 강화 */
+      oklch(0.85 0.05 25 / 15%) 0%, transparent 50%);    /* Warm Rose hint */
 }
 ```
 
@@ -203,21 +187,5 @@ hover: bg-[var(--glass-bg-light-hover)] border-[var(--glass-border-light-hover)]
 | 0.3 모드별 전략 | 라이트 모드 설명 "Warm Glass" 반영 |
 | 0.5 원칙 3 | "Glassmorphism은 양쪽 모드에 적용, 톤만 다름"으로 수정 |
 | 1.2 액센트 컬러 토큰 | Warm Accent 컬러 추가 |
-| 1.2 Glassmorphism 토큰 | "다크 모드 전용" → 양쪽 모드 토큰으로 확장 |
-| 1.2 다크 Glassmorphism 토큰 | glass-bg 5%→8%, border 10%→15%, blur 12→16px 강화 |
+| 1.2 Glassmorphism 토큰 | "다크 모드 전용" → 라이트 토큰 추가 |
 | 10. Dark Mode | "10. Theme별 Glass 효과"로 확장, 라이트 메쉬 추가 |
-| 10. 다크 메쉬 | 투명도 50%→65%, 채도 증가 |
-
-### 다크 모드 Glass 토큰 강화 (기존 대비 변경)
-
-| 토큰 | 기존 | 강화 | 변경점 |
-|------|------|------|--------|
-| `--glass-bg` | `oklch(1 0 0 / 5%)` | `oklch(1 0 0 / 8%)` | 카드가 더 드러남 |
-| `--glass-bg-hover` | `oklch(1 0 0 / 8%)` | `oklch(1 0 0 / 12%)` | hover 대비 증가 |
-| `--glass-border` | `oklch(1 0 0 / 10%)` | `oklch(1 0 0 / 15%)` | 유리 단면 선명 |
-| `--glass-border-hover` | `oklch(1 0 0 / 15%)` | `oklch(1 0 0 / 22%)` | hover 보더 강화 |
-| `--glass-blur` | `12px` | `16px` | blur 효과 강화 |
-| `--glass-shadow` | `oklch(0 0 0 / 20%)` | `oklch(0 0 0 / 30%)` | 입체감 증가 |
-| 메쉬 투명도 | 50% | 65% | 색감 선명 |
-| 메쉬 채도 | 0.08-0.12 | 0.15-0.18 | 컬러 강화 |
-| hover glow | `15%` | `20%` | glow 눈에 띄게 |
