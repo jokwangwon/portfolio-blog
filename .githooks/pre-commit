@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Git pre-commit hook — 하네스 엔지니어링 Layer 3
+# 커밋 전 lint, test, docs 검증 실행
+set -euo pipefail
+
+ROOT=$(git rev-parse --show-toplevel)
+
+echo "=== Pre-commit Hook (Harness Layer 3) ==="
+
+# 변경된 파일 목록 (staged only)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+# --- 1. Backend: Java 파일 변경 시 ---
+JAVA_FILES=$(echo "$STAGED_FILES" | grep '\.java$' || true)
+if [ -n "$JAVA_FILES" ]; then
+  echo "[Backend] Java files changed — running gradle check..."
+  cd "$ROOT/backend"
+  if [ -f gradlew ]; then
+    ./gradlew check --quiet 2>&1 || {
+      echo ""
+      echo "ERROR: Backend check failed. Fix issues before committing."
+      exit 1
+    }
+    echo "[Backend] PASSED"
+  else
+    echo "[Backend] SKIPPED (gradlew not found)"
+  fi
+  cd "$ROOT"
+fi
+
+# --- 2. Frontend: TS/TSX 파일 변경 시 ---
+TS_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$TS_FILES" ]; then
+  if [ -f "$ROOT/frontend/package.json" ] && [ -d "$ROOT/frontend/node_modules" ]; then
+    echo "[Frontend] TypeScript files changed — running lint..."
+    cd "$ROOT/frontend"
+    npx eslint --no-warn-ignored $TS_FILES 2>&1 || {
+      echo ""
+      echo "ERROR: Frontend lint failed. Fix issues before committing."
+      exit 1
+    }
+    echo "[Frontend] PASSED"
+    cd "$ROOT"
+  else
+    echo "[Frontend] SKIPPED (package.json or node_modules not found)"
+  fi
+fi
+
+# --- 3. Docs: Markdown 파일 변경 시 ---
+MD_FILES=$(echo "$STAGED_FILES" | grep '\.md$' || true)
+if [ -n "$MD_FILES" ]; then
+  if [ -f "$ROOT/scripts/validate-docs.sh" ]; then
+    echo "[Docs] Markdown files changed — validating cross-references..."
+    bash "$ROOT/scripts/validate-docs.sh" 2>&1 || {
+      echo ""
+      echo "WARNING: Documentation cross-reference issues found."
+      echo "Consider fixing before committing."
+      # Warning only — docs issues don't block commit
+    }
+  fi
+fi
+
+echo "=== Pre-commit PASSED ==="
