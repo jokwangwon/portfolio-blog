@@ -15,10 +15,14 @@ export default function CategoryFilter({
   onSelect,
 }: CategoryFilterProps) {
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <nav className="flex flex-col gap-1">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+        카테고리
+      </h3>
       <Button
-        variant={!selectedId ? "default" : "outline"}
+        variant="ghost"
         size="sm"
+        className={`justify-start ${!selectedId ? "bg-accent text-accent-foreground font-medium" : "text-muted-foreground"}`}
         onClick={() => onSelect(undefined)}
       >
         전체
@@ -26,13 +30,14 @@ export default function CategoryFilter({
       {categories.map((cat) => (
         <Button
           key={cat.id}
-          variant={selectedId === cat.id ? "default" : "outline"}
+          variant="ghost"
           size="sm"
+          className={`justify-start ${selectedId === cat.id ? "bg-accent text-accent-foreground font-medium" : "text-muted-foreground"}`}
           onClick={() => onSelect(cat.id)}
         >
           {cat.name}
         </Button>
       ))}
-    </div>
+    </nav>
   );
 }
