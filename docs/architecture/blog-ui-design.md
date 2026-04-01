@@ -2,7 +2,8 @@
 
 > Frontend Blog 모듈의 디자인 컨셉, 컴포넌트별 디자인 스펙, 레이아웃 구조, 디자인 토큰, 반응형 전략을 정의합니다.
 
-**최종 업데이트**: 2026-03-31 (세션 #12)
+**최종 업데이트**: 2026-04-01
+**관련 문서**: `portfolio-landing-design.md` (포트폴리오 랜딩), `light-mode-glass-design.md` (Glass 토큰)
 
 ---
 
@@ -153,13 +154,19 @@
 
 ## 2. 레이아웃 구조
 
-### 2.1 전체 레이아웃 (ShellLayout)
+> **라우트 구조 변경 (2026-04-01)**: Route Group 분리 적용.
+> 포트폴리오 랜딩(`/`)은 `(portfolio)` 그룹, 블로그(`/blog`)는 `(blog)` 그룹.
+> 상세: `portfolio-landing-design.md` 참조.
+
+### 2.1 블로그 레이아웃 (BlogLayout — `(blog)` Route Group)
+
+기존 ShellLayout을 `(blog)` Route Group의 layout.tsx가 계승.
 
 ```
 ┌──────────────────────────────────────────────────────┐
 │ Header (h-14, border-b, bg-background)               │
 │ ┌─ Logo ──── Nav ──────────── Auth Actions ────────┐ │
-│ │ Portfolio │ 블로그        글쓰기 │ user │ 로그아웃│ │
+│ │ KW │ 블로그                글쓰기 │ user │ 로그아웃│ │
 │ └──────────────────────────────────────────────────┘ │
 ├──────────────────────────────────────────────────────┤
 │                                                      │
@@ -434,7 +441,7 @@
 
 | 요소 | 동작 |
 |------|------|
-| Logo "Portfolio" | → `/` (홈) |
+| Logo "KW" | → `/` (포트폴리오 랜딩) |
 | "블로그" | → `/blog` (목록) |
 | "글쓰기" (Header) | → `/blog/editor` (인증 시만 표시) |
 | PostCard 클릭 | → `/blog/{id}` (상세) |
@@ -527,13 +534,17 @@ import { buttonVariants } from "@/components/ui/button";
 ```
 depth-2-module-structure.md (전체 프론트엔드 아키텍처)
     ↓
-blog-ui-design.md (이 문서 — Blog 모듈 UI 세부 스펙)
-    ↓
-실제 구현 파일:
-    ├─→ src/modules/blog/components/  (PostCard, PostEditor, ...)
-    ├─→ app/blog/                     (라우트 페이지)
-    ├─→ components/ui/                (shadcn 컴포넌트)
-    └─→ app/globals.css               (디자인 토큰)
+├── portfolio-landing-design.md (포트폴리오 랜딩 UI)
+│       ↓
+│   실제 구현: app/(portfolio)/, src/modules/portfolio/
+│
+└── blog-ui-design.md (이 문서 — Blog 모듈 UI 세부 스펙)
+        ↓
+    실제 구현:
+        ├─→ src/modules/blog/components/  (PostCard, PostEditor, ...)
+        ├─→ app/(blog)/blog/              (라우트 페이지)
+        ├─→ components/ui/                (shadcn 컴포넌트)
+        └─→ app/globals.css               (디자인 토큰)
 ```
 
 ---
