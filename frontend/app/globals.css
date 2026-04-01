@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.98 0.015 85);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -29,6 +29,23 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
+
+  /* Accent: Trust Blue / Cyan */
+  --accent-blue: oklch(0.546 0.245 262);
+  --accent-cyan: oklch(0.715 0.143 215);
+
+  /* Warm Glass: Light mode tokens */
+  --warm-amber: oklch(0.78 0.18 75);
+  --warm-gold: oklch(0.85 0.14 85);
+  --warm-rose: oklch(0.72 0.14 25);
+  --accent-ice: oklch(0.90 0.08 85);
+  --glass-bg: oklch(1 0 0 / 55%);
+  --glass-bg-hover: oklch(1 0 0 / 70%);
+  --glass-border: oklch(0.78 0.12 75 / 25%);
+  --glass-border-hover: oklch(0.78 0.12 75 / 45%);
+  --glass-blur: 12px;
+  --glass-shadow: 0 4px 30px oklch(0.78 0.14 75 / 18%);
+  --glass-glow: 0 0 25px oklch(0.78 0.18 75 / 20%);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -116,6 +133,19 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Accent: Dark mode (밝기 보정) */
+  --accent-blue: oklch(0.60 0.20 262);
+  --accent-cyan: oklch(0.75 0.12 215);
+
+  /* Cool Glass: Dark mode tokens (강화) */
+  --glass-bg: oklch(1 0 0 / 8%);
+  --glass-bg-hover: oklch(1 0 0 / 12%);
+  --glass-border: oklch(1 0 0 / 15%);
+  --glass-border-hover: oklch(1 0 0 / 22%);
+  --glass-blur: 16px;
+  --glass-shadow: 0 8px 32px oklch(0 0 0 / 30%);
+  --glass-glow: 0 0 25px oklch(0.546 0.245 262 / 20%);
 }
 
 @layer base {
@@ -124,8 +154,75 @@
   }
   body {
     @apply bg-background text-foreground;
+    position: relative;
   }
   html {
     @apply font-sans;
+  }
+
+  /* Light mode: Warm Sunlit mesh gradient */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 30%,
+        oklch(0.85 0.14 85 / 50%) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 80% at 80% 20%,
+        oklch(0.78 0.18 75 / 45%) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 50% at 60% 80%,
+        oklch(0.72 0.14 25 / 30%) 0%, transparent 50%);
+  }
+
+  /* Dark mode: Cool Glass mesh gradient (강화) */
+  .dark body::before {
+    background:
+      radial-gradient(ellipse 80% 50% at 30% 20%,
+        oklch(0.25 0.15 262 / 65%) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 60% at 70% 60%,
+        oklch(0.30 0.18 230 / 55%) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 50% at 50% 90%,
+        oklch(0.40 0.15 215 / 45%) 0%, transparent 50%);
+  }
+}
+
+/* Glass utility classes */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-glow);
+}
+
+.glass-header {
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-sidebar {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+/* Accessibility: reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

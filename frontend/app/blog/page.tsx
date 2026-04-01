@@ -12,7 +12,7 @@ import PostCard from "@/src/modules/blog/components/PostCard";
 import CategoryFilter from "@/src/modules/blog/components/CategoryFilter";
 import SearchBar from "@/src/modules/blog/components/SearchBar";
 import Pagination from "@/src/modules/blog/components/Pagination";
-import Loading from "@/src/shared/components/Loading";
+import PostCardSkeleton from "@/src/modules/blog/components/PostCardSkeleton";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function BlogPage() {
@@ -51,8 +51,11 @@ export default function BlogPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">블로그</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">블로그</h1>
+          <p className="text-sm text-muted-foreground mt-1">개발 경험과 기술을 공유합니다</p>
+        </div>
         {isAuthenticated && (
           <Link href="/blog/editor" className={buttonVariants()}>
             글쓰기
@@ -60,49 +63,82 @@ export default function BlogPage() {
         )}
       </div>
 
-      <div className="flex items-center gap-4 mb-6">
-        <SearchBar onSearch={handleSearch} />
-      </div>
+      <div className="flex gap-8">
+        {/* 좌측 사이드바 */}
+        {!isSearching && categories && (
+          <aside className="hidden lg:block w-48 flex-shrink-0">
+            <div className="sticky top-20">
+              <CategoryFilter
+                categories={categories}
+                selectedId={categoryId}
+                onSelect={handleCategorySelect}
+              />
+            </div>
+          </aside>
+        )}
 
-      {!isSearching && categories && (
-        <CategoryFilter
-          categories={categories}
-          selectedId={categoryId}
-          onSelect={handleCategorySelect}
-        />
-      )}
-
-      {isLoading ? (
-        <Loading />
-      ) : displayData?.empty ? (
-        <div className="text-center py-20 text-muted-foreground">
-          {isSearching
-            ? `"${searchKeyword}"에 대한 검색 결과가 없습니다.`
-            : "아직 게시글이 없습니다."}
-        </div>
-      ) : (
-        <>
-          {isSearching && (
-            <p className="text-sm text-muted-foreground mb-4">
-              &quot;{searchKeyword}&quot; 검색 결과 ({displayData?.totalElements}건)
-            </p>
-          )}
-
-          <div className="grid gap-4">
-            {displayData?.content.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
+        {/* 메인 콘텐츠 */}
+        <div className="flex-1 min-w-0">
+          <div className="mb-6">
+            <SearchBar onSearch={handleSearch} />
           </div>
 
-          {displayData && (
-            <Pagination
-              currentPage={displayData.number}
-              totalPages={displayData.totalPages}
-              onPageChange={setPage}
-            />
+          {/* 모바일 카테고리 */}
+          {!isSearching && categories && (
+            <div className="lg:hidden flex flex-wrap gap-2 mb-6">
+              {[{ id: undefined, name: "전체" } as const, ...categories.map(c => ({ id: c.id, name: c.name } as const))].map((cat) => (
+                <button
+                  key={cat.id ?? "all"}
+                  className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                    (cat.id === undefined ? !categoryId : categoryId === cat.id)
+                      ? "bg-foreground text-background border-foreground"
+                      : "text-muted-foreground border-border hover:border-foreground"
+                  }`}
+                  onClick={() => handleCategorySelect(cat.id)}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
           )}
-        </>
-      )}
+
+          {isLoading ? (
+            <div className="grid gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <PostCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : displayData?.empty ? (
+            <div className="text-center py-20 text-muted-foreground">
+              {isSearching
+                ? `"${searchKeyword}"에 대한 검색 결과가 없습니다.`
+                : "아직 게시글이 없습니다."}
+            </div>
+          ) : (
+            <>
+              {isSearching && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  &quot;{searchKeyword}&quot; 검색 결과 ({displayData?.totalElements}건)
+                </p>
+              )}
+
+              <div className="grid gap-4">
+                {displayData?.content.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+              </div>
+
+              {displayData && (
+                <Pagination
+                  currentPage={displayData.number}
+                  totalPages={displayData.totalPages}
+                  onPageChange={setPage}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

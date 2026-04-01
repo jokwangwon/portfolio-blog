@@ -11,7 +11,7 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   return (
     <Link href={`/blog/${post.id}`}>
-      <Card className="hover:ring-2 hover:ring-ring/20 transition-all">
+      <Card className="glass-card transition-all duration-200 ease-out hover:-translate-y-0.5">
         <CardContent>
           <div className="flex items-center gap-2 mb-3">
             {post.category && (
@@ -22,7 +22,7 @@ export default function PostCard({ post }: PostCardProps) {
             </span>
           </div>
 
-          <h2 className="text-lg font-semibold text-foreground mb-2 line-clamp-2">
+          <h2 className="text-lg font-semibold text-foreground mb-2 line-clamp-2 tracking-tight">
             {post.title}
           </h2>
 
