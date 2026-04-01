@@ -4,6 +4,7 @@
 > OpenAPI 3.0 기반 Frontend-Backend 계약
 
 **작성일**: 2026-01-07
+**최종 수정**: 2026-04-01
 **우선순위**: 🔴 **CRITICAL**
 **OpenAPI 파일**: `openapi.yaml`
 
