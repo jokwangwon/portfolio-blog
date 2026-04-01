@@ -16,7 +16,7 @@ export default function Header() {
       <div className="mx-auto max-w-5xl px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="text-lg font-bold text-foreground">
-            Portfolio
+            KW
           </Link>
           <Separator orientation="vertical" className="h-5" />
           <nav className="flex gap-1">
