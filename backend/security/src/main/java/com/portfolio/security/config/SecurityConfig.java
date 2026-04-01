@@ -2,6 +2,7 @@ package com.portfolio.security.config;
 
 import com.portfolio.security.jwt.JwtAuthenticationFilter;
 import com.portfolio.security.oauth2.CustomOAuth2UserService;
+import com.portfolio.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.portfolio.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
+    private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -57,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/portal/auth/refresh").permitAll()
                         .requestMatchers("/api/portal/auth/logout").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers("/login/oauth2/code/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/tags/**").permitAll()
@@ -88,9 +91,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(auth -> auth
                                 .baseUri("/oauth2/authorize")
-                        )
-                        .redirectionEndpoint(redirect -> redirect
-                                .baseUri("/oauth2/callback/*")
+                                .authorizationRequestRepository(cookieAuthorizationRequestRepository)
                         )
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
