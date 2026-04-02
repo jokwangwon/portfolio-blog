@@ -2,8 +2,11 @@ package com.portfolio.module.ai.controller;
 
 import com.portfolio.module.ai.dto.DraftRequest;
 import com.portfolio.module.ai.dto.DraftResponse;
+import com.portfolio.module.ai.dto.SummarizeRequest;
+import com.portfolio.module.ai.dto.SummarizeResponse;
 import com.portfolio.module.ai.service.LlmService;
 import com.portfolio.module.ai.service.NotionService;
+import com.portfolio.module.ai.service.SummarizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,7 @@ public class AiDraftController {
 
     private final NotionService notionService;
     private final LlmService llmService;
+    private final SummarizationService summarizationService;
 
     @PostMapping("/generate-draft")
     public ResponseEntity<DraftResponse> generateDraft(
@@ -48,5 +52,24 @@ public class AiDraftController {
         log.info("AI 초안 생성 완료 - {}ms, provider: {}", durationMs, response.getProvider());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/summarize")
+    public ResponseEntity<SummarizeResponse> summarize(
+            @Valid @RequestBody SummarizeRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        log.info("AI 요약 요청 - user: {}, maxLength: {}",
+                userDetails.getUsername(), request.getMaxLength());
+
+        long startTime = System.currentTimeMillis();
+
+        String summary = summarizationService.summarize(
+                request.getContent(), request.getTitle(), request.getMaxLength());
+
+        long durationMs = System.currentTimeMillis() - startTime;
+
+        return ResponseEntity.ok(new SummarizeResponse(
+                summary, summarizationService.getProvider(), durationMs));
     }
 }

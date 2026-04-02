@@ -44,6 +44,12 @@ ai:
   gemini-model: ${GEMINI_MODEL:gemini-2.0-flash}
   provider: ${AI_PROVIDER:ollama}
 
+# Langfuse (LLM Observability) — Phase 2: OpenTelemetry 기반 통합 예정
+# langfuse:
+#   public-key: ${LANGFUSE_PUBLIC_KEY:}
+#   secret-key: ${LANGFUSE_SECRET_KEY:}
+#   host: ${LANGFUSE_HOST:https://cloud.langfuse.com}
+
 # Frontend URL (OAuth2 callback redirect)
 app:
   frontend-url: ${APP_FRONTEND_URL:http://localhost:3000}
