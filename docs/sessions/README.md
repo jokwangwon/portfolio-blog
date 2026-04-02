@@ -33,8 +33,9 @@
 | 2026-03-31 | #10 | JWT jti claim, Flyway 통합, Dockerfile, docker-compose 기동 테스트 | [SESSION_2026-03-30.md](SESSION_2026-03-30.md) |
 | 2026-03-31 | #11 | shadcn/ui 도입, Blog 에디터 CRUD 완성, 디자인 문서 작성 | [SESSION_2026-03-31.md](SESSION_2026-03-31.md) |
 | 2026-03-31 | #12 | Blog 고도화(좋아요/댓글/검색), 프론트엔드 테스트 57개, OAuth2 소셜 로그인 | [SESSION_2026-03-31.md](SESSION_2026-03-31.md) |
+| 2026-04-02 | #13–#14 | 하네스 엔지니어링 점검, OAuth2 4건 수정, 에디터 3건 수정 (slug/SSR/슬래시) | [SESSION_2026-04-02.md](SESSION_2026-04-02.md) |
 
-**총 세션**: 12개
+**총 세션**: 14개
 
 ---
 
@@ -257,6 +258,21 @@
 - 프론트엔드 테스트에서 fireEvent.change 사용 (fakeTimers 호환)
 
 **다음 작업**: 요구사항 vs MVP 비교 분석, UI 시각적 점검, "진짜 구현" 단계 계획
+
+### 세션 #13–#14 (2026-04-02)
+**Phase**: Phase 1B (버그 수정 + 안정화)
+**주요 성과**:
+- 하네스 엔지니어링 6개 Layer 전수 점검 (모두 정상)
+- OAuth2 소셜 로그인 4건 버그 수정 (CRITICAL 2, HIGH 1, MEDIUM 1)
+- `.env.local` 환경변수 관리 체계 구축
+- 블로그 에디터 3건 수정: 한글 slug 생성 (`generateUniqueSlug`), Tiptap SSR hydration, 슬래시 명령어 "/" 잔존
+
+**주요 결정**:
+- OAuth2 refresh_token은 프론트엔드 callback에서 Next.js 프록시 경유 쿠키 설정
+- 한글 slug는 `post-{timestamp}` 형식, 중복 시 suffix 자동 추가
+- Tiptap SSR에서 `immediatelyRender: false` 필수
+
+**다음 작업**: 요구사항 vs MVP 비교 분석, UI 시각적 점검
 
 ---
 

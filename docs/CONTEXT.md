@@ -3,7 +3,7 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-31 (세션 #12)
+**최종 업데이트**: 2026-04-02 (세션 #14)
 
 ---
 
@@ -12,12 +12,12 @@
 ### Phase
 **Phase 1B: 프론트엔드 개발** (진행 중)
 
-### 마지막 작업 (세션 #12, 2026-03-31)
-- Blog 고도화 완성: 좋아요(LikeButton), 댓글(CommentSection/CommentForm), 검색(SearchBar)
-- Vitest + RTL + MSW 프론트엔드 테스트 인프라 구축 (8개 파일, 57개 테스트)
-- OAuth2 소셜 로그인 — Google, GitHub (백엔드 TDD 5개 + 프론트엔드 UI)
-- 모노레포 정리 (frontend/.git 제거 → 부모 레포 통합)
-- 시스템 분석 에이전트 실행: 종합 8.3/10
+### 마지막 작업 (세션 #13–#14, 2026-04-02)
+- 하네스 엔지니어링 6개 Layer 전수 점검 — 모두 정상
+- OAuth2 소셜 로그인 4건 버그 수정 (CRITICAL 2, HIGH 1, MEDIUM 1)
+- `.env.local` + Gradle bootRun 환경변수 로딩 체계 구축
+- 이슈 보고서 문서화 (`docs/review/oauth2-issue-report.md`)
+- 블로그 에디터 3건 버그 수정 (한글 slug, Tiptap SSR, 슬래시 명령어)
 
 ### 완료된 개발
 
@@ -43,7 +43,7 @@
 - **OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD + 프론트 UI) — 세션 #12**
 
 ### 현재 상황
-**Phase 1B 마무리 단계**: 프론트엔드 Blog 기능 전체 완성 (CRUD + 좋아요 + 댓글 + 검색). OAuth2 소셜 로그인(Google/GitHub) 구현 완료. 프론트엔드 테스트 57개 구축. AI Benchmark API(FastAPI), Service Registry UI 미착수. 요구사항 vs MVP 비교 분석 후 "진짜 구현" 단계 진입 예정.
+**Phase 1B 마무리 단계**: 프론트엔드 Blog 기능 전체 완성 (CRUD + 좋아요 + 댓글 + 검색). OAuth2 소셜 로그인(Google/GitHub) 구현 완료 — 4건 버그 수정 (세션 #13). 블로그 에디터 3건 버그 수정 — 한글 slug, Tiptap SSR hydration, 슬래시 명령어 (세션 #14). 하네스 엔지니어링 도입 완료 (6 Layer). module-ai, module-benchmark 백엔드 구현 완료.
 
 ---
 
@@ -244,6 +244,13 @@
 - Vitest + RTL + MSW 프론트엔드 테스트 57개
 - OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD 5개 + 프론트 UI)
 - 모노레포 정리, 시스템 분석 8.3/10
+
+### 세션 #13–#14 (2026-04-02)
+- 하네스 엔지니어링 6개 Layer 전수 점검 (모두 정상)
+- OAuth2 소셜 로그인 4건 버그 수정 (CRITICAL 2, HIGH 1, MEDIUM 1)
+- `.env.local` 환경변수 관리 체계 구축
+- 이슈 보고서 문서화 (`docs/review/oauth2-issue-report.md`)
+- 블로그 에디터 3건 수정: 한글 slug 생성, Tiptap SSR hydration, 슬래시 명령어 "/" 잔존
 
 ---
 
