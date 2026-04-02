@@ -13,6 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import dynamic from "next/dynamic";
 import EditorToolbar from "./EditorToolbar";
 import MarkdownRenderer from "./MarkdownRenderer";
@@ -34,6 +41,12 @@ interface PostEditorProps {
   tags: TagResponse[];
   onSubmit: (data: PostRequest) => void;
   isPending: boolean;
+  onCreateCategory?: (name: string) => Promise<CategoryResponse>;
+  onDeleteCategory?: (id: number) => Promise<void>;
+  onCreateTag?: (name: string) => Promise<TagResponse>;
+  onDeleteTag?: (id: number) => Promise<void>;
+  onSummarize?: (content: string, title: string) => Promise<string>;
+  isSummarizing?: boolean;
 }
 
 export default function PostEditor({
@@ -42,6 +55,12 @@ export default function PostEditor({
   tags,
   onSubmit,
   isPending,
+  onCreateCategory,
+  onDeleteCategory,
+  onCreateTag,
+  onDeleteTag,
+  onSummarize,
+  isSummarizing,
 }: PostEditorProps) {
   const postId = initialData?.id;
   const [title, setTitle] = useState(initialData?.title ?? "");
@@ -61,6 +80,9 @@ export default function PostEditor({
   );
   const [draftBanner, setDraftBanner] = useState<DraftData | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 임시저장 데이터 확인 (마운트 시 1회) — event callback으로 처리
@@ -211,7 +233,22 @@ export default function PostEditor({
 
       {/* 요약 */}
       <div className="space-y-2">
-        <Label htmlFor="excerpt">요약 (선택)</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="excerpt">요약 (선택)</Label>
+          {onSummarize && (
+            <button
+              type="button"
+              className="text-xs text-primary hover:underline disabled:opacity-50 disabled:no-underline"
+              disabled={isSummarizing || !content.trim()}
+              onClick={async () => {
+                const summary = await onSummarize(content, title);
+                if (summary) setExcerpt(summary);
+              }}
+            >
+              {isSummarizing ? "AI 요약 생성 중..." : "AI 요약 생성"}
+            </button>
+          )}
+        </div>
         <Input
           id="excerpt"
           value={excerpt}
@@ -224,62 +261,150 @@ export default function PostEditor({
       {/* 카테고리 / 상태 */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="category">카테고리</Label>
-          <select
-            id="category"
-            value={categoryId ?? ""}
-            onChange={(e) =>
-              setCategoryId(
-                e.target.value ? Number(e.target.value) : undefined
-              )
-            }
-            className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            <option value="">카테고리 없음</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="category">카테고리</Label>
+            {onCreateCategory && (
+              <button
+                type="button"
+                className="text-xs text-primary hover:underline"
+                onClick={() => setShowCategoryInput((v) => !v)}
+              >
+                {showCategoryInput ? "취소" : "+ 추가"}
+              </button>
+            )}
+          </div>
+          {showCategoryInput && onCreateCategory && (
+            <form
+              className="flex gap-1"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!newCategoryName.trim()) return;
+                const created = await onCreateCategory(newCategoryName.trim());
+                setCategoryId(created.id);
+                setNewCategoryName("");
+                setShowCategoryInput(false);
+              }}
+            >
+              <Input
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="새 카테고리 이름"
+                className="h-7 text-xs"
+                autoFocus
+              />
+              <Button type="submit" size="sm" className="h-7 text-xs px-2">
+                생성
+              </Button>
+            </form>
+          )}
+          <div className="flex gap-1">
+            <Select
+              value={categoryId?.toString() ?? ""}
+              onValueChange={(val) =>
+                setCategoryId(val ? Number(val) : undefined)
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="카테고리 없음" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">카테고리 없음</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id.toString()}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {onDeleteCategory && categoryId && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-destructive hover:text-destructive"
+                title="선택한 카테고리 삭제"
+                onClick={async () => {
+                  if (!confirm("이 카테고리를 삭제하시겠습니까?")) return;
+                  await onDeleteCategory(categoryId);
+                  setCategoryId(undefined);
+                }}
+              >
+                ✕
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="status">상태</Label>
-          <select
-            id="status"
+          <Select
             value={status}
-            onChange={(e) =>
-              setStatus(e.target.value as "DRAFT" | "PUBLISHED")
+            onValueChange={(val) =>
+              setStatus((val ?? "DRAFT") as "DRAFT" | "PUBLISHED")
             }
-            className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
-            <option value="DRAFT">임시저장</option>
-            <option value="PUBLISHED">발행</option>
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="DRAFT">임시저장</SelectItem>
+              <SelectItem value="PUBLISHED">발행</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* 태그 */}
-      {tags.length > 0 && (
-        <div className="space-y-2">
-          <Label>태그</Label>
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <Badge
-                key={tag.id}
-                variant={
-                  selectedTagIds.includes(tag.id) ? "default" : "outline"
-                }
-                className="cursor-pointer"
-                onClick={() => toggleTag(tag.id)}
-              >
-                #{tag.name}
-              </Badge>
-            ))}
-          </div>
+      <div className="space-y-2">
+        <Label>태그</Label>
+        <div className="flex flex-wrap gap-2">
+          {tags.map((tag) => (
+            <Badge
+              key={tag.id}
+              variant={
+                selectedTagIds.includes(tag.id) ? "default" : "outline"
+              }
+              className="cursor-pointer group"
+              onClick={() => toggleTag(tag.id)}
+            >
+              #{tag.name}
+              {onDeleteTag && (
+                <button
+                  type="button"
+                  className="ml-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (!confirm(`"${tag.name}" 태그를 삭제하시겠습니까?`)) return;
+                    setSelectedTagIds((prev) => prev.filter((id) => id !== tag.id));
+                    await onDeleteTag(tag.id);
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+            </Badge>
+          ))}
+          {onCreateTag && (
+            <form
+              className="inline-flex items-center gap-1"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!newTagName.trim()) return;
+                const created = await onCreateTag(newTagName.trim());
+                setSelectedTagIds((prev) => [...prev, created.id]);
+                setNewTagName("");
+              }}
+            >
+              <Input
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                placeholder="+ 새 태그"
+                className="h-6 w-24 text-xs px-2 focus:w-32 transition-all"
+              />
+            </form>
+          )}
         </div>
-      )}
+      </div>
 
       <Separator />
 

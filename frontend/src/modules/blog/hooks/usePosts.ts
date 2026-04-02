@@ -15,10 +15,16 @@ import {
   deleteComment,
   searchPosts,
   fetchMyPosts,
+  createCategory,
+  deleteCategory,
+  createTag,
+  deleteTag,
   PostListParams,
   MyPostListParams,
   CommentListParams,
   SearchParams,
+  summarizePost,
+  SummarizeRequest,
 } from "@modules/blog/api/blogApi";
 import type { PostRequest, CommentRequest } from "@/src/types/api";
 
@@ -61,10 +67,51 @@ export function useCategories() {
   });
 }
 
+export function useCreateCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (request: { name: string; description?: string }) =>
+      createCategory(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+  });
+}
+
+export function useDeleteCategory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    },
+  });
+}
+
 export function useTags() {
   return useQuery({
     queryKey: ["tags"],
     queryFn: fetchTags,
+  });
+}
+
+export function useCreateTag() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (request: { name: string }) => createTag(request),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
+    },
+  });
+}
+
+export function useDeleteTag() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => deleteTag(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
+    },
   });
 }
 
@@ -97,6 +144,14 @@ export function useDeletePost() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
+  });
+}
+
+// === AI Summarization ===
+
+export function useSummarizePost() {
+  return useMutation({
+    mutationFn: (request: SummarizeRequest) => summarizePost(request),
   });
 }
 

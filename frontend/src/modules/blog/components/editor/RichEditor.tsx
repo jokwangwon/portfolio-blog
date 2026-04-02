@@ -129,10 +129,23 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
   return (
     <div ref={containerRef} className="relative">
       <BubbleToolbar editor={editor} />
-      <EditorContent
-        editor={editor}
-        className="rich-editor-content prose prose-sm max-w-none p-4 min-h-[400px] focus:outline-none"
-      />
+      <div
+        className="cursor-text"
+        role="textbox"
+        tabIndex={-1}
+        onKeyDown={() => editor.commands.focus()}
+        onClick={(e) => {
+          // Click on empty area → focus editor at end
+          if (e.target === e.currentTarget) {
+            editor.chain().focus("end").run();
+          }
+        }}
+      >
+        <EditorContent
+          editor={editor}
+          className="rich-editor-content prose prose-sm max-w-none p-4 min-h-[400px] focus:outline-none"
+        />
+      </div>
       {slashPos && (
         <SlashCommandMenu
           position={slashPos}

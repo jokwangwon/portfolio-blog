@@ -311,6 +311,7 @@ class PostServiceTest {
         @DisplayName("본인 게시글을 소프트 삭제한다")
         void softDeleteOwnPost() {
             given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(userRepository.findByUsername("testuser")).willReturn(Optional.of(author));
 
             postService.deletePost(1L, "testuser");
 
@@ -320,10 +321,32 @@ class PostServiceTest {
         @Test
         @DisplayName("타인 게시글 삭제 시 예외를 던진다")
         void throwWhenNotOwner() {
+            User otherUser = User.builder()
+                    .email("other@test.com").username("otheruser")
+                    .password("encoded").role(UserRole.USER).build();
+            ReflectionTestUtils.setField(otherUser, "id", 2L);
+
             given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(userRepository.findByUsername("otheruser")).willReturn(Optional.of(otherUser));
 
             assertThatThrownBy(() -> postService.deletePost(1L, "otheruser"))
                     .isInstanceOf(ForbiddenException.class);
+        }
+
+        @Test
+        @DisplayName("ADMIN은 타인 게시글도 삭제할 수 있다")
+        void adminCanDeleteOthersPost() {
+            User admin = User.builder()
+                    .email("admin@test.com").username("admin")
+                    .password("encoded").role(UserRole.ADMIN).build();
+            ReflectionTestUtils.setField(admin, "id", 99L);
+
+            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(userRepository.findByUsername("admin")).willReturn(Optional.of(admin));
+
+            postService.deletePost(1L, "admin");
+
+            assertThat(post.getDeletedAt()).isNotNull();
         }
     }
 

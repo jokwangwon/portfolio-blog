@@ -167,7 +167,10 @@ public class PostService {
         Post post = postRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
 
-        if (!post.getAuthor().getUsername().equals(username)) {
+        User requester = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
+
+        if (!post.getAuthor().getUsername().equals(username) && !requester.isAdmin()) {
             throw new ForbiddenException("POST_FORBIDDEN", "게시글 삭제 권한이 없습니다");
         }
 

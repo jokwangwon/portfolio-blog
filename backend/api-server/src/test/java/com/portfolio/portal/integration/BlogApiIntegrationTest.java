@@ -76,13 +76,14 @@ class BlogApiIntegrationTest extends IntegrationTestBase {
 
     @Test
     @Order(3)
-    @DisplayName("카테고리 생성 (일반 사용자) → 403")
-    void createCategory_normalUser_forbidden() throws Exception {
+    @DisplayName("카테고리 생성 (일반 사용자) → 201")
+    void createCategory_normalUser_success() throws Exception {
         mockMvc.perform(post("/api/portal/categories")
                         .header("Authorization", "Bearer " + userAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("name", "Unauthorized"))))
-                .andExpect(status().isForbidden());
+                        .content(objectMapper.writeValueAsString(Map.of("name", "UserCategory"))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("UserCategory"));
     }
 
     @Test

@@ -41,9 +41,35 @@ export async function fetchCategories(): Promise<CategoryResponse[]> {
   return data;
 }
 
+export async function createCategory(request: {
+  name: string;
+  description?: string;
+}): Promise<CategoryResponse> {
+  const { data } = await apiClient.post<CategoryResponse>(
+    "/categories",
+    request
+  );
+  return data;
+}
+
+export async function deleteCategory(id: number): Promise<void> {
+  await apiClient.delete(`/categories/${id}`);
+}
+
 export async function fetchTags(): Promise<TagResponse[]> {
   const { data } = await apiClient.get<TagResponse[]>("/tags");
   return data;
+}
+
+export async function createTag(request: {
+  name: string;
+}): Promise<TagResponse> {
+  const { data } = await apiClient.post<TagResponse>("/tags", request);
+  return data;
+}
+
+export async function deleteTag(id: number): Promise<void> {
+  await apiClient.delete(`/tags/${id}`);
 }
 
 export async function createPost(
@@ -182,3 +208,28 @@ export async function searchPosts(
   );
   return data;
 }
+
+// === AI Summarization ===
+
+export interface SummarizeRequest {
+  content: string;
+  title?: string;
+  maxLength?: number;
+}
+
+export interface SummarizeResponse {
+  summary: string;
+  provider: string;
+  durationMs: number;
+}
+
+export async function summarizePost(
+  request: SummarizeRequest
+): Promise<SummarizeResponse> {
+  const { data } = await apiClient.post<SummarizeResponse>(
+    "/ai/summarize",
+    request
+  );
+  return data;
+}
+

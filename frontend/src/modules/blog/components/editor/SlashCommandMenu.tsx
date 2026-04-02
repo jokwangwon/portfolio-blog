@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Editor } from "@tiptap/react";
 
 interface SlashCommand {
@@ -34,18 +34,37 @@ interface SlashCommandMenuProps {
 }
 
 export default function SlashCommandMenu({ position, query, onSelect, onClose }: SlashCommandMenuProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const filtered = COMMANDS.filter((cmd) =>
-    cmd.label.toLowerCase().includes(query.toLowerCase()) ||
-    cmd.description.toLowerCase().includes(query.toLowerCase())
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return COMMANDS.filter((cmd) =>
+      cmd.label.toLowerCase().includes(q) ||
+      cmd.description.toLowerCase().includes(q)
+    );
+  }, [query]);
+
+  // selectedIndex resets to 0 whenever query changes via key-based state reset
+  const [selectedState, setSelectedState] = useState({ query, index: 0 });
+  const selectedIndex = selectedState.query === query ? selectedState.index : 0;
+  const setSelectedIndex = useCallback(
+    (updater: number | ((prev: number) => number)) => {
+      setSelectedState((prev) => {
+        const current = prev.query === query ? prev.index : 0;
+        const next = typeof updater === "function" ? updater(current) : updater;
+        return { query, index: next };
+      });
+    },
+    [query]
   );
 
+  // Auto-scroll selected item into view
   useEffect(() => {
-    setSelectedIndex(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+    const menu = menuRef.current;
+    if (!menu) return;
+    const item = menu.children[selectedIndex] as HTMLElement | undefined;
+    item?.scrollIntoView({ block: "nearest" });
+  }, [selectedIndex]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -66,14 +85,14 @@ export default function SlashCommandMenu({ position, query, onSelect, onClose }:
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [filtered, selectedIndex, onSelect, onClose]);
+  }, [filtered, selectedIndex, setSelectedIndex, onSelect, onClose]);
 
   if (filtered.length === 0) return null;
 
   return (
     <div
       ref={menuRef}
-      className="absolute z-50 w-64 rounded-lg border bg-popover shadow-md overflow-hidden"
+      className="absolute z-50 w-64 max-h-72 rounded-lg border bg-popover shadow-md overflow-y-auto"
       style={{ top: position.top, left: position.left }}
     >
       {filtered.map((cmd, i) => (
