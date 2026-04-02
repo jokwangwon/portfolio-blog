@@ -8,7 +8,6 @@ include(
     "module-blog",
     "module-user",
     "module-registry",
-    "module-ai",
-    "module-benchmark",
     "api-server"
 )
+// module-ai, module-benchmark → ai-backend 독립 서비스로 이전

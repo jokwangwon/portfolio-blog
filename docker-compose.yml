@@ -90,11 +90,36 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-900000}
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
+      AI_BACKEND_URL: http://ai-backend:8081
     ports:
       - "${API_SERVER_PORT:-8080}:8080"
     depends_on:
       portal-db:
         condition: service_healthy
+    networks:
+      - portal-network
+    restart: unless-stopped
+    profiles:
+      - backend
+
+  # ==========================================
+  # AI Backend (Spring Boot — 내부 서비스)
+  # ==========================================
+  ai-backend:
+    build:
+      context: ./ai-backend
+      dockerfile: Dockerfile
+    container_name: portfolio-ai-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      AI_PROVIDER: ${AI_PROVIDER:-ollama}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:12b}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
+      NOTION_API_KEY: ${NOTION_API_KEY:}
+    ports:
+      - "${AI_BACKEND_PORT:-8081}:8081"
     networks:
       - portal-network
     restart: unless-stopped

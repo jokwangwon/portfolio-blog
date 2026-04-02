@@ -35,20 +35,9 @@ spring:
             scope: user:email,read:user
             redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
 
-# AI Draft Generation
-ai:
-  notion-api-key: ${NOTION_API_KEY:}
-  gemini-api-key: ${GEMINI_API_KEY:}
-  ollama-host: ${OLLAMA_HOST:http://localhost:11434}
-  ollama-model: ${OLLAMA_MODEL:gemma3:12b}
-  gemini-model: ${GEMINI_MODEL:gemini-2.0-flash}
-  provider: ${AI_PROVIDER:ollama}
-
-# Langfuse (LLM Observability) — Phase 2: OpenTelemetry 기반 통합 예정
-# langfuse:
-#   public-key: ${LANGFUSE_PUBLIC_KEY:}
-#   secret-key: ${LANGFUSE_SECRET_KEY:}
-#   host: ${LANGFUSE_HOST:https://cloud.langfuse.com}
+# AI Backend (내부 서비스)
+ai-backend:
+  url: ${AI_BACKEND_URL:http://localhost:8081}
 
 # Frontend URL (OAuth2 callback redirect)
 app:

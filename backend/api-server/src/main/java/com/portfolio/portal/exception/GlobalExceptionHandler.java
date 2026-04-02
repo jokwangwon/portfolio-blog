@@ -3,6 +3,7 @@ package com.portfolio.portal.exception;
 import com.portfolio.common.exception.DuplicateResourceException;
 import com.portfolio.common.exception.ForbiddenException;
 import com.portfolio.common.exception.ResourceNotFoundException;
+import com.portfolio.portal.ai.AiServiceException;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,13 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(errorBody("SYSTEM_INTERNAL_ERROR", "서버 내부 오류가 발생했습니다", null));
+    }
+
+    @ExceptionHandler(AiServiceException.class)
+    public ResponseEntity<Map<String, Object>> handleAiServiceException(AiServiceException e) {
+        log.error("AI 서비스 오류: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(errorBody("AI_SERVICE_UNAVAILABLE", e.getMessage(), null));
     }
 
     private Map<String, Object> errorBody(String code, String message, List<Map<String, String>> errors) {

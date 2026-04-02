@@ -12,11 +12,10 @@ dependencies {
     implementation(project(":module-blog"))
     implementation(project(":module-user"))
     implementation(project(":module-registry"))
-    implementation(project(":module-ai"))
-    implementation(project(":module-benchmark"))
 
     // Spring Boot Starters
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux") // AiClient용
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
