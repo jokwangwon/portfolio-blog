@@ -82,10 +82,7 @@ public class PostService {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
 
-        String slug = generateSlug(request.getTitle());
-        if (postRepository.existsBySlugAndDeletedAtIsNull(slug)) {
-            throw new DuplicateResourceException("POST_SLUG_DUPLICATE", "이미 존재하는 슬러그입니다: " + slug);
-        }
+        String slug = generateUniqueSlug(request.getTitle());
 
         Category category = null;
         if (request.getCategoryId() != null) {
@@ -205,6 +202,19 @@ public class PostService {
 
         likeRepository.deleteByUserIdAndPostId(user.getId(), postId);
         post.decrementLikeCount();
+    }
+
+    private String generateUniqueSlug(String title) {
+        String base = generateSlug(title);
+        if (base.isEmpty() || base.length() < 3) {
+            base = "post-" + System.currentTimeMillis();
+        }
+        String slug = base;
+        int suffix = 1;
+        while (postRepository.existsBySlugAndDeletedAtIsNull(slug)) {
+            slug = base + "-" + suffix++;
+        }
+        return slug;
     }
 
     private String generateSlug(String title) {

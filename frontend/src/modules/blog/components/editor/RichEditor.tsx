@@ -24,10 +24,12 @@ interface RichEditorProps {
 export default function RichEditor({ content, onChange }: RichEditorProps) {
   const [slashPos, setSlashPos] = useState<{ top: number; left: number } | null>(null);
   const [slashQuery, setSlashQuery] = useState("");
+  const slashDocPos = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastContentRef = useRef(content);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({ codeBlock: false }),
       Placeholder.configure({ placeholder: "내용을 입력하세요... ( / 로 명령어 사용)" }),
@@ -53,6 +55,8 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
             const coords = editor.view.coordsAtPos(from);
             const containerRect = containerRef.current?.getBoundingClientRect();
             if (containerRect) {
+              // from is after the "/" has been inserted, so "/" is at from - 1
+              slashDocPos.current = from - 1;
               setSlashPos({
                 top: coords.bottom - containerRect.top + 4,
                 left: coords.left - containerRect.left,
@@ -63,6 +67,7 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
           return false;
         }
         if (slashPos && event.key === "Escape") {
+          slashDocPos.current = null;
           setSlashPos(null);
           return true;
         }
@@ -81,16 +86,21 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
 
   // Track slash query
   useEffect(() => {
-    if (!editor || !slashPos) return;
+    if (!editor || !slashPos || slashDocPos.current == null) return;
     const handler = () => {
+      const slashStart = slashDocPos.current;
+      if (slashStart == null) return;
       const { from } = editor.state.selection;
-      const textBefore = editor.state.doc.textBetween(Math.max(0, from - 20), from);
-      const slashIdx = textBefore.lastIndexOf("/");
-      if (slashIdx === -1) {
+      // Cursor moved before the slash position → close menu
+      if (from <= slashStart) {
+        slashDocPos.current = null;
         setSlashPos(null);
-      } else {
-        setSlashQuery(textBefore.slice(slashIdx + 1));
+        return;
       }
+      // Extract query text between "/" and cursor
+      const queryStart = slashStart + 1;
+      const query = editor.state.doc.textBetween(queryStart, from);
+      setSlashQuery(query);
     };
     editor.on("selectionUpdate", handler);
     editor.on("update", handler);
@@ -102,15 +112,15 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
 
   const handleSlashCommand = useCallback((action: (e: typeof editor) => void) => {
     if (!editor) return;
-    // Remove the slash and query text
-    const { from } = editor.state.selection;
-    const textBefore = editor.state.doc.textBetween(Math.max(0, from - 20), from);
-    const slashIdx = textBefore.lastIndexOf("/");
-    if (slashIdx !== -1) {
-      const deleteFrom = from - (textBefore.length - slashIdx);
-      editor.chain().focus().deleteRange({ from: deleteFrom, to: from }).run();
+    // Remove the "/" and any query text typed after it
+    const deleteFrom = slashDocPos.current;
+    if (deleteFrom != null) {
+      const { from } = editor.state.selection;
+      const deleteTo = Math.max(from, deleteFrom + 1);
+      editor.chain().focus().deleteRange({ from: deleteFrom, to: deleteTo }).run();
     }
     action(editor);
+    slashDocPos.current = null;
     setSlashPos(null);
   }, [editor]);
 
@@ -128,7 +138,7 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
           position={slashPos}
           query={slashQuery}
           onSelect={handleSlashCommand}
-          onClose={() => setSlashPos(null)}
+          onClose={() => { slashDocPos.current = null; setSlashPos(null); }}
         />
       )}
       <div className="px-4 py-2 text-xs text-muted-foreground border-t border-input flex gap-4">

@@ -199,18 +199,25 @@ class PostServiceTest {
         }
 
         @Test
-        @DisplayName("중복 슬러그로 생성 시 예외를 던진다")
-        void throwWhenDuplicateSlug() {
+        @DisplayName("중복 슬러그 시 suffix를 붙여 고유 슬러그를 생성한다")
+        void createWithDuplicateSlugAddsSuffix() {
             PostRequest request = new PostRequest();
             ReflectionTestUtils.setField(request, "title", "Test Post");
             ReflectionTestUtils.setField(request, "content", "Content");
+            ReflectionTestUtils.setField(request, "status", "DRAFT");
 
             given(userRepository.findByUsername("testuser")).willReturn(Optional.of(author));
-            given(postRepository.existsBySlugAndDeletedAtIsNull(anyString())).willReturn(true);
+            given(postRepository.existsBySlugAndDeletedAtIsNull("test-post")).willReturn(true);
+            given(postRepository.existsBySlugAndDeletedAtIsNull("test-post-1")).willReturn(false);
+            given(postRepository.save(any(Post.class))).willAnswer(invocation -> {
+                Post saved = invocation.getArgument(0);
+                ReflectionTestUtils.setField(saved, "id", 10L);
+                return saved;
+            });
 
-            assertThatThrownBy(() -> postService.createPost(request, "testuser"))
-                    .isInstanceOf(DuplicateResourceException.class)
-                    .hasMessageContaining("슬러그");
+            PostResponse result = postService.createPost(request, "testuser");
+
+            assertThat(result.getSlug()).isEqualTo("test-post-1");
         }
 
         @Test
