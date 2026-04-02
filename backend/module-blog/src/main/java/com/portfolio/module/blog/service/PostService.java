@@ -50,6 +50,19 @@ public class PostService {
                 .map(PostResponse::summary);
     }
 
+    public Page<PostResponse> getMyPosts(String username, String status, Pageable pageable) {
+        User author = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
+
+        if (status != null && !status.isBlank()) {
+            PostStatus postStatus = PostStatus.valueOf(status.toUpperCase());
+            return postRepository.findAllByAuthorAndStatus(author.getId(), postStatus, pageable)
+                    .map(PostResponse::from);
+        }
+        return postRepository.findAllByAuthor(author.getId(), pageable)
+                .map(PostResponse::from);
+    }
+
     @Transactional
     public PostResponse getPost(Long id) {
         Post post = postRepository.findByIdAndDeletedAtIsNull(id)

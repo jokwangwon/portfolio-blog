@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,6 +31,9 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtProperties jwtProperties;
+
+    @Value("${app.cookie-secure:false}")
+    private boolean cookieSecure;
 
     @PostMapping("/signup")
     public ResponseEntity<Map<String, Object>> signup(
@@ -99,7 +103,7 @@ public class AuthController {
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // dev: false, prod: true
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/api/portal/auth");
         cookie.setMaxAge((int) (jwtProperties.getRefreshExpiration() / 1000));
         response.addCookie(cookie);
@@ -108,7 +112,7 @@ public class AuthController {
     private void clearRefreshTokenCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/api/portal/auth");
         cookie.setMaxAge(0);
         response.addCookie(cookie);

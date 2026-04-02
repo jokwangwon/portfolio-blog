@@ -13,6 +13,7 @@ import com.portfolio.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -181,7 +182,7 @@ public class AuthService {
         return new UsernamePasswordAuthenticationToken(
                 user.getUsername(),
                 null,
-                null
+                java.util.List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
     }
 }

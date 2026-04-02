@@ -40,6 +40,15 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<Page<PostResponse>> getMyPosts(
+            @RequestParam(required = false) String status,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Page<PostResponse> posts = postService.getMyPosts(userDetails.getUsername(), status, pageable);
+        return ResponseEntity.ok(posts);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<Page<PostResponse>> searchPosts(
             @RequestParam String keyword,

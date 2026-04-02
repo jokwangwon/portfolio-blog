@@ -8,5 +8,6 @@ include(
     "module-blog",
     "module-user",
     "module-registry",
+    "module-ai",
     "api-server"
 )

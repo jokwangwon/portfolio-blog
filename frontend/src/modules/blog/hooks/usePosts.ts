@@ -14,7 +14,9 @@ import {
   updateComment,
   deleteComment,
   searchPosts,
+  fetchMyPosts,
   PostListParams,
+  MyPostListParams,
   CommentListParams,
   SearchParams,
 } from "@modules/blog/api/blogApi";
@@ -34,6 +36,13 @@ export function usePostDetail(id: number) {
     queryKey: ["posts", id],
     queryFn: () => fetchPostById(id),
     enabled: id > 0,
+  });
+}
+
+export function useMyPosts(params: MyPostListParams = {}) {
+  return useQuery({
+    queryKey: ["posts", "my", params],
+    queryFn: () => fetchMyPosts(params),
   });
 }
 

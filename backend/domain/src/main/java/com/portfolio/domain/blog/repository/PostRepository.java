@@ -37,4 +37,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL AND p.author.id = :authorId")
     Page<Post> findAllByAuthor(@Param("authorId") Long authorId, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.deletedAt IS NULL AND p.author.id = :authorId AND p.status = :status")
+    Page<Post> findAllByAuthorAndStatus(@Param("authorId") Long authorId, @Param("status") PostStatus status, Pageable pageable);
 }

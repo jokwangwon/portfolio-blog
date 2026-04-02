@@ -1,7 +1,9 @@
 package com.portfolio.security.config;
 
 import com.portfolio.security.jwt.JwtAuthenticationFilter;
+import com.portfolio.security.oauth2.CookieOAuth2AuthorizationRequestRepository;
 import com.portfolio.security.oauth2.CustomOAuth2UserService;
+import com.portfolio.security.oauth2.OAuth2AuthenticationFailureHandler;
 import com.portfolio.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2FailureHandler;
+    private final CookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,7 +48,7 @@ public class SecurityConfig {
                 // CORS 설정
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // 세션 사용하지 않음 (Stateless)
+                // 세션 사용하지 않음 (Stateless) — OAuth2 authorization request는 쿠키로 저장
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -88,6 +92,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(auth -> auth
                                 .baseUri("/oauth2/authorize")
+                                .authorizationRequestRepository(cookieAuthorizationRequestRepository)
                         )
                         .redirectionEndpoint(redirect -> redirect
                                 .baseUri("/oauth2/callback/*")
@@ -96,6 +101,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler)
                 )
 
                 // JWT 인증 필터 추가

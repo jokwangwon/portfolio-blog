@@ -34,12 +34,18 @@ if [ -n "$TS_FILES" ]; then
   if [ -f "$ROOT/frontend/package.json" ] && [ -d "$ROOT/frontend/node_modules" ]; then
     echo "[Frontend] TypeScript files changed — running lint..."
     cd "$ROOT/frontend"
-    npx eslint --no-warn-ignored $TS_FILES 2>&1 || {
+    # Strip "frontend/" prefix since we cd'd into frontend/
+    FRONTEND_TS_FILES=$(echo "$TS_FILES" | sed 's|^frontend/||' | grep -v '^backend/' || true)
+    if [ -z "$FRONTEND_TS_FILES" ]; then
+      echo "[Frontend] No frontend TS files to lint"
+    else
+    npx eslint --no-warn-ignored $FRONTEND_TS_FILES 2>&1 || {
       echo ""
       echo "ERROR: Frontend lint failed. Fix issues before committing."
       exit 1
     }
     echo "[Frontend] PASSED"
+    fi
     cd "$ROOT"
   else
     echo "[Frontend] SKIPPED (package.json or node_modules not found)"

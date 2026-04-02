@@ -134,6 +134,31 @@ export async function deleteComment(
   await apiClient.delete(`/posts/${postId}/comments/${commentId}`);
 }
 
+// === My Posts ===
+
+export interface MyPostListParams {
+  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  page?: number;
+  size?: number;
+}
+
+export async function fetchMyPosts(
+  params: MyPostListParams = {}
+): Promise<PageResponse<PostResponse>> {
+  const { data } = await apiClient.get<PageResponse<PostResponse>>(
+    "/posts/my",
+    {
+      params: {
+        status: params.status,
+        page: params.page ?? 0,
+        size: params.size ?? 20,
+        sort: "createdAt,desc",
+      },
+    }
+  );
+  return data;
+}
+
 // === Search ===
 
 export interface SearchParams {

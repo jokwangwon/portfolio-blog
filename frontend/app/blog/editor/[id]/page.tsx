@@ -11,7 +11,8 @@ import {
 } from "@/src/modules/blog/hooks/usePosts";
 import PostEditor from "@/src/modules/blog/components/PostEditor";
 import Loading from "@/src/shared/components/Loading";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { clearDraft } from "@/src/modules/blog/hooks/useAutoSave";
+import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function EditPostPage({
@@ -79,6 +80,7 @@ export default function EditPostPage({
             { id: postId, request: data },
             {
               onSuccess: () => {
+                clearDraft(postId);
                 router.push(`/blog/${postId}`);
               },
             }

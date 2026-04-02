@@ -15,7 +15,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.portfolio.security",
         "com.portfolio.module.user",
         "com.portfolio.module.blog",
-        "com.portfolio.module.registry"
+        "com.portfolio.module.registry",
+        "com.portfolio.module.ai"
     }
 )
 @EnableScheduling

@@ -25,13 +25,24 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID:google-client-id}
-            client-secret: ${GOOGLE_CLIENT_SECRET:google-client-secret}
+            client-id: ${OAUTH_GOOGLE_CLIENT_ID:google-client-id}
+            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET:google-client-secret}
             scope: email,profile
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
           github:
-            client-id: ${GITHUB_CLIENT_ID:github-client-id}
-            client-secret: ${GITHUB_CLIENT_SECRET:github-client-secret}
+            client-id: ${OAUTH_GITHUB_CLIENT_ID:github-client-id}
+            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET:github-client-secret}
             scope: user:email,read:user
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+
+# AI Draft Generation
+ai:
+  notion-api-key: ${NOTION_API_KEY:}
+  gemini-api-key: ${GEMINI_API_KEY:}
+  ollama-host: ${OLLAMA_HOST:http://localhost:11434}
+  ollama-model: ${OLLAMA_MODEL:gemma3:12b}
+  gemini-model: ${GEMINI_MODEL:gemini-2.0-flash}
+  provider: ${AI_PROVIDER:ollama}
 
 # Frontend URL (OAuth2 callback redirect)
 app:

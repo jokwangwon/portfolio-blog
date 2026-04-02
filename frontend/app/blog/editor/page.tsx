@@ -9,6 +9,7 @@ import {
 } from "@/src/modules/blog/hooks/usePosts";
 import PostEditor from "@/src/modules/blog/components/PostEditor";
 import Loading from "@/src/shared/components/Loading";
+import { clearDraft } from "@/src/modules/blog/hooks/useAutoSave";
 import { useEffect } from "react";
 
 export default function NewPostPage() {
@@ -36,6 +37,7 @@ export default function NewPostPage() {
         onSubmit={(data) => {
           createPost.mutate(data, {
             onSuccess: (post) => {
+              clearDraft();
               router.push(`/blog/${post.id}`);
             },
           });

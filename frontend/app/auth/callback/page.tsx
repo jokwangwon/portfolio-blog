@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/src/shell/state/store";
 import { setCredentials } from "@/src/shell/state/authSlice";
 import apiClient from "@/src/shell/api/client";
@@ -10,27 +10,38 @@ import Loading from "@/src/shared/components/Loading";
 
 export default function OAuthCallbackPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const [error, setError] = useState("");
+  const processed = useRef(false);
 
   useEffect(() => {
-    const accessToken = searchParams.get("accessToken");
+    // StrictMode 중복 실행 방지
+    if (processed.current) return;
+    processed.current = true;
 
-    if (!accessToken) {
-      setError("인증 토큰을 받지 못했습니다.");
-      return;
+    // Fragment(#)에서 토큰 추출 — query param과 달리 서버 로그/Referrer에 노출 안 됨
+    const hash = window.location.hash;
+    const params = new URLSearchParams(hash.replace("#", ""));
+    const accessToken = params.get("accessToken");
+
+    // 읽은 즉시 fragment 제거 (브라우저 히스토리에서도 삭제)
+    if (hash) {
+      window.history.replaceState(null, "", window.location.pathname);
     }
 
-    async function processToken(token: string) {
+    async function processToken() {
+      if (!accessToken) {
+        setError("인증 토큰을 받지 못했습니다.");
+        return;
+      }
       try {
         const { data: userInfo } = await apiClient.get<UserInfo>("/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         });
 
         dispatch(
           setCredentials({
-            accessToken: token,
+            accessToken,
             user: {
               username: userInfo.username,
               role: userInfo.authorities[0] || "ROLE_USER",
@@ -44,8 +55,8 @@ export default function OAuthCallbackPage() {
       }
     }
 
-    processToken(accessToken);
-  }, [searchParams, dispatch, router]);
+    processToken();
+  }, [dispatch, router]);
 
   if (error) {
     return (

@@ -38,6 +38,9 @@ export default function Header() {
           <Separator orientation="vertical" className="h-5" />
           {isAuthenticated ? (
             <>
+              <Link href="/blog/drafts" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                임시저장
+              </Link>
               <Link href="/blog/editor" className={buttonVariants({ variant: "ghost", size: "sm" })}>
                 글쓰기
               </Link>

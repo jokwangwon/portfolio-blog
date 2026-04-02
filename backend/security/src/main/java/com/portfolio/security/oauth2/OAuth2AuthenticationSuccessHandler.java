@@ -33,6 +33,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
 
+    @Value("${app.cookie-secure:false}")
+    private boolean cookieSecure;
+
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
@@ -59,13 +62,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // Refresh Token을 HttpOnly Cookie로 설정
         Cookie cookie = new Cookie("refresh_token", refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // dev: false, prod: true
+        cookie.setSecure(cookieSecure);
         cookie.setPath("/api/portal/auth");
         cookie.setMaxAge((int) (jwtProperties.getRefreshExpiration() / 1000));
         response.addCookie(cookie);
 
-        // 프론트엔드 콜백 URL로 리다이렉트 (access token은 URL param으로)
-        String redirectUrl = frontendUrl + "/auth/callback?accessToken="
+        // 프론트엔드 콜백 URL로 리다이렉트 (fragment로 전달 — 서버 로그/Referrer 헤더에 노출 안 됨)
+        String redirectUrl = frontendUrl + "/auth/callback#accessToken="
                 + URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
 
         log.info("OAuth2 login successful for user: {}", user.getUsername());
