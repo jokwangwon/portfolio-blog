@@ -3,8 +3,40 @@
 > Portal API에서 AI 기능을 독립 서비스(`ai-backend`)로 분리
 
 **작성일**: 2026-04-02
+**최종 수정**: 2026-04-02
+**스택**: **Python 3.12 + FastAPI** (Java에서 전환)
 **우선순위**: 높음
 **관련 문서**: [depth-2-module-structure.md](./depth-2-module-structure.md), [API_SPECIFICATION.md](../api/API_SPECIFICATION.md)
+
+---
+
+## 0. 스택 전환: Java → Python
+
+### 전환 사유
+
+초기 구현은 기존 Portal API 코드 재사용을 위해 Java(Spring Boot)로 작성했으나,
+다음 이유로 **Python(FastAPI)**으로 전환 결정:
+
+1. **LLM 생태계**: LangChain Python이 Java 대비 압도적으로 풍부 (RAG, Agent, Tool, VectorStore, Callbacks 등)
+2. **고급 AI 기능 확장**: 향후 RAG 파이프라인, AI Agent, 벡터 검색, 임베딩 등 고급 기능 추가 예정
+3. **경량성**: JVM ~200MB+ vs Python ~50MB, AI 연산 서비스에 적합
+4. **포트폴리오 가치**: Python AI 역량 + Spring Boot 백엔드 역량을 동시에 어필
+
+### 기술 스택
+
+| 레이어 | 도구 |
+|--------|------|
+| 웹 프레임워크 | FastAPI |
+| LLM 체인 | LangChain + langchain-google-genai + langchain-ollama |
+| HTTP 클라이언트 | httpx (async, Notion API용) |
+| 설정 관리 | pydantic-settings |
+| 런타임 | uvicorn |
+
+### 영향 범위
+
+- **Portal API**: 변경 없음 — AiClient는 HTTP 엔드포인트만 호출하므로 내부 구현 언어 무관
+- **Frontend**: 변경 없음
+- **docker-compose**: context만 변경
 
 ---
 
@@ -80,33 +112,17 @@ Portal API(Spring Boot)가 다음 모듈을 모두 포함:
 
 ```
 ai-backend/                              # 프로젝트 루트 (backend과 동급)
-├── build.gradle.kts                     # Spring Boot + LangChain4j + WebFlux + Caffeine
-├── settings.gradle.kts                  # 단일 프로젝트 (멀티모듈 X)
+├── requirements.txt                     # Python 의존성
 ├── Dockerfile
-├── src/main/java/com/portfolio/ai/
-│   ├── AiApplication.java              # @SpringBootApplication
-│   ├── config/
-│   │   ├── AiProperties.java           # ai.* 설정
-│   │   └── AiConfig.java               # WebClient, Caffeine Cache
-│   ├── controller/
-│   │   ├── SummarizeController.java     # POST /summarize
-│   │   ├── DraftController.java         # POST /generate-draft
-│   │   ├── BenchmarkController.java     # 벤치마크 엔드포인트
-│   │   └── HealthController.java        # GET /health
-│   ├── dto/
-│   │   ├── SummarizeRequest.java
-│   │   ├── SummarizeResponse.java
-│   │   ├── DraftRequest.java
-│   │   ├── DraftResponse.java
-│   │   └── Benchmark*.java
-│   └── service/
-│       ├── SummarizationService.java    # LangChain4j 기반 요약
-│       ├── LlmService.java             # Ollama/Gemini WebClient
-│       ├── NotionService.java           # Notion API 연동
-│       └── BenchmarkService.java        # 벤치마크 로직
-└── src/main/resources/
-    ├── application.yml
-    └── application-dev.yml
+├── app/
+│   ├── __init__.py
+│   ├── main.py                          # FastAPI 앱 + 라우트
+│   ├── config.py                        # pydantic-settings 설정
+│   ├── schemas.py                       # Pydantic 요청/응답 모델
+│   ├── llm_service.py                   # LangChain 기반 LLM 호출 (요약, 초안)
+│   └── notion_service.py                # Notion API 연동 (httpx async)
+└── tests/
+    └── __init__.py
 ```
 
 ### 엔드포인트 (내부 전용, 인증 없음)
