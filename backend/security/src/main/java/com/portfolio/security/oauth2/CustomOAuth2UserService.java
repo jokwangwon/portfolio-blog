@@ -41,6 +41,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = extractEmail(provider, attributes);
         String name = extractName(provider, attributes);
 
+        // GitHub 등에서 이메일이 비공개인 경우 fallback 이메일 생성
+        if (email == null || email.isBlank()) {
+            email = provider.name().toLowerCase() + "_" + providerId + "@oauth.placeholder";
+            log.warn("OAuth email not available for provider={}, using placeholder: {}", provider, email);
+        }
+
         User user = processOAuthUser(provider, providerId, email, name);
 
         return new OAuth2UserPrincipal(user, attributes);

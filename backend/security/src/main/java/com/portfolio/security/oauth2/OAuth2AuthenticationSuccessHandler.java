@@ -5,7 +5,6 @@ import com.portfolio.domain.user.User;
 import com.portfolio.domain.user.repository.RefreshTokenRepository;
 import com.portfolio.security.config.JwtProperties;
 import com.portfolio.security.jwt.JwtTokenProvider;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +32,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
 
-    @Value("${app.cookie-secure:false}")
-    private boolean cookieSecure;
-
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request,
@@ -59,17 +55,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .build();
         refreshTokenRepository.save(refreshTokenEntity);
 
-        // Refresh Token을 HttpOnly Cookie로 설정
-        Cookie cookie = new Cookie("refresh_token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/api/portal/auth");
-        cookie.setMaxAge((int) (jwtProperties.getRefreshExpiration() / 1000));
-        response.addCookie(cookie);
+        // Refresh Token Cookie는 여기서 설정하지 않음 — 이 응답은 백엔드(8080)에서 프론트(3000)로의 redirect이므로
+        // 쿠키가 백엔드 도메인에 저장되어 Next.js 프록시 경유 요청에 포함되지 않음.
+        // 대신 프론트엔드 callback 페이지에서 /auth/oauth-session 엔드포인트를 통해 쿠키를 설정함.
 
         // 프론트엔드 콜백 URL로 리다이렉트 (fragment로 전달 — 서버 로그/Referrer 헤더에 노출 안 됨)
         String redirectUrl = frontendUrl + "/auth/callback#accessToken="
-                + URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
+                + URLEncoder.encode(accessToken, StandardCharsets.UTF_8)
+                + "&refreshToken=" + URLEncoder.encode(refreshToken, StandardCharsets.UTF_8);
 
         log.info("OAuth2 login successful for user: {}", user.getUsername());
         response.sendRedirect(redirectUrl);

@@ -6,7 +6,6 @@ import com.portfolio.domain.user.UserRole;
 import com.portfolio.domain.user.repository.RefreshTokenRepository;
 import com.portfolio.security.config.JwtProperties;
 import com.portfolio.security.jwt.JwtTokenProvider;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,10 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,26 +78,22 @@ class OAuth2AuthenticationSuccessHandlerTest {
         handler.onAuthenticationSuccess(request, response, authentication);
 
         // then
-        // Verify refresh token saved
+        // Verify refresh token saved to DB
         ArgumentCaptor<RefreshToken> tokenCaptor = ArgumentCaptor.forClass(RefreshToken.class);
         verify(refreshTokenRepository).save(tokenCaptor.capture());
         RefreshToken savedToken = tokenCaptor.getValue();
         assertThat(savedToken.getToken()).isEqualTo("refresh-token-456");
         assertThat(savedToken.getUser()).isEqualTo(testUser);
 
-        // Verify refresh token cookie
-        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
-        verify(response).addCookie(cookieCaptor.capture());
-        Cookie cookie = cookieCaptor.getValue();
-        assertThat(cookie.getName()).isEqualTo("refresh_token");
-        assertThat(cookie.getValue()).isEqualTo("refresh-token-456");
-        assertThat(cookie.isHttpOnly()).isTrue();
+        // Cookie는 설정하지 않음 (프론트엔드 callback에서 /auth/oauth-session으로 설정)
+        verify(response, never()).addCookie(any());
 
-        // Verify redirect to frontend with access token
+        // Verify redirect to frontend with both tokens in fragment
         ArgumentCaptor<String> redirectCaptor = ArgumentCaptor.forClass(String.class);
         verify(response).sendRedirect(redirectCaptor.capture());
         String redirectUrl = redirectCaptor.getValue();
         assertThat(redirectUrl).startsWith("http://localhost:3000/auth/callback");
         assertThat(redirectUrl).contains("accessToken=access-token-123");
+        assertThat(redirectUrl).contains("refreshToken=refresh-token-456");
     }
 }

@@ -23,6 +23,7 @@ export default function OAuthCallbackPage() {
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.replace("#", ""));
     const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
 
     // 읽은 즉시 fragment 제거 (브라우저 히스토리에서도 삭제)
     if (hash) {
@@ -35,6 +36,11 @@ export default function OAuthCallbackPage() {
         return;
       }
       try {
+        // OAuth2 refresh token 쿠키 설정 — Next.js 프록시 경유로 프론트 도메인에 쿠키 저장
+        if (refreshToken) {
+          await apiClient.post("/auth/oauth-session", { refreshToken });
+        }
+
         const { data: userInfo } = await apiClient.get<UserInfo>("/auth/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });

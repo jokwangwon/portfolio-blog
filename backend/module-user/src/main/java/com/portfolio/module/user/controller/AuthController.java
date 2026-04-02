@@ -83,6 +83,24 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * OAuth2 소셜 로그인 후 refresh token 쿠키 설정.
+     * OAuth2 콜백은 백엔드에서 프론트엔드로 redirect하므로 쿠키가 백엔드 도메인에 설정됨.
+     * 프론트엔드는 이 엔드포인트를 Next.js 프록시를 경유하여 호출해 쿠키를 프론트 도메인에 설정.
+     */
+    @PostMapping("/oauth-session")
+    public ResponseEntity<Map<String, Object>> setOAuthSession(
+            @RequestBody Map<String, String> body,
+            HttpServletResponse response) {
+        String refreshToken = body.get("refreshToken");
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "refreshToken is required"));
+        }
+        addRefreshTokenCookie(response, refreshToken);
+        return ResponseEntity.ok(Map.of("message", "session established"));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(Map.of(

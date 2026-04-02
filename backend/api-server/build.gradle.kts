@@ -45,6 +45,26 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.19.3")
 }
 
+tasks.bootRun {
+    // .env 파일에서 환경변수 로드 (OAuth2 키 등 민감정보)
+    // 우선순위: backend/.env.local > 프로젝트루트/.env
+    val candidates = listOf(
+        rootProject.file(".env.local"),
+        rootProject.file("../.env"),
+    )
+    val envFile = candidates.firstOrNull { it.exists() }
+    if (envFile != null) {
+        envFile.readLines()
+            .filter { it.isNotBlank() && !it.trimStart().startsWith("#") && it.contains("=") }
+            .forEach { line ->
+                val (key, rawValue) = line.split("=", limit = 2)
+                // 인라인 주석 제거: "value  # comment" → "value"
+                val value = rawValue.replace(Regex("\\s+#.*$"), "")
+                environment(key.trim(), value.trim())
+            }
+    }
+}
+
 tasks.bootJar {
     enabled = true
     archiveFileName.set("portfolio-portal-api.jar")

@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/portal/auth/login").permitAll()
                         .requestMatchers("/api/portal/auth/refresh").permitAll()
                         .requestMatchers("/api/portal/auth/logout").permitAll()
+                        .requestMatchers("/api/portal/auth/oauth-session").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/categories/**").permitAll()
@@ -82,9 +83,9 @@ public class SecurityConfig {
                 // API 요청에 대해 401 반환 (302 리다이렉트 방지)
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"Authentication required\"}");
+                            response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
                         })
                 )
 

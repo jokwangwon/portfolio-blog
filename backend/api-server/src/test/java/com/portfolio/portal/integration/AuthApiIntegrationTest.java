@@ -159,10 +159,10 @@ class AuthApiIntegrationTest extends IntegrationTestBase {
 
     @Test
     @Order(10)
-    @DisplayName("미인증 사용자 정보 조회 → 403 (Spring Security 기본)")
-    void me_unauthenticated_forbidden() throws Exception {
+    @DisplayName("미인증 사용자 정보 조회 → 401 (Spring Security 기본)")
+    void me_unauthenticated_unauthorized() throws Exception {
         mockMvc.perform(get("/api/portal/auth/me"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

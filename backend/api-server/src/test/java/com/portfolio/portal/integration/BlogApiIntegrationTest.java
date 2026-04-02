@@ -143,13 +143,13 @@ class BlogApiIntegrationTest extends IntegrationTestBase {
 
     @Test
     @Order(11)
-    @DisplayName("게시글 생성 (미인증) → 403")
-    void createPost_unauthenticated_forbidden() throws Exception {
+    @DisplayName("게시글 생성 (미인증) → 401")
+    void createPost_unauthenticated_unauthorized() throws Exception {
         mockMvc.perform(post("/api/portal/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 Map.of("title", "Unauthorized", "content", "Should fail"))))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
