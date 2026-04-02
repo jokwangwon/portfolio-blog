@@ -41,7 +41,7 @@ if [[ "$FILE_PATH" == *.md ]]; then
       echo "BROKEN REF: $FILE_PATH -> $ref" >&2
       ERRORS=$((ERRORS + 1))
     fi
-  done < <(grep -oP '\[.*?\]\(\K[^)#]+\.md' "$FILE_PATH" 2>/dev/null || true)
+  done < <(grep -oE '\[[^]]*\]\([^)#]+\.md' "$FILE_PATH" 2>/dev/null | sed 's/.*](//' | sed 's/)$//' || true)
   if [ $ERRORS -gt 0 ]; then
     echo "$ERRORS broken reference(s) found in $FILE_PATH" >&2
   fi

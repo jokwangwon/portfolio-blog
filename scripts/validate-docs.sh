@@ -23,7 +23,7 @@ while IFS= read -r file; do
     [[ "$ref" == mailto* ]] && continue
 
     # 상대 경로 해결
-    TARGET=$(cd "$DIR" && realpath -q "$ref" 2>/dev/null || echo "$DIR/$ref")
+    TARGET=$(cd "$DIR" && python3 -c "import os; print(os.path.realpath('$ref'))" 2>/dev/null || echo "$DIR/$ref")
 
     CHECKED=$((CHECKED + 1))
     if [ ! -f "$TARGET" ]; then
@@ -31,7 +31,7 @@ while IFS= read -r file; do
       echo "    -> $ref (resolved: $TARGET)"
       ERRORS=$((ERRORS + 1))
     fi
-  done < <(grep -oP '\[.*?\]\(\K[^)#\s]+\.md' "$file" 2>/dev/null || true)
+  done < <(grep -oE '\[[^]]*\]\([^)#[:space:]]+\.md' "$file" 2>/dev/null | sed 's/.*](//' | sed 's/)$//' || true)
 done < <(find "$ROOT/docs" -name '*.md' -type f 2>/dev/null)
 
 # 2. CLAUDE.md 내 백틱 경로 참조 검증
@@ -39,12 +39,14 @@ echo "[2/3] Checking CLAUDE.md path references..."
 if [ -f "$ROOT/CLAUDE.md" ]; then
   while IFS= read -r ref; do
     [[ "$ref" == http* ]] && continue
+    # Skip glob patterns and templates (e.g., SESSION_*.md, SESSION_{날짜}.md)
+    [[ "$ref" == *'*'* || "$ref" == *'{'* ]] && continue
     CHECKED=$((CHECKED + 1))
     if [ ! -f "$ROOT/$ref" ]; then
       echo "  BROKEN in CLAUDE.md: $ref"
       ERRORS=$((ERRORS + 1))
     fi
-  done < <(grep -oP '`\K[^`]*\.md' "$ROOT/CLAUDE.md" 2>/dev/null || true)
+  done < <(grep -oE '`[^`]*\.md`' "$ROOT/CLAUDE.md" 2>/dev/null | sed 's/^`//;s/`$//' || true)
 fi
 
 # 3. INDEX.md 참조 검증
@@ -58,7 +60,7 @@ if [ -f "$ROOT/docs/INDEX.md" ]; then
       echo "  BROKEN in INDEX.md: $ref (resolved: $TARGET)"
       ERRORS=$((ERRORS + 1))
     fi
-  done < <(grep -oP '\[.*?\]\(\K[^)#\s]+\.md' "$ROOT/docs/INDEX.md" 2>/dev/null || true)
+  done < <(grep -oE '\[[^]]*\]\([^)#[:space:]]+\.md' "$ROOT/docs/INDEX.md" 2>/dev/null | sed 's/.*](//' | sed 's/)$//' || true)
 fi
 
 # 결과 요약
