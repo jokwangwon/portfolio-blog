@@ -9,5 +9,6 @@ include(
     "module-user",
     "module-registry",
     "module-ai",
+    "module-benchmark",
     "api-server"
 )

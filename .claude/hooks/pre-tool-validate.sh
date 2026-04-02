@@ -12,8 +12,8 @@ if [[ "$COMMAND" =~ rm[[:space:]]+-rf?[[:space:]]+[./] ]]; then
   exit 2
 fi
 
-# git push --force 방지
-if [[ "$COMMAND" =~ git[[:space:]]+push[[:space:]]+.*--force ]]; then
+# git push --force 방지 (--force-with-lease는 허용)
+if [[ "$COMMAND" =~ git[[:space:]]+push[[:space:]]+.*--force ]] && ! [[ "$COMMAND" =~ --force-with-lease ]]; then
   echo "Force push blocked. Use --force-with-lease or ask user." >&2
   exit 2
 fi

@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":module-user"))
     implementation(project(":module-registry"))
     implementation(project(":module-ai"))
+    implementation(project(":module-benchmark"))
 
     // Spring Boot Starters
     implementation("org.springframework.boot:spring-boot-starter-web")
