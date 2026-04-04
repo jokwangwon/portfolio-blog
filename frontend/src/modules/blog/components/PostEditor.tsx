@@ -21,8 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import dynamic from "next/dynamic";
-import EditorToolbar from "./EditorToolbar";
-import MarkdownRenderer from "./MarkdownRenderer";
 
 const RichEditor = dynamic(
   () => import("./editor/RichEditor"),
@@ -75,9 +73,7 @@ export default function PostEditor({
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED">(
     initialData?.status === "PUBLISHED" ? "PUBLISHED" : "DRAFT"
   );
-  const [viewMode, setViewMode] = useState<"edit" | "preview" | "split">(
-    "edit"
-  );
+  const [showSource, setShowSource] = useState(false);
   const [draftBanner, setDraftBanner] = useState<DraftData | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -408,71 +404,32 @@ export default function PostEditor({
 
       <Separator />
 
-      {/* 에디터 본문 */}
+      {/* 에디터 본문 (WYSIWYG) */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label>본문</Label>
-          <div className="flex gap-1">
-            <Button
-              variant={viewMode === "edit" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("edit")}
-            >
-              에디터
-            </Button>
-            <Button
-              variant={viewMode === "split" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("split")}
-            >
-              마크다운
-            </Button>
-            <Button
-              variant={viewMode === "preview" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("preview")}
-            >
-              미리보기
-            </Button>
-          </div>
+          <button
+            type="button"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setShowSource((v) => !v)}
+          >
+            {showSource ? "에디터로 돌아가기" : "마크다운 소스"}
+          </button>
         </div>
 
-        {/* 리치 에디터 모드 (기본) */}
-        {viewMode === "edit" && (
+        {showSource ? (
+          <Textarea
+            ref={textareaRef}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="마크다운으로 직접 작성하세요..."
+            className="min-h-[400px] font-mono text-sm leading-relaxed rounded-lg border border-input"
+            required
+          />
+        ) : (
           <div className="rounded-lg border border-input overflow-hidden">
             <RichEditor content={content} onChange={setContent} />
-          </div>
-        )}
-
-        {/* 마크다운 직접 편집 모드 */}
-        {viewMode === "split" && (
-          <div>
-            <EditorToolbar
-              textareaRef={textareaRef}
-              onInsert={setContent}
-            />
-            <Textarea
-              ref={textareaRef}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="마크다운으로 직접 작성하세요..."
-              className="min-h-[400px] font-mono text-sm leading-relaxed"
-              required
-            />
-          </div>
-        )}
-
-        {/* 미리보기 모드 */}
-        {viewMode === "preview" && (
-          <div className="glass-card rounded-lg p-6 min-h-[400px]">
-            {content ? (
-              <MarkdownRenderer content={content} />
-            ) : (
-              <p className="text-muted-foreground">
-                미리보기할 내용이 없습니다.
-              </p>
-            )}
           </div>
         )}
 

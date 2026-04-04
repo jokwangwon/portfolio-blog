@@ -294,6 +294,236 @@
 .rich-editor-content em { font-style: italic; }
 .rich-editor-content s { text-decoration: line-through; }
 
+/* Toggle block — Notion style */
+.rich-editor-content .toggle-block {
+  margin: 0.25rem 0;
+}
+.rich-editor-content .toggle-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.125rem;
+  padding: 0.125rem 0;
+}
+.rich-editor-content .toggle-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  transition: transform 0.15s ease, background-color 0.15s;
+}
+.rich-editor-content .toggle-arrow:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+.rich-editor-content .toggle-arrow svg {
+  transition: transform 0.15s ease;
+}
+.rich-editor-content .toggle-block[data-open="true"] .toggle-arrow svg {
+  transform: rotate(90deg);
+}
+.rich-editor-content .toggle-summary-text {
+  flex: 1;
+  min-height: 1.5rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+.rich-editor-content .toggle-block[data-open="false"] .toggle-content {
+  display: none;
+}
+.rich-editor-content .toggle-content {
+  padding-left: 1.75rem;
+}
+
+/* Table — Notion-compact style */
+.rich-editor-content .tableWrapper {
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+.rich-editor-content table {
+  border-collapse: collapse;
+  width: auto;
+  table-layout: auto;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.rich-editor-content th,
+.rich-editor-content td {
+  border: 1px solid oklch(0.75 0 0);
+  padding: 0.35rem 0.625rem;
+  min-width: 60px;
+  max-width: 300px;
+  vertical-align: top;
+  position: relative;
+  text-align: left;
+}
+.dark .rich-editor-content th,
+.dark .rich-editor-content td {
+  border-color: oklch(0.4 0 0);
+}
+.rich-editor-content th {
+  font-weight: 600;
+  background: var(--muted);
+}
+.rich-editor-content td p,
+.rich-editor-content th p {
+  margin: 0;
+}
+/* Selected cell highlight */
+.rich-editor-content .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: oklch(0.6 0.15 250 / 0.12);
+  pointer-events: none;
+}
+/* Column resize handle */
+.rich-editor-content .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary);
+  cursor: col-resize;
+  z-index: 10;
+}
+.rich-editor-content .resize-cursor {
+  cursor: col-resize;
+}
+
+/* Callout blocks — Notion style */
+.rich-editor-content .callout-block {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid;
+}
+.rich-editor-content .callout-icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: 0.25rem;
+}
+.rich-editor-content .callout-icon:hover {
+  background: oklch(0 0 0 / 8%);
+}
+.rich-editor-content .callout-content {
+  flex: 1;
+  min-width: 0;
+}
+.rich-editor-content .callout-content p { margin: 0; }
+
+/* Callout type variants */
+.rich-editor-content .callout-info {
+  background: oklch(0.95 0.04 250 / 60%);
+  border-color: oklch(0.7 0.12 250 / 40%);
+}
+.rich-editor-content .callout-warning {
+  background: oklch(0.95 0.06 85 / 60%);
+  border-color: oklch(0.75 0.15 85 / 40%);
+}
+.rich-editor-content .callout-success {
+  background: oklch(0.95 0.04 150 / 60%);
+  border-color: oklch(0.7 0.12 150 / 40%);
+}
+.rich-editor-content .callout-error {
+  background: oklch(0.95 0.04 25 / 60%);
+  border-color: oklch(0.7 0.12 25 / 40%);
+}
+
+/* Dark mode callout variants */
+.dark .rich-editor-content .callout-info {
+  background: oklch(0.25 0.06 250 / 50%);
+  border-color: oklch(0.5 0.12 250 / 40%);
+}
+.dark .rich-editor-content .callout-warning {
+  background: oklch(0.25 0.06 85 / 50%);
+  border-color: oklch(0.5 0.12 85 / 40%);
+}
+.dark .rich-editor-content .callout-success {
+  background: oklch(0.25 0.06 150 / 50%);
+  border-color: oklch(0.5 0.12 150 / 40%);
+}
+.dark .rich-editor-content .callout-error {
+  background: oklch(0.25 0.06 25 / 50%);
+  border-color: oklch(0.5 0.12 25 / 40%);
+}
+.dark .rich-editor-content .callout-icon:hover {
+  background: oklch(1 0 0 / 10%);
+}
+
+/* Embed block */
+.rich-editor-content .embed-block {
+  margin: 0.75rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.rich-editor-content .embed-iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+}
+
+/* Math block (KaTeX) */
+.rich-editor-content .math-block {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.rich-editor-content .math-preview {
+  text-align: center;
+  overflow-x: auto;
+}
+.rich-editor-content .math-preview .katex-display {
+  margin: 0;
+}
+.rich-editor-content .math-input {
+  width: 100%;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.875rem;
+  resize: vertical;
+  outline: none;
+  color: var(--foreground);
+}
+.rich-editor-content .math-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px oklch(0.5 0.15 250 / 20%);
+}
+
+/* Text highlight */
+.rich-editor-content mark {
+  border-radius: 0.15rem;
+  padding: 0.05rem 0.1rem;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 /* Accessibility: reduce motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
