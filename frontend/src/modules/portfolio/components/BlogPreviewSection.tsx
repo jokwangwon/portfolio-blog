@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { MotionSection } from "@/src/shared/animations/MotionSection";
 
 export default function BlogPreviewSection() {
   return (
-    <section id="blog" className="py-24 md:py-32">
+    <MotionSection id="blog" className="py-24 md:py-32">
       <div className="max-w-5xl mx-auto px-6">
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-3xl font-bold tracking-tight">Blog</h2>
@@ -25,6 +26,6 @@ export default function BlogPreviewSection() {
           </p>
         </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }

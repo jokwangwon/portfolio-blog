@@ -174,6 +174,7 @@
         oklch(0.78 0.18 75 / 45%) 0%, transparent 55%),
       radial-gradient(ellipse 50% 50% at 60% 80%,
         oklch(0.72 0.14 25 / 30%) 0%, transparent 50%);
+    animation: mesh-drift 25s ease-in-out infinite;
   }
 
   /* Dark mode: Cool Glass mesh gradient (강화) */
@@ -216,6 +217,74 @@
   -webkit-backdrop-filter: blur(12px);
   border-radius: 0.75rem;
   padding: 1rem;
+}
+
+/* Glass card with mouse-tracking glow */
+.glass-card-glow {
+  position: relative;
+  overflow: hidden;
+}
+.glass-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    var(--glass-glow-color, oklch(0.78 0.18 75 / 15%)) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 1;
+}
+.glass-card-glow:hover::before {
+  opacity: 1;
+}
+.dark .glass-card-glow::before {
+  background: radial-gradient(
+    300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    oklch(0.546 0.245 262 / 15%) 0%,
+    transparent 100%
+  );
+}
+
+/* Animated gradient text */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.animate-gradient-text {
+  background-size: 200% auto;
+  animation: gradient-shift 4s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.animate-gradient-text {
+  background-image: linear-gradient(
+    90deg,
+    oklch(0.78 0.18 75),
+    oklch(0.85 0.14 85),
+    oklch(0.72 0.14 25),
+    oklch(0.78 0.18 75)
+  );
+}
+.dark .animate-gradient-text {
+  background-image: linear-gradient(
+    90deg,
+    oklch(0.546 0.245 262),
+    oklch(0.715 0.143 215),
+    oklch(0.546 0.245 262)
+  );
+}
+
+/* Background mesh drift animation */
+@keyframes mesh-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(2%, -1%) scale(1.02); }
+  66% { transform: translate(-1%, 2%) scale(0.98); }
 }
 
 /* ========== Rich Editor (Tiptap) ========== */

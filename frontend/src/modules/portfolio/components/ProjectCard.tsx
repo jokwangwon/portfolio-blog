@@ -4,16 +4,22 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import type { Project } from "../data/projects";
+import { useMouseGlow } from "@/src/shared/animations/useMouseGlow";
 
 export default function ProjectCard({ project }: { project: Project }) {
+  const glowRef = useMouseGlow<HTMLDivElement>();
+
   return (
-    <div className="glass-card rounded-lg overflow-hidden transition-all duration-200 hover:-translate-y-1">
+    <div
+      ref={glowRef}
+      className="glass-card glass-card-glow rounded-lg overflow-hidden transition-all duration-200 hover:-translate-y-1"
+    >
       <div className="aspect-video bg-muted flex items-center justify-center">
         <span className="text-2xl font-bold text-muted-foreground">
           {project.title.charAt(0)}
         </span>
       </div>
-      <div className="p-6">
+      <div className="p-6 relative z-10">
         <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
         <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
           {project.description}

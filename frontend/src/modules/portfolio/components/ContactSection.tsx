@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Mail, FolderGit2, Globe, FileText } from "lucide-react";
+import { MotionSection } from "@/src/shared/animations/MotionSection";
 
 const links = [
   {
@@ -28,7 +29,7 @@ const links = [
 
 export default function ContactSection() {
   return (
-    <section
+    <MotionSection
       id="contact"
       className="py-24 md:py-32 bg-muted/30 dark:bg-muted/10"
     >
@@ -56,6 +57,6 @@ export default function ContactSection() {
           ))}
         </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }

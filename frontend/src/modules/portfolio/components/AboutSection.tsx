@@ -1,6 +1,10 @@
+"use client";
+
+import { MotionSection } from "@/src/shared/animations/MotionSection";
+
 export default function AboutSection() {
   return (
-    <section id="about" className="py-24 md:py-32">
+    <MotionSection id="about" className="py-24 md:py-32">
       <div className="max-w-5xl mx-auto px-6">
         <h2 className="text-3xl font-bold tracking-tight mb-12">About</h2>
         <div className="grid md:grid-cols-[280px_1fr] gap-12 items-start">
@@ -35,6 +39,6 @@ export default function AboutSection() {
           </div>
         </div>
       </div>
-    </section>
+    </MotionSection>
   );
 }

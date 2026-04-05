@@ -3,7 +3,7 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-04-02 (세션 #14)
+**최종 업데이트**: 2026-04-05 (세션 #15)
 
 ---
 
@@ -12,12 +12,12 @@
 ### Phase
 **Phase 1B: 프론트엔드 개발** (진행 중)
 
-### 마지막 작업 (세션 #13–#14, 2026-04-02)
-- 하네스 엔지니어링 6개 Layer 전수 점검 — 모두 정상
-- OAuth2 소셜 로그인 4건 버그 수정 (CRITICAL 2, HIGH 1, MEDIUM 1)
-- `.env.local` + Gradle bootRun 환경변수 로딩 체계 구축
-- 이슈 보고서 문서화 (`docs/review/oauth2-issue-report.md`)
-- 블로그 에디터 3건 버그 수정 (한글 slug, Tiptap SSR, 슬래시 명령어)
+### 마지막 작업 (세션 #15, 2026-04-05)
+- 프로젝트 기획 문서 전수 점검 (14개 설계 문서, 구현율 55-60%)
+- 3-Stage 디자인 강화 통합 설계 문서 작성 (`design-enhancement.md`)
+- **Stage 1 마이크로 인터랙션 구현 완료**: framer-motion, 스크롤 애니메이션, 마우스 glow, 배경 메쉬 drift
+- 포트폴리오 7개 섹션 + 블로그 PostCard 애니메이션 적용
+- 접근성(prefers-reduced-motion) 대응 완료
 
 ### 완료된 개발
 
@@ -43,16 +43,16 @@
 - **OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD + 프론트 UI) — 세션 #12**
 
 ### 현재 상황
-**Phase 1B 마무리 단계**: 프론트엔드 Blog 기능 전체 완성 (CRUD + 좋아요 + 댓글 + 검색). OAuth2 소셜 로그인(Google/GitHub) 구현 완료 — 4건 버그 수정 (세션 #13). 블로그 에디터 3건 버그 수정 — 한글 slug, Tiptap SSR hydration, 슬래시 명령어 (세션 #14). 하네스 엔지니어링 도입 완료 (6 Layer). module-ai, module-benchmark 백엔드 구현 완료.
+**디자인 강화 진행 중**: Blog 기능 완성 → 디자인 임팩트 강화 3-Stage 계획 수립. Stage 1(마이크로 인터랙션) 완료. framer-motion 도입, 스크롤 애니메이션, 마우스 glow, 배경 메쉬 drift, 텍스트 그라데이션 적용. Stage 2(3D Hero, 프로젝트 카드 리디자인) 진행 예정.
 
 ---
 
 ## 📋 다음 할 일 (Next Actions)
 
-### 즉시 진행 (MVP → "진짜 구현" 전환)
-1. **요구사항 vs MVP 비교 분석** — SDD 명세 대비 현재 구현 상태 매트릭스
-2. **UI 시각적 점검** — dev 서버 기동 후 화면 확인
-3. **"진짜 구현" 단계 계획** — MVP 이후 강화 로드맵 수립
+### 디자인 강화 로드맵 (design-enhancement.md 기준)
+1. ~~**Stage 1**: 마이크로 인터랙션 & 애니메이션~~ ✅ 완료
+2. **Stage 2**: 차별화 요소 (3D Hero, 프로젝트 카드 리디자인, Tech Stack 아이콘)
+3. **Stage 3**: Pixel Office & 고급 인터랙션
 
 ### Phase 1B 잔여
 1. **AI Benchmark API**
@@ -63,7 +63,7 @@
    - [ ] 등록된 서비스 목록 대시보드
 
 3. **프론트엔드 테스트 강화**
-   - [ ] 커버리지 향상 (현재 57개 → 목표 70%+)
+   - [ ] 커버리지 향상 (현재 57개 + 10개 = 67개 → 목표 70%+)
    - [ ] E2E 테스트 도입 검토
 
 ---
@@ -252,14 +252,20 @@
 - 이슈 보고서 문서화 (`docs/review/oauth2-issue-report.md`)
 - 블로그 에디터 3건 수정: 한글 slug 생성, Tiptap SSR hydration, 슬래시 명령어 "/" 잔존
 
+### 세션 #15 (2026-04-05)
+- 기획 문서 전수 점검 (14개 설계 문서, 구현율 55-60%)
+- 3-Stage 디자인 강화 통합 설계 (`design-enhancement.md`)
+- **Stage 1 완료**: framer-motion, 스크롤 애니메이션 7개 섹션, 마우스 glow, 배경 메쉬 drift, 텍스트 그라데이션
+- 테스트 10개 추가 (총 67개)
+
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### Phase 1B 남은 우선순위
-1. ~~Blog 고도화 (검색, 댓글, 좋아요)~~ ✅ 완료
-2. ~~OAuth2 소셜 로그인 (Google, GitHub)~~ ✅ 완료
-3. 요구사항 vs MVP 비교 분석 → "진짜 구현" 단계 전환
+### 디자인 강화 우선순위
+1. ~~Stage 1: 마이크로 인터랙션~~ ✅ 완료
+2. **Stage 2: 3D Hero + 프로젝트 카드 리디자인 + Tech Stack 아이콘** ← 다음
+3. Stage 3: Pixel Office + 커서 트레일 + 벤치마크 시각화
 4. AI Benchmark API (FastAPI) 독립 프로젝트 생성
 5. Service Registry UI 대시보드
 

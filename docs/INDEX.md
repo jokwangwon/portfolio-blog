@@ -61,7 +61,8 @@ docs/
 │   ├── pixel-office-design.md        # 🟠 AI 픽셀 오피스 설계
 │   ├── blog-ui-design.md             # 🟠 Blog UI 디자인 명세
 │   ├── portfolio-landing-design.md   # 🟠 포트폴리오 랜딩 페이지 설계
-│   └── multi-agent-system-design.md  # 🟠 멀티 에이전트 합의 시스템 설계
+│   ├── multi-agent-system-design.md  # 🟠 멀티 에이전트 합의 시스템 설계
+│   └── design-enhancement.md        # 🔴 3-Stage 디자인 강화 통합 설계
 │
 ├── api/                              # API 명세
 │   ├── API_SPECIFICATION.md          # API 엔드포인트 상세 명세
