@@ -7,6 +7,7 @@ import { techStack, techCategories } from "../data/techStack";
 import { MotionSection } from "@/src/shared/animations/MotionSection";
 import { staggerContainer, scaleIn } from "@/src/shared/animations/variants";
 import { useReducedMotion } from "@/src/shared/animations/useReducedMotion";
+import ProficiencyBar from "./ProficiencyBar";
 
 export default function TechStackSection() {
   const [activeCategory, setActiveCategory] = useState<string>("Backend");
@@ -43,11 +44,14 @@ export default function TechStackSection() {
             <motion.div
               key={tech.name}
               variants={scaleIn}
-              className="glass-card rounded-lg p-4 text-center transition-all duration-200 hover:-translate-y-1"
+              className="glass-card rounded-lg p-4 transition-all duration-200 hover:-translate-y-1"
             >
-              <span className="text-sm font-medium text-foreground">
+              <span className="text-sm font-medium text-foreground block mb-2 text-center">
                 {tech.name}
               </span>
+              {tech.proficiency != null && (
+                <ProficiencyBar value={tech.proficiency} />
+              )}
             </motion.div>
           ))}
         </motion.div>

@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { fadeIn, staggerContainer, fadeInUp } from "@/src/shared/animations/variants";
 import { useReducedMotion } from "@/src/shared/animations/useReducedMotion";
+import HeroCanvas from "./hero/HeroCanvas";
 
 export default function HeroSection() {
   const reduced = useReducedMotion();
@@ -16,6 +17,7 @@ export default function HeroSection() {
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative">
+      <HeroCanvas className="absolute inset-0 -z-10" />
       <motion.div
         className="max-w-3xl mx-auto"
         variants={staggerContainer}
