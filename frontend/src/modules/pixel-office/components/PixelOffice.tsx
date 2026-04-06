@@ -327,7 +327,7 @@ export default function PixelOffice() {
         tileSize: TILE_SIZE,
         selectedAgentId,
       };
-      rendererRef.current.render(renderState);
+      rendererRef.current.render(renderState, dt);
     },
     [layout, selectedAgentId],
   );
@@ -343,7 +343,7 @@ export default function PixelOffice() {
     if (!ctx) return;
 
     const renderer = new SpriteRenderer(ctx, TILE_SIZE);
-    renderer.render({ agents, layout, tileSize: TILE_SIZE, selectedAgentId });
+    renderer.render({ agents, layout, tileSize: TILE_SIZE, selectedAgentId }, 0);
   }, [reducedMotion, agents, layout, selectedAgentId]);
 
   // Click handler — use renderPosition for sub-pixel accuracy
