@@ -3,7 +3,7 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-04-06 (세션 #16)
+**최종 업데이트**: 2026-04-06 (세션 #17)
 
 ---
 
@@ -12,11 +12,10 @@
 ### Phase
 **Phase 1B: 프론트엔드 개발** (진행 중)
 
-### 마지막 작업 (세션 #16, 2026-04-06)
-- pixel-agents 오픈소스 분석 + 내부 Pixel Office 설계 비교
-- **3+1 멀티 에이전트 합의 프로토콜 실행**: Agent A(구현), B(품질), C(대안) 독립 분석 + Reviewer 합의
-- **ADR-008 채택**: Pixel Office Canvas 2D MVP 전환 (PixiJS → Canvas 2D, 7존→3존, 5에이전트→3, 8상태→4)
-- ADR-005 Superseded 처리, pixel-office-design.md MVP 개정, design-enhancement.md Stage 3 업데이트
+### 마지막 작업 (세션 #17, 2026-04-06)
+- **pixel-agents 렌더링 엔진 이식 완료**: PNG 에셋 54개 + 엔진 19파일 + assetLoader + usePixelOffice 어댑터
+- **백엔드 보안 정비**: module-registry GET 인증 추가, AiClient CircuitBreaker/Retry, 벤치마크 @Deprecated
+- 84개 테스트 통과, Next.js 빌드 성공
 
 ### 완료된 개발
 
@@ -42,7 +41,7 @@
 - **OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD + 프론트 UI) — 세션 #12**
 
 ### 현재 상황
-**디자인 강화 Stage 3 준비 중**: Stage 1(마이크로 인터랙션) ✅ + Stage 2(3D Hero) ✅ 완료. Stage 3 Pixel Office는 3+1 멀티 에이전트 합의를 통해 **Canvas 2D MVP 전환 결정** (ADR-008). PixiJS → Canvas 2D, 7존→3존, 5에이전트→3, 8상태→4로 축소. pixel-agents 오픈소스 설계 패턴 참고(코드 복사 아님). 문서 개정 완료, 구현 착수 대기.
+**디자인 강화 Stage 3 완료**: Stage 1(마이크로 인터랙션) ✅ + Stage 2(3D Hero) ✅ + Stage 3(Pixel Office) ✅. pixel-agents 오픈소스 렌더링 엔진을 이식하여 실제 PNG 스프라이트로 업그레이드. 백엔드 보안 3건 정비 완료 (module-registry 인증, AiClient resilience4j, 벤치마크 deprecation).
 
 ---
 
@@ -259,29 +258,27 @@
 - 테스트 10개 추가 (총 67개)
 
 ### 세션 #16 (2026-04-06)
-- pixel-agents 오픈소스(github.com/pablodelucca/pixel-agents) 분석
-- **3+1 멀티 에이전트 합의 프로토콜 실행** (아키텍처 의사결정)
-  - Agent A(구현): Option C(하이브리드) 권장
-  - Agent B(품질): Option B(ADR-005 유지) 안전, Option C 조건부 권장
-  - Agent C(대안): **Option F(MVP 축소 + Canvas 2D)** 신규 제안
-  - Reviewer: Option F-Safe 채택 (Agent C 기반 + Agent B 안전장치)
-- **ADR-008 작성**: Pixel Office Canvas 2D MVP 전환
-- ADR-005 Superseded 처리
-- pixel-office-design.md MVP 개정 (3존, 3에이전트, 4상태)
-- design-enhancement.md Stage 3 업데이트
+- pixel-agents 분석 + 3+1 멀티 에이전트 합의 → ADR-008 (Canvas 2D MVP)
+- Pixel Office MVP 엔진 구현 (39 테스트, TDD)
+- 디자인 시스템 재설계 (SpriteData, Colorize, 어두운 팔레트)
+
+### 세션 #17 (2026-04-06)
+- **pixel-agents 렌더링 엔진 이식**: PNG 에셋 54개 + pixel-engine/ 19파일 + assetLoader + usePixelOffice
+- **백엔드 보안 정비**: module-registry GET 인증, AiClient CircuitBreaker/Retry, 벤치마크 @Deprecated
+- 84개 테스트 통과, Next.js 빌드 성공
+- CREDITS.md MIT 라이선스 고지
 
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### 다음 세션(#17) 우선순위
-1. ~~Stage 1: 마이크로 인터랙션~~ ✅ 완료
-2. ~~Stage 2: 3D Hero + 프로젝트 카드~~ ✅ 완료
-3. ~~Stage 3: Pixel Office MVP 엔진~~ ✅ 완료 (39 테스트, TDD)
-4. **pixel-agents 렌더링 엔진 이식** ← 최우선 (에셋+엔진 20파일, /tmp/pixel-agents 클론 완료)
-5. **백엔드 보안/정비** — module-registry GET 인증, AiClient CircuitBreaker, domain 벤치마크 엔티티 정리
-6. 관리자 /admin/office (Hook SSE + 실시간)
-7. 커서 트레일 + 벤치마크 시각화
+### 다음 세션(#18) 우선순위
+1. ~~Stage 1~~ ✅ ~~Stage 2~~ ✅ ~~Stage 3~~ ✅ ~~pixel-agents 이식~~ ✅ ~~백엔드 보안~~ ✅
+2. 관리자 /admin/office (Hook SSE + 실시간)
+3. Git 히스토리 JSON 추출 스크립트 (타임랩스 실데이터)
+4. 커서 트레일 + 벤치마크 시각화
+5. AI Benchmark API (FastAPI)
+6. Service Registry UI 대시보드
 
 ---
 

@@ -20,11 +20,13 @@ public class ServiceRegistryController {
     private final ServiceRegistryService serviceRegistryService;
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ServiceStatusResponse>> getAllServices() {
         return ResponseEntity.ok(serviceRegistryService.getAllServices());
     }
 
     @GetMapping("/{serviceName}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ServiceStatusResponse> getService(@PathVariable String serviceName) {
         return ResponseEntity.ok(serviceRegistryService.getService(serviceName));
     }

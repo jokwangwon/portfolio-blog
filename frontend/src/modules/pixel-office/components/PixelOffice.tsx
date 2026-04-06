@@ -1,399 +1,219 @@
 "use client";
 
-import { useRef, useState, useCallback, useMemo, useEffect } from "react";
-import { useGameLoop } from "../hooks/useGameLoop";
-import { useAgentStatus } from "../hooks/useAgentStatus";
-import { useReducedMotion } from "@/src/shared/animations/useReducedMotion";
-import { SpriteRenderer } from "../engine/SpriteRenderer";
-import { TileMap } from "../engine/TileMap";
-import { PathFinder } from "../engine/PathFinder";
-import { StateMachine } from "../engine/StateMachine";
-import { EventMapper } from "../engine/EventMapper";
-import type {
-  Agent,
-  AgentRole,
-  RenderState,
-} from "../types/office.types";
-import { InteractionPanel } from "./InteractionPanel";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePixelOffice } from "../hooks/usePixelOffice";
+import { startGameLoop } from "../pixel-engine/engine/gameLoop";
+import { renderFrame } from "../pixel-engine/engine/renderer";
+import { TILE_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_SCROLL_THRESHOLD } from "../pixel-engine/constants";
 
-const TILE_SIZE = 32;
-const MOVE_SPEED = 3; // tiles per second
-const WANDER_MIN = 8;
-const WANDER_MAX = 15;
+const STATE_LABELS: Record<string, string> = {
+  idle: "대기 중",
+  walk: "이동 중",
+  type: "작업 중",
+};
 
-function randomWanderDelay(): number {
-  return WANDER_MIN + Math.random() * (WANDER_MAX - WANDER_MIN);
-}
-
-function createInitialAgents(layout: ReturnType<typeof TileMap.createDefaultLayout>): Agent[] {
-  const roles: { role: AgentRole; name: string; color: string }[] = [
-    { role: "BACKEND", name: "백엔드 개발자", color: "#4A90D9" },
-    { role: "FRONTEND", name: "프론트엔드 개발자", color: "#D94A8C" },
-    { role: "DEVOPS", name: "DevOps 엔지니어", color: "#6BD94A" },
-  ];
-
-  return roles.map(({ role, name, color }) => {
-    const pos = layout.deskPositions[role];
-    return {
-      id: role,
-      role,
-      name,
-      state: "IDLE" as const,
-      position: { ...pos },
-      renderPosition: { x: pos.x * TILE_SIZE, y: pos.y * TILE_SIZE },
-      targetPosition: null,
-      path: [],
-      direction: "DOWN" as const,
-      color,
-      moveProgress: 0,
-      bubble: null,
-      wanderTimer: randomWanderDelay(),
-    };
-  });
-}
+const DEFAULT_ZOOM = 3;
 
 export default function PixelOffice() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const reducedMotion = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const panRef = useRef({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const zoomAccum = useRef(0);
 
-  const layout = useMemo(() => TileMap.createDefaultLayout(), []);
-  const [agents, setAgents] = useState<Agent[]>(() => createInitialAgents(layout));
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-  const [replayActive, setReplayActive] = useState(true);
+  const {
+    officeState,
+    isLoading,
+    setSelectedAgentId,
+    getAgentName,
+    getAgentRole,
+    getSelectedCharacter,
+    replayActive,
+  } = usePixelOffice();
 
-  const agentsRef = useRef(agents);
-  useEffect(() => { agentsRef.current = agents; });
-
-  const stateMachines = useRef<Record<string, StateMachine>>({} as Record<string, StateMachine>);
+  // Resize canvas to fill container (DPR-aware)
   useEffect(() => {
-    if (Object.keys(stateMachines.current).length === 0) {
-      stateMachines.current = Object.fromEntries(
-        agents.map((a) => [a.id, new StateMachine(a.state)]),
-      );
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const rendererRef = useRef<SpriteRenderer | null>(null);
-
-  const { data: activityData } = useAgentStatus();
-
-  // Process GitHub events
-  useEffect(() => {
-    if (!activityData) return;
-
-    setAgents((prev) => {
-      const updated = [...prev];
-
-      for (const event of activityData.events) {
-        const updates = EventMapper.mapEvent(event);
-        for (const update of updates) {
-          const idx = updated.findIndex((a) => a.id === update.agentId);
-          if (idx === -1) continue;
-
-          const sm = stateMachines.current[update.agentId];
-          if (!sm || !sm.canTransition("COMMIT")) continue;
-
-          sm.transition("COMMIT");
-          updated[idx] = {
-            ...updated[idx],
-            state: "WORK",
-            bubble: {
-              text: update.task?.slice(0, 20) ?? "작업 중...",
-              expiresAt: Date.now() + 5000,
-            },
-          };
-        }
-      }
-
-      // Inactivity check
-      if (activityData.lastActivity) {
-        const inactiveUpdates = EventMapper.checkInactivity(
-          new Date(activityData.lastActivity), new Date(), 12,
-        );
-        for (const update of inactiveUpdates) {
-          const idx = updated.findIndex((a) => a.id === update.agentId);
-          if (idx === -1) continue;
-          const sm = stateMachines.current[update.agentId];
-          if (!sm || sm.current !== "IDLE") continue;
-
-          const loungePos = TileMap.getRandomLoungePosition(layout);
-          const path = PathFinder.findPath(layout.tiles, updated[idx].position, loungePos);
-          if (path && path.length > 1) {
-            sm.transition("MOVE");
-            updated[idx] = {
-              ...updated[idx],
-              state: "WALK",
-              targetPosition: loungePos,
-              path,
-              moveProgress: 0,
-              bubble: { text: "☕ 휴식", icon: "☕", expiresAt: 0 },
-            };
-          }
-        }
-      }
-
-      return updated;
-    });
-  }, [activityData, layout]);
-
-  // Timelapse replay: simulate activity on page load
-  useEffect(() => {
-    if (!replayActive) return;
-
-    const events = [
-      { delay: 2000, agentId: "FRONTEND", task: "UI 컴포넌트 작업" },
-      { delay: 5000, agentId: "BACKEND", task: "JWT 인증 구현" },
-      { delay: 8000, agentId: "DEVOPS", task: "Docker 빌드" },
-      { delay: 12000, agentId: "FRONTEND", task: "블로그 에디터" },
-      { delay: 16000, agentId: "BACKEND", task: "API 테스트" },
-    ];
-
-    const timers = events.map(({ delay, agentId, task }) =>
-      setTimeout(() => {
-        setAgents((prev) => {
-          const idx = prev.findIndex((a) => a.id === agentId);
-          if (idx === -1) return prev;
-          const updated = [...prev];
-          const sm = stateMachines.current[agentId];
-          if (sm && sm.current !== "WORK") {
-            if (sm.canTransition("COMMIT")) sm.transition("COMMIT");
-            else if (sm.current === "WALK") {
-              sm.transition("ARRIVE");
-              sm.transition("COMMIT");
-            }
-          }
-          updated[idx] = {
-            ...updated[idx],
-            state: "WORK",
-            bubble: { text: task, expiresAt: Date.now() + 4000 },
-            wanderTimer: randomWanderDelay(),
-          };
-          return updated;
-        });
-
-        // Return to IDLE after work
-        setTimeout(() => {
-          setAgents((prev) => {
-            const idx = prev.findIndex((a) => a.id === agentId);
-            if (idx === -1) return prev;
-            const updated = [...prev];
-            const sm = stateMachines.current[agentId];
-            if (sm && sm.current === "WORK" && sm.canTransition("COMPLETE")) {
-              sm.transition("COMPLETE");
-            }
-            updated[idx] = { ...updated[idx], state: "IDLE", wanderTimer: randomWanderDelay() };
-            return updated;
-          });
-        }, 3000);
-      }, delay),
-    );
-
-    const stopTimer = setTimeout(() => setReplayActive(false), 20000);
-
-    return () => {
-      timers.forEach(clearTimeout);
-      clearTimeout(stopTimer);
-    };
-  }, [replayActive]);
-
-  // Game frame: lerp movement + wander
-  const onFrame = useCallback(
-    (ctx: CanvasRenderingContext2D, deltaMs: number) => {
-      const dt = deltaMs / 1000;
-      const currentAgents = agentsRef.current;
-      const nextAgents = [...currentAgents];
-      let needsUpdate = false;
-
-      for (let i = 0; i < nextAgents.length; i++) {
-        const agent = nextAgents[i];
-
-        // --- Wander behavior ---
-        if (agent.state === "IDLE") {
-          const newTimer = agent.wanderTimer - dt;
-          if (newTimer <= 0) {
-            // Pick random walkable tile in zone or corridor
-            const zone = layout.zones.find((z) => {
-              const { x, y, w, h } = z.bounds;
-              return agent.position.x >= x && agent.position.x < x + w &&
-                     agent.position.y >= y && agent.position.y < y + h;
-            });
-            const targets: { x: number; y: number }[] = [];
-            const bounds = zone?.bounds ?? { x: 1, y: 1, w: layout.width - 2, h: layout.height - 2 };
-            for (let ty = bounds.y; ty < bounds.y + bounds.h; ty++) {
-              for (let tx = bounds.x; tx < bounds.x + bounds.w; tx++) {
-                if (layout.tiles[ty]?.[tx]?.walkable && (tx !== agent.position.x || ty !== agent.position.y)) {
-                  targets.push({ x: tx, y: ty });
-                }
-              }
-            }
-            if (targets.length > 0) {
-              const target = targets[Math.floor(Math.random() * targets.length)];
-              const path = PathFinder.findPath(layout.tiles, agent.position, target);
-              if (path && path.length > 1) {
-                const sm = stateMachines.current[agent.id];
-                if (sm?.canTransition("MOVE")) {
-                  sm.transition("MOVE");
-                  nextAgents[i] = {
-                    ...agent,
-                    state: "WALK",
-                    targetPosition: target,
-                    path,
-                    moveProgress: 0,
-                    wanderTimer: randomWanderDelay(),
-                  };
-                  needsUpdate = true;
-                  continue;
-                }
-              }
-            }
-            nextAgents[i] = { ...agent, wanderTimer: randomWanderDelay() };
-            needsUpdate = true;
-            continue;
-          }
-          if (newTimer !== agent.wanderTimer) {
-            nextAgents[i] = { ...agent, wanderTimer: newTimer };
-            needsUpdate = true;
-          }
-          continue;
-        }
-
-        // --- Lerp movement ---
-        if (agent.state === "WALK" && agent.path.length >= 2) {
-          const progress = agent.moveProgress + dt * MOVE_SPEED;
-          const pathIndex = Math.floor(progress);
-
-          if (pathIndex >= agent.path.length - 1) {
-            // Arrived
-            const finalPos = agent.path[agent.path.length - 1];
-            const sm = stateMachines.current[agent.id];
-            sm?.transition("ARRIVE");
-
-            const isLounge = layout.zones.some(
-              (z) => z.type === "LOUNGE" &&
-                finalPos.x >= z.bounds.x && finalPos.x < z.bounds.x + z.bounds.w &&
-                finalPos.y >= z.bounds.y && finalPos.y < z.bounds.y + z.bounds.h,
-            );
-
-            nextAgents[i] = {
-              ...agent,
-              state: isLounge ? "REST" : "IDLE",
-              position: finalPos,
-              renderPosition: { x: finalPos.x * TILE_SIZE, y: finalPos.y * TILE_SIZE },
-              path: [],
-              targetPosition: null,
-              moveProgress: 0,
-              wanderTimer: randomWanderDelay(),
-              bubble: isLounge ? { text: "☕", expiresAt: 0 } : null,
-            };
-          } else {
-            // Interpolate between tiles
-            const from = agent.path[pathIndex];
-            const to = agent.path[pathIndex + 1];
-            const t = progress - pathIndex; // fractional 0-1
-
-            const rx = (from.x + (to.x - from.x) * t) * TILE_SIZE;
-            const ry = (from.y + (to.y - from.y) * t) * TILE_SIZE;
-
-            let direction = agent.direction;
-            if (to.x > from.x) direction = "RIGHT";
-            else if (to.x < from.x) direction = "LEFT";
-            else if (to.y > from.y) direction = "DOWN";
-            else if (to.y < from.y) direction = "UP";
-
-            nextAgents[i] = {
-              ...agent,
-              position: from,
-              renderPosition: { x: rx, y: ry },
-              moveProgress: progress,
-              direction,
-            };
-          }
-          needsUpdate = true;
-        }
-      }
-
-      if (needsUpdate) {
-        agentsRef.current = nextAgents;
-        setAgents(nextAgents);
-      }
-
-      // Render
-      if (!rendererRef.current) {
-        rendererRef.current = new SpriteRenderer(ctx, TILE_SIZE);
-      }
-      const renderState: RenderState = {
-        agents: agentsRef.current,
-        layout,
-        tileSize: TILE_SIZE,
-        selectedAgentId,
-      };
-      rendererRef.current.render(renderState, dt);
-    },
-    [layout, selectedAgentId],
-  );
-
-  useGameLoop(canvasRef, onFrame, !reducedMotion);
-
-  // Static render for reduced motion
-  useEffect(() => {
-    if (!reducedMotion) return;
+    const container = containerRef.current;
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!container || !canvas) return;
 
-    const renderer = new SpriteRenderer(ctx, TILE_SIZE);
-    renderer.render({ agents, layout, tileSize: TILE_SIZE, selectedAgentId }, 0);
-  }, [reducedMotion, agents, layout, selectedAgentId]);
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
-  // Click handler — use renderPosition for sub-pixel accuracy
+  // Game loop
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !officeState) return;
+
+    const stop = startGameLoop(canvas, {
+      update(dt) {
+        officeState.update(dt);
+      },
+      render(ctx) {
+        ctx.imageSmoothingEnabled = false;
+        const chars = Array.from(officeState.characters.values());
+        renderFrame(
+          ctx,
+          canvas.width,
+          canvas.height,
+          officeState.tileMap,
+          officeState.furniture,
+          chars,
+          zoom,
+          panRef.current.x,
+          panRef.current.y,
+          {
+            selectedAgentId: officeState.selectedAgentId,
+            hoveredAgentId: officeState.hoveredAgentId,
+            hoveredTile: officeState.hoveredTile,
+            seats: officeState.seats,
+            characters: officeState.characters,
+          },
+          officeState.layout.tileColors ?? undefined,
+          officeState.layout.cols,
+          officeState.layout.rows,
+        );
+      },
+    });
+
+    return stop;
+  }, [officeState, zoom]);
+
+  // Click handler
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (!officeState || !canvasRef.current) return;
       const canvas = canvasRef.current;
-      if (!canvas) return;
-
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const clickX = (e.clientX - rect.left) * scaleX;
-      const clickY = (e.clientY - rect.top) * scaleY;
+      const dpr = window.devicePixelRatio || 1;
+      const x = (e.clientX - rect.left) * dpr;
+      const y = (e.clientY - rect.top) * dpr;
 
-      const clicked = agents.find((a) => {
-        const cx = a.renderPosition.x + TILE_SIZE / 2;
-        const cy = a.renderPosition.y + TILE_SIZE / 2;
-        const dist = Math.sqrt((clickX - cx) ** 2 + (clickY - cy) ** 2);
-        return dist < TILE_SIZE * 0.5;
-      });
+      const mapW = (officeState.layout.cols ?? 20) * TILE_SIZE * zoom;
+      const mapH = (officeState.layout.rows ?? 11) * TILE_SIZE * zoom;
+      const offsetX = Math.floor((canvas.width - mapW) / 2) + Math.round(panRef.current.x);
+      const offsetY = Math.floor((canvas.height - mapH) / 2) + Math.round(panRef.current.y);
 
-      setSelectedAgentId(clicked ? clicked.id : null);
+      const worldX = (x - offsetX) / zoom;
+      const worldY = (y - offsetY) / zoom;
+
+      const hit = officeState.getCharacterAt(worldX, worldY);
+      if (hit != null) {
+        officeState.setSelection(hit);
+        setSelectedAgentId(hit);
+      } else {
+        officeState.setSelection(null);
+        setSelectedAgentId(null);
+      }
     },
-    [agents],
+    [officeState, zoom, setSelectedAgentId],
   );
 
-  const canvasWidth = layout.width * TILE_SIZE;
-  const canvasHeight = layout.height * TILE_SIZE;
-  const selectedAgent = agents.find((a) => a.id === selectedAgentId) ?? null;
+  // Zoom with scroll/pinch
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      e.preventDefault();
+      zoomAccum.current += e.deltaY;
+      if (Math.abs(zoomAccum.current) >= ZOOM_SCROLL_THRESHOLD) {
+        const direction = zoomAccum.current > 0 ? -1 : 1;
+        setZoom((z) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z + direction)));
+        zoomAccum.current = 0;
+      }
+    },
+    [],
+  );
+
+  // Pan with middle-mouse drag
+  const isPanning = useRef(false);
+  const panStart = useRef({ x: 0, y: 0 });
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button === 1) {
+      isPanning.current = true;
+      panStart.current = { x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y };
+    }
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isPanning.current) {
+      panRef.current = {
+        x: e.clientX - panStart.current.x,
+        y: e.clientY - panStart.current.y,
+      };
+    }
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isPanning.current = false;
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="w-full aspect-[16/9] rounded-lg bg-muted animate-pulse flex items-center justify-center">
+        <span className="text-muted-foreground text-sm">Loading Pixel Office...</span>
+      </div>
+    );
+  }
+
+  const selectedChar = getSelectedCharacter();
 
   return (
-    <div className="relative inline-block">
+    <div className="relative w-full" ref={containerRef}>
       <canvas
         ref={canvasRef}
-        width={canvasWidth}
-        height={canvasHeight}
         onClick={handleClick}
-        className="border border-border rounded-lg cursor-pointer"
-        style={{ imageRendering: "pixelated", maxWidth: "100%", height: "auto" }}
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className="w-full aspect-[16/9] rounded-lg border border-border cursor-pointer"
+        style={{ imageRendering: "pixelated" }}
       />
       {replayActive && (
         <div className="absolute top-2 left-2 text-[10px] text-muted-foreground bg-background/70 px-1.5 py-0.5 rounded">
           Based on actual git history
         </div>
       )}
-      {selectedAgent && (
-        <InteractionPanel
-          agent={selectedAgent}
-          onClose={() => setSelectedAgentId(null)}
-        />
+      {selectedChar && (
+        <div className="absolute top-2 right-2 w-64 rounded-lg border border-border bg-background/95 backdrop-blur-sm p-4 shadow-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-sm">{getAgentName(selectedChar.id)}</h3>
+            <button
+              onClick={() => {
+                if (officeState) officeState.setSelection(null);
+                setSelectedAgentId(null);
+              }}
+              className="text-muted-foreground hover:text-foreground text-sm"
+              aria-label="Close panel"
+            >
+              X
+            </button>
+          </div>
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">역할</dt>
+              <dd>{getAgentRole(selectedChar.id)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">상태</dt>
+              <dd>{STATE_LABELS[selectedChar.state] ?? selectedChar.state}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">위치</dt>
+              <dd>({selectedChar.tileCol}, {selectedChar.tileRow})</dd>
+            </div>
+          </dl>
+        </div>
       )}
     </div>
   );
