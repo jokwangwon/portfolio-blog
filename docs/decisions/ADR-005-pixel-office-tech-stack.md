@@ -1,6 +1,6 @@
 # ADR-005: Pixel Office 2D 렌더링 기술 선택
 
-**Status**: Accepted
+**Status**: Superseded by [ADR-008](ADR-008-pixel-office-canvas2d-mvp.md)
 **Date**: 2026-03-26
 **Deciders**: kwangwon
 **Tags**: frontend, pixel-art, 2d-rendering, pixi

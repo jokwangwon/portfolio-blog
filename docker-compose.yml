@@ -113,11 +113,11 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       AI_PROVIDER: ${AI_PROVIDER:-ollama}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:12b}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
-      NOTION_API_KEY: ${NOTION_API_KEY:}
+      NOTION_API_KEY: ${NOTION_API_KEY:-}
     ports:
       - "${AI_BACKEND_PORT:-8081}:8081"
     networks:

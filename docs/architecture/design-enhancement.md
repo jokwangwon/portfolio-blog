@@ -380,51 +380,53 @@ PostCard 확장:
 
 ## 4. Stage 3: Pixel Office & 고급 인터랙션
 
-### 4.1 Pixel Office
+### 4.1 Pixel Office (MVP — ADR-008)
 
 > 상세 설계는 [pixel-office-design.md](./pixel-office-design.md) 참조.
+> 기술 결정은 [ADR-008](../decisions/ADR-008-pixel-office-canvas2d-mvp.md) 참조.
 > 이 섹션은 pixel-office-design.md와의 통합 지점만 정의.
+
+**핵심 변경 (2026-04-06)**: 3+1 멀티 에이전트 합의를 통해 MVP 축소 + Canvas 2D 전환 결정.
+- PixiJS 8 → Canvas 2D API (R3F로 WebGL 이미 증명, 기술 스펙트럼 확장)
+- 7존 → 3존, 5에이전트 → 3, 8상태 → 4상태
+- 백엔드 module-office → Phase 2 연기 (Next.js API Route로 대체)
+- pixel-agents 오픈소스 설계 패턴 참고 (코드 복사 아님)
 
 #### 4.1.1 프론트엔드 모듈 구조
 
 ```
 src/modules/pixel-office/
-├── components/        # PixiJS 렌더링 컴포넌트 (모두 "use client")
-├── engine/            # 순수 로직 (StateMachine, PathFinder, EventMapper)
-├── hooks/             # React 훅 (API 연동, 스프라이트 애니메이션)
-├── state/             # Redux slice (officeSlice.ts)
-├── api/               # API 클라이언트 (officeApi.ts)
+├── components/        # Canvas 2D 렌더링 + React 오버레이 (모두 "use client")
+├── engine/            # 순수 로직 (GameLoop, StateMachine, PathFinder, EventMapper)
+���── hooks/             # React 훅 (useGameLoop, useAgentStatus)
+├── api/               # API 클라이언트 (githubActivity.ts)
+├── assets/            # 스프라이트, 타일맵
 └── types/             # TypeScript 타입 (office.types.ts)
 ```
 
 #### 4.1.2 라우트 통합
 
-| 경로 | 역할 | 레이아웃 |
+| 경로 | 역할 | 레이���웃 |
 |------|------|---------|
-| `/office` | 전체 화면 Pixel Office | 최소 레이아웃 (얇은 헤더만) |
+| `/office` | 전�� 화면 Pixel Office | 최소 레이아웃 (얇은 헤더만) |
 | `/` (위젯) | 랜딩 페이지 미니 프리뷰 | PortfolioLayout 내 섹션 |
 
 #### 4.1.3 에셋 전략
 
-**Phase 1 (초기)**: 컬러 사각형 placeholder
-- 각 구역은 색상 구분된 사각형으로 표현
-- 에이전트는 색상 + 이니셜로 표현
-- 상태 전이, 이동, 상호작용 로직을 먼저 완성
+**Phase 1 (MVP)**: 컬러 사각형 placeholder
+- 3개 구역은 색상 구분된 ���각형으로 표현
+- 3개 에이전트는 컬러 원형 + 방향 표시로 표현
+- 4상태 전이, BFS 이동, 클릭 인터랙션 로직을 먼저 완성
 
-**Phase 2 (이후)**: 실제 픽셀아트 에셋으로 교체
-- 32x32 캐릭터 스프라이트시트
-- 타일맵 JSON + PNG
+**Phase 2 (이후)**: 실제 픽셀아트 에셋으��� 교체
+- 32x32 캐릭터 스프라이���시트
+- ��일맵 JSON + PNG
 - 가구/오브젝트 스프라이트
 
-#### 4.1.4 백엔드 모듈 (`module-office`)
+#### 4.1.4 데이터 소스
 
-pixel-office-design.md 섹션 7 기준으로 Spring Boot 모듈 구현:
-- `OfficeController`: `/api/portal/office/*` 엔드포인트
-- `OfficeService`: 에이전트 상태 관리
-- `GitHubSyncService`: GitHub API 폴링 → 에이전트 상태 업데이트
-- `OfficeEventPublisher`: SSE 실시간 이벤트
-- JPA 엔티티: `OfficeAgent`, `OfficeEvent`
-- Flyway 마이그레이션: `office_agents`, `office_events` 테이블
+**Phase 1**: Next.js API Route (`app/api/office/route.ts`) + GitHub API + ISR 캐싱 (5분)
+**Phase 2**: Spring Boot `module-office` (SSE 실시간, DB 캐싱, GitHub 동기화)
 
 ### 4.2 커서 트레일
 
@@ -467,9 +469,9 @@ Stage 2 (three, R3F)          Stage 1 인프라 의존
   ├── ProjectCardEnhanced (glow 사용)   │  → Stage 3에서 패턴 재사용
   └── ProficiencyBar (motion 사용)      │
                                         ▼
-Stage 3 (pixi.js, tsparticles)    Stage 2 패턴 재사용
+Stage 3 (Canvas 2D, tsparticles)  Stage 2 패턴 재사용
   │
-  ├── pixel-office 모듈 (dynamic import)
+  ├── pixel-office 모듈 (Canvas 2D, dynamic import)
   ├── CursorTrail (useReducedMotion 사용)
   └── BenchmarkSection (MotionSection 사용)
 ```
@@ -481,7 +483,7 @@ Stage 3 (pixi.js, tsparticles)    Stage 2 패턴 재사용
 | 항목 | 전략 |
 |------|------|
 | Three.js (~600KB) | `next/dynamic ssr:false`, `(portfolio)` 라우트 전용 |
-| PixiJS (~400KB) | `next/dynamic ssr:false`, `/office` 라우트 전용 |
+| Canvas 2D (0KB) | `next/dynamic ssr:false`, `/office` 라우트 전용 (번들 추가 없음) |
 | tsparticles | `next/dynamic ssr:false`, portfolio 전용 |
 | R3F Canvas | `frameloop="demand"`, `dpr={[1, 1.5]}` |
 | 모바일 | md 미만에서 3D/파티클/커서 트레일 비활성화 |

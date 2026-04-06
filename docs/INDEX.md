@@ -2,7 +2,7 @@
 
 > **프로젝트 문서 전체 구조 및 읽는 순서**
 
-**최종 업데이트**: 2026-04-01
+**최종 업데이트**: 2026-04-06
 
 ---
 
@@ -82,9 +82,10 @@ docs/
 │   ├── ADR-002-observability-first.md
 │   ├── ADR-003-jwt-refresh-token-rotation.md
 │   ├── ADR-004-test-strategy.md
-│   ├── ADR-005-pixel-office-tech-stack.md
+│   ├── ADR-005-pixel-office-tech-stack.md  # Superseded by ADR-008
 │   ├── ADR-006-microservice-architecture.md
-│   └── ADR-007-multi-agent-consensus-system.md
+│   ├── ADR-007-multi-agent-consensus-system.md
+│   └── ADR-008-pixel-office-canvas2d-mvp.md  # Canvas 2D MVP 전환
 │
 ├── sessions/                         # 세션별 작업 로그
 │   ├── README.md                     # 세션 로그 가이드
@@ -159,6 +160,7 @@ architecture-review.md (검토 및 개선안)
 | 2026-03-31 | Blog UI 디자인 명세 문서 작성 | `blog-ui-design.md` |
 | 2026-03-31 | Blog 고도화, 프론트엔드 테스트, OAuth2 소셜 로그인 | `SESSION_2026-03-31.md` |
 | 2026-04-01 | 포트폴리오 랜딩 설계, Route Group 분리 | `portfolio-landing-design.md`, `blog-ui-design.md` |
+| 2026-04-06 | **Pixel Office MVP 전환** — Canvas 2D + 규모 축소 (3+1 에이전트 합의) | `ADR-008`, `pixel-office-design.md`, `design-enhancement.md` |
 
 ---
 

@@ -3,7 +3,7 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-04-05 (세션 #15)
+**최종 업데이트**: 2026-04-06 (세션 #16)
 
 ---
 
@@ -12,12 +12,11 @@
 ### Phase
 **Phase 1B: 프론트엔드 개발** (진행 중)
 
-### 마지막 작업 (세션 #15, 2026-04-05)
-- 프로젝트 기획 문서 전수 점검 (14개 설계 문서, 구현율 55-60%)
-- 3-Stage 디자인 강화 통합 설계 문서 작성 (`design-enhancement.md`)
-- **Stage 1 마이크로 인터랙션 구현 완료**: framer-motion, 스크롤 애니메이션, 마우스 glow, 배경 메쉬 drift
-- 포트폴리오 7개 섹션 + 블로그 PostCard 애니메이션 적용
-- 접근성(prefers-reduced-motion) 대응 완료
+### 마지막 작업 (세션 #16, 2026-04-06)
+- pixel-agents 오픈소스 분석 + 내부 Pixel Office 설계 비교
+- **3+1 멀티 에이전트 합의 프로토콜 실행**: Agent A(구현), B(품질), C(대안) 독립 분석 + Reviewer 합의
+- **ADR-008 채택**: Pixel Office Canvas 2D MVP 전환 (PixiJS → Canvas 2D, 7존→3존, 5에이전트→3, 8상태→4)
+- ADR-005 Superseded 처리, pixel-office-design.md MVP 개정, design-enhancement.md Stage 3 업데이트
 
 ### 완료된 개발
 
@@ -43,7 +42,7 @@
 - **OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD + 프론트 UI) — 세션 #12**
 
 ### 현재 상황
-**디자인 강화 진행 중**: Blog 기능 완성 → 디자인 임팩트 강화 3-Stage 계획 수립. Stage 1(마이크로 인터랙션) 완료. framer-motion 도입, 스크롤 애니메이션, 마우스 glow, 배경 메쉬 drift, 텍스트 그라데이션 적용. Stage 2(3D Hero, 프로젝트 카드 리디자인) 진행 예정.
+**디자인 강화 Stage 3 준비 중**: Stage 1(마이크로 인터랙션) ✅ + Stage 2(3D Hero) ✅ 완료. Stage 3 Pixel Office는 3+1 멀티 에이전트 합의를 통해 **Canvas 2D MVP 전환 결정** (ADR-008). PixiJS → Canvas 2D, 7존→3존, 5에이전트→3, 8상태→4로 축소. pixel-agents 오픈소스 설계 패턴 참고(코드 복사 아님). 문서 개정 완료, 구현 착수 대기.
 
 ---
 
@@ -51,8 +50,8 @@
 
 ### 디자인 강화 로드맵 (design-enhancement.md 기준)
 1. ~~**Stage 1**: 마이크로 인터랙션 & 애니메이션~~ ✅ 완료
-2. **Stage 2**: 차별화 요소 (3D Hero, 프로젝트 카드 리디자인, Tech Stack 아이콘)
-3. **Stage 3**: Pixel Office & 고급 인터랙션
+2. ~~**Stage 2**: 3D Hero, 프로젝트 카드 리디자인~~ ✅ 완료
+3. **Stage 3**: Pixel Office MVP (Canvas 2D, 3존, 3에이전트, 4상태) ← **다음**
 
 ### Phase 1B 잔여
 1. **AI Benchmark API**
@@ -83,6 +82,7 @@
 | 7 | PixiJS + @pixi/react 채택 (Pixel Office) | 2026-03-26 | [ADR-005](decisions/ADR-005-pixel-office-tech-stack.md) |
 | 8 | **독립 서비스 아키텍처 전환** | 2026-03-30 | [ADR-006](decisions/ADR-006-microservice-architecture.md) |
 | 9 | **멀티 에이전트 합의 시스템** | 2026-03-30 | [ADR-007](decisions/ADR-007-multi-agent-consensus-system.md) |
+| 10 | **Pixel Office Canvas 2D MVP 전환** | 2026-04-06 | [ADR-008](decisions/ADR-008-pixel-office-canvas2d-mvp.md) |
 
 ---
 
@@ -258,16 +258,29 @@
 - **Stage 1 완료**: framer-motion, 스크롤 애니메이션 7개 섹션, 마우스 glow, 배경 메쉬 drift, 텍스트 그라데이션
 - 테스트 10개 추가 (총 67개)
 
+### 세션 #16 (2026-04-06)
+- pixel-agents 오픈소스(github.com/pablodelucca/pixel-agents) 분석
+- **3+1 멀티 에이전트 합의 프로토콜 실행** (아키텍처 의사결정)
+  - Agent A(구현): Option C(하이브리드) 권장
+  - Agent B(품질): Option B(ADR-005 유지) 안전, Option C 조건부 권장
+  - Agent C(대안): **Option F(MVP 축소 + Canvas 2D)** 신규 제안
+  - Reviewer: Option F-Safe 채택 (Agent C 기반 + Agent B 안전장치)
+- **ADR-008 작성**: Pixel Office Canvas 2D MVP 전환
+- ADR-005 Superseded 처리
+- pixel-office-design.md MVP 개정 (3존, 3에이전트, 4상태)
+- design-enhancement.md Stage 3 업데이트
+
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### 디자인 강화 우선순위
+### 다음 세션 우선순위
 1. ~~Stage 1: 마이크로 인터랙션~~ ✅ 완료
-2. **Stage 2: 3D Hero + 프로젝트 카드 리디자인 + Tech Stack 아이콘** ← 다음
-3. Stage 3: Pixel Office + 커서 트레일 + 벤치마크 시각화
-4. AI Benchmark API (FastAPI) 독립 프로젝트 생성
-5. Service Registry UI 대시보드
+2. ~~Stage 2: 3D Hero + 프로젝트 카드~~ ✅ 완료
+3. **Stage 3: Pixel Office MVP (Canvas 2D)** ← 다음 (ADR-008, 설계 개정 완료)
+4. 커서 트레일 + 벤치마크 시각화
+5. AI Benchmark API (FastAPI) 독립 프로젝트 생성
+6. Service Registry UI 대시보드
 
 ---
 
