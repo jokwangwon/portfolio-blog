@@ -127,9 +127,8 @@ export default function PixelOffice() {
     const mapPxW = cols * TILE_SIZE;
     const mapPxH = rows * TILE_SIZE;
     const rect = container.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
     const fitZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX,
-      Math.floor(Math.min((rect.width * dpr) / mapPxW, (rect.height * dpr) / mapPxH)),
+      Math.floor(Math.min(rect.width / mapPxW, rect.height / mapPxH)),
     ));
     setZoom(fitZoom);
   }, [officeState]);
@@ -198,11 +197,27 @@ export default function PixelOffice() {
         className="w-full aspect-[16/9] rounded-lg border border-border cursor-pointer"
         style={{ imageRendering: "pixelated" }}
       />
-      {replayActive && (
-        <div className="absolute top-2 left-2 text-[10px] text-muted-foreground bg-background/70 px-1.5 py-0.5 rounded">
-          Based on actual git history
+      {/* Zoom controls + replay badge */}
+      <div className="absolute top-2 left-2 flex items-center gap-2">
+        <div className="flex items-center gap-1 bg-background/80 rounded px-1 py-0.5">
+          <button
+            onClick={() => setZoom((z) => Math.max(ZOOM_MIN, z - 1))}
+            className="text-xs px-1.5 py-0.5 rounded hover:bg-muted text-muted-foreground"
+            aria-label="Zoom out"
+          >−</button>
+          <span className="text-xs text-muted-foreground w-8 text-center">{zoom}x</span>
+          <button
+            onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + 1))}
+            className="text-xs px-1.5 py-0.5 rounded hover:bg-muted text-muted-foreground"
+            aria-label="Zoom in"
+          >+</button>
         </div>
-      )}
+        {replayActive && (
+          <div className="text-[10px] text-muted-foreground bg-background/70 px-1.5 py-0.5 rounded">
+            Based on actual git history
+          </div>
+        )}
+      </div>
       {selectedChar && (
         <div className="absolute top-2 right-2 w-64 rounded-lg border border-border bg-background/95 backdrop-blur-sm p-4 shadow-lg">
           <div className="flex items-center justify-between mb-3">

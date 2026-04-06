@@ -68,18 +68,17 @@ export default function AdminOffice() {
     return () => clearTimeout(timer);
   }, [latestEvent, officeState, getAnimationForTool]);
 
-  // Auto-fit zoom
+  // Auto-fit zoom (no DPR — canvas DPR is handled separately)
   useEffect(() => {
     const container = containerRef.current;
     if (!container || !officeState) return;
     const cols = officeState.layout.cols ?? 20;
     const rows = officeState.layout.rows ?? 11;
     const rect = container.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
     const fitZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX,
-      Math.floor(Math.min((rect.width * dpr) / (cols * TILE_SIZE), (rect.height * dpr) / (rows * TILE_SIZE))),
+      Math.floor(Math.min(rect.width / (cols * TILE_SIZE), rect.height / (rows * TILE_SIZE))),
     ));
-    setZoom(fitZoom);
+    setZoom(Math.max(ZOOM_MIN, fitZoom));
   }, [officeState]);
 
   // Resize canvas
@@ -206,12 +205,27 @@ export default function AdminOffice() {
           style={{ imageRendering: "pixelated" }}
         />
 
-        {/* Connection status */}
-        <div className={`absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded text-xs ${
-          connected ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-        }`}>
-          <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-400 animate-pulse" : "bg-red-400"}`} />
-          {connected ? "Live" : "Disconnected"}
+        {/* Connection status + Zoom controls */}
+        <div className="absolute top-2 left-2 flex items-center gap-2">
+          <div className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs ${
+            connected ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+          }`}>
+            <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-400 animate-pulse" : "bg-red-400"}`} />
+            {connected ? "Live" : "Disconnected"}
+          </div>
+          <div className="flex items-center gap-1 bg-background/80 rounded px-1 py-0.5">
+            <button
+              onClick={() => setZoom((z) => Math.max(ZOOM_MIN, z - 1))}
+              className="text-xs px-1.5 py-0.5 rounded hover:bg-muted text-muted-foreground"
+              aria-label="Zoom out"
+            >−</button>
+            <span className="text-xs text-muted-foreground w-8 text-center">{zoom}x</span>
+            <button
+              onClick={() => setZoom((z) => Math.min(ZOOM_MAX, z + 1))}
+              className="text-xs px-1.5 py-0.5 rounded hover:bg-muted text-muted-foreground"
+              aria-label="Zoom in"
+            >+</button>
+          </div>
         </div>
 
         {/* Selected agent panel */}
