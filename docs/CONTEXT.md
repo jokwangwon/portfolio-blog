@@ -274,14 +274,14 @@
 
 ## 💡 다음 세션을 위한 메모
 
-### 다음 세션 우선순위
+### 다음 세션(#17) 우선순위
 1. ~~Stage 1: 마이크로 인터랙션~~ ✅ 완료
 2. ~~Stage 2: 3D Hero + 프로젝트 카드~~ ✅ 완료
 3. ~~Stage 3: Pixel Office MVP 엔진~~ ✅ 완료 (39 테스트, TDD)
-4. **pixel-agents 렌더링 엔진 이식** ← 다음 세션 최우선 (에셋+엔진 20파일)
-5. 관리자 /admin/office (Hook SSE + 실시간)
-6. 커서 트레일 + 벤치마크 시각화
-7. AI Benchmark API (FastAPI) 독립 프로젝트 생성
+4. **pixel-agents 렌더링 엔진 이식** ← 최우선 (에셋+엔진 20파일, /tmp/pixel-agents 클론 완료)
+5. **백엔드 보안/정비** — module-registry GET 인증, AiClient CircuitBreaker, domain 벤치마크 엔티티 정리
+6. 관리자 /admin/office (Hook SSE + 실시간)
+7. 커서 트레일 + 벤치마크 시각화
 
 ---
 
