@@ -133,7 +133,7 @@ async function decodeCharactersFromPng(
 ): Promise<CharacterDirectionSprites[]> {
   const sprites: CharacterDirectionSprites[] = [];
   for (const relPath of index.characters) {
-    const png = await decodePng(`${base}assets/${getIndexedAssetPath('characters', relPath)}`);
+    const png = await decodePng(`${base}${getIndexedAssetPath('characters', relPath)}`);
     const byDir: CharacterDirectionSprites = { down: [], up: [], right: [] };
 
     for (let dirIdx = 0; dirIdx < CHARACTER_DIRECTIONS.length; dirIdx++) {
@@ -154,7 +154,7 @@ async function decodeCharactersFromPng(
 async function decodeFloorsFromPng(base: string, index: AssetIndex): Promise<string[][][]> {
   const floors: string[][][] = [];
   for (const relPath of index.floors) {
-    const png = await decodePng(`${base}assets/${getIndexedAssetPath('floors', relPath)}`);
+    const png = await decodePng(`${base}${getIndexedAssetPath('floors', relPath)}`);
     floors.push(readSprite(png, FLOOR_TILE_SIZE, FLOOR_TILE_SIZE));
   }
   return floors;
@@ -163,7 +163,7 @@ async function decodeFloorsFromPng(base: string, index: AssetIndex): Promise<str
 async function decodeWallsFromPng(base: string, index: AssetIndex): Promise<string[][][][]> {
   const wallSets: string[][][][] = [];
   for (const relPath of index.walls) {
-    const png = await decodePng(`${base}assets/${getIndexedAssetPath('walls', relPath)}`);
+    const png = await decodePng(`${base}${getIndexedAssetPath('walls', relPath)}`);
     const set: string[][][] = [];
     for (let mask = 0; mask < WALL_BITMASK_COUNT; mask++) {
       const ox = (mask % WALL_GRID_COLS) * WALL_PIECE_WIDTH;
@@ -181,7 +181,7 @@ async function decodeFurnitureFromPng(
 ): Promise<Record<string, string[][]>> {
   const sprites: Record<string, string[][]> = {};
   for (const entry of catalog) {
-    const png = await decodePng(`${base}assets/${entry.furniturePath}`);
+    const png = await decodePng(`${base}${entry.furniturePath}`);
     sprites[entry.id] = readSprite(png, entry.width, entry.height);
   }
   return sprites;
@@ -205,10 +205,10 @@ export async function loadPixelOfficeAssets(basePath: string): Promise<LoadedAss
   ]);
 
   const [characters, floorSprites, wallSets, furnitureSprites] = await Promise.all([
-    decodeCharactersFromPng(base.replace(/assets\/$/, ''), assetIndex),
-    decodeFloorsFromPng(base.replace(/assets\/$/, ''), assetIndex),
-    decodeWallsFromPng(base.replace(/assets\/$/, ''), assetIndex),
-    decodeFurnitureFromPng(base.replace(/assets\/$/, ''), catalog),
+    decodeCharactersFromPng(base, assetIndex),
+    decodeFloorsFromPng(base, assetIndex),
+    decodeWallsFromPng(base, assetIndex),
+    decodeFurnitureFromPng(base, catalog),
   ]);
 
   // Initialize subsystems
