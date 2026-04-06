@@ -66,6 +66,10 @@ export class EventMapper {
     }));
   }
 
+  static detectRoleFromPath(path: string): AgentRole | null {
+    return EventMapper.detectRole(path);
+  }
+
   private static detectRole(path: string): AgentRole | null {
     if (DEVOPS_PATTERNS.some((p) => p.test(path))) return "DEVOPS";
     if (BACKEND_PATTERNS.some((p) => p.test(path))) return "BACKEND";
