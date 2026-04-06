@@ -2,13 +2,17 @@
 # Post-tool event reporter for Pixel Office admin dashboard
 # Sends tool usage events to /api/admin/office/events via curl
 # Non-blocking: failures are silently ignored (|| true)
+# Uses jq for safe JSON construction (prevents injection via file paths)
 
 INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.tool_name // "unknown"')
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.command // .tool_input.pattern // "unknown"' | head -c 100)
+TS=$(date -Iseconds)
 
-# Only send if dev server is likely running
+PAYLOAD=$(jq -n --arg tool "$TOOL" --arg file "$FILE" --arg ts "$TS" \
+  '{tool: $tool, file: $file, timestamp: $ts}')
+
 curl -s --max-time 1 -X POST http://localhost:3000/api/admin/office/events \
   -H "Content-Type: application/json" \
-  -d "{\"tool\":\"$TOOL\",\"file\":\"$FILE\",\"timestamp\":\"$(date -Iseconds)\"}" \
+  -d "$PAYLOAD" \
   > /dev/null 2>&1 || true

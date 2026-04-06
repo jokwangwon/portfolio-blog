@@ -114,42 +114,57 @@ export function usePixelOffice(): UsePixelOfficeReturn {
     }
   }, [activityData]);
 
-  // Timelapse replay on mount
+  // Timelapse replay from real GitHub events
   useEffect(() => {
-    if (!replayActive) return;
+    if (!replayActive || !activityData || !officeStateRef.current) return;
 
-    const events = [
-      { delay: 2000, agentId: AGENT_IDS.FRONTEND, tool: "Edit" },
-      { delay: 5000, agentId: AGENT_IDS.BACKEND, tool: "Read" },
-      { delay: 8000, agentId: AGENT_IDS.DEVOPS, tool: "Bash" },
-      { delay: 12000, agentId: AGENT_IDS.FRONTEND, tool: "Write" },
-      { delay: 16000, agentId: AGENT_IDS.BACKEND, tool: "Grep" },
-    ];
+    const realEvents = activityData.events;
+    if (realEvents.length === 0) {
+      // Defer state update to avoid cascading renders in effect
+      const t = setTimeout(() => setReplayActive(false), 0);
+      return () => clearTimeout(t);
+    }
 
-    const timers = events.map(({ delay, agentId, tool }) =>
-      setTimeout(() => {
+    // Map real events to agent activations with compressed timing (2s intervals)
+    const replayQueue = realEvents.slice(0, 10).map((event, i) => {
+      const updates = EventMapper.mapEvent(event);
+      const role = updates[0]?.agentId as keyof typeof AGENT_IDS | undefined;
+      const agentId = role ? AGENT_IDS[role] : AGENT_IDS.FRONTEND;
+      // Guess tool from event type
+      const tool = event.type === "ACTION_RUN" || event.type === "ACTION_COMPLETE" ? "Bash"
+        : event.path.includes("test") ? "Grep" : "Edit";
+      return { delay: 2000 + i * 2000, agentId, tool };
+    });
+
+    const allTimers: ReturnType<typeof setTimeout>[] = [];
+
+    for (const { delay, agentId, tool } of replayQueue) {
+      const activateTimer = setTimeout(() => {
         const state = officeStateRef.current;
         if (!state) return;
         state.setAgentActive(agentId, true);
         state.setAgentTool(agentId, tool);
         state.showWaitingBubble(agentId);
+      }, delay);
 
-        setTimeout(() => {
-          if (officeStateRef.current) {
-            officeStateRef.current.setAgentActive(agentId, false);
-            officeStateRef.current.setAgentTool(agentId, null);
-          }
-        }, 3000);
-      }, delay),
-    );
+      const deactivateTimer = setTimeout(() => {
+        const state = officeStateRef.current;
+        if (!state) return;
+        state.setAgentActive(agentId, false);
+        state.setAgentTool(agentId, null);
+      }, delay + 3000);
 
-    const stopTimer = setTimeout(() => setReplayActive(false), 20000);
+      allTimers.push(activateTimer, deactivateTimer);
+    }
+
+    const totalDuration = replayQueue.length * 2000 + 5000;
+    const stopTimer = setTimeout(() => setReplayActive(false), totalDuration);
+    allTimers.push(stopTimer);
 
     return () => {
-      timers.forEach(clearTimeout);
-      clearTimeout(stopTimer);
+      allTimers.forEach(clearTimeout);
     };
-  }, [replayActive]);
+  }, [replayActive, activityData]);
 
   const getAgentName = useCallback((id: number) => AGENT_NAMES[id] ?? `Agent ${id}`, []);
   const getAgentRole = useCallback((id: number) => AGENT_ROLES[id] ?? "UNKNOWN", []);
