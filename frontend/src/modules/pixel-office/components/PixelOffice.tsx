@@ -12,7 +12,7 @@ const STATE_LABELS: Record<string, string> = {
   type: "작업 중",
 };
 
-const DEFAULT_ZOOM = 3;
+const DEFAULT_ZOOM = 2; // will be auto-calculated to fit container
 
 export default function PixelOffice() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -118,9 +118,27 @@ export default function PixelOffice() {
     [officeState, zoom, setSelectedAgentId],
   );
 
-  // Zoom with scroll/pinch
-  const handleWheel = useCallback(
-    (e: React.WheelEvent) => {
+  // Auto-fit zoom to container on mount
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !officeState) return;
+    const cols = officeState.layout.cols ?? 20;
+    const rows = officeState.layout.rows ?? 11;
+    const mapPxW = cols * TILE_SIZE;
+    const mapPxH = rows * TILE_SIZE;
+    const rect = container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const fitZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX,
+      Math.floor(Math.min((rect.width * dpr) / mapPxW, (rect.height * dpr) / mapPxH)),
+    ));
+    setZoom(fitZoom);
+  }, [officeState]);
+
+  // Zoom with scroll — native event to allow preventDefault on non-passive
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const handler = (e: WheelEvent) => {
       e.preventDefault();
       zoomAccum.current += e.deltaY;
       if (Math.abs(zoomAccum.current) >= ZOOM_SCROLL_THRESHOLD) {
@@ -128,16 +146,18 @@ export default function PixelOffice() {
         setZoom((z) => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, z + direction)));
         zoomAccum.current = 0;
       }
-    },
-    [],
-  );
+    };
+    canvas.addEventListener("wheel", handler, { passive: false });
+    return () => canvas.removeEventListener("wheel", handler);
+  }, []);
 
-  // Pan with middle-mouse drag
+  // Pan with left-click drag (or middle-click)
   const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0 });
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button === 1) {
+    // Left click (0) or middle click (1)
+    if (e.button === 0 || e.button === 1) {
       isPanning.current = true;
       panStart.current = { x: e.clientX - panRef.current.x, y: e.clientY - panRef.current.y };
     }
@@ -171,7 +191,6 @@ export default function PixelOffice() {
       <canvas
         ref={canvasRef}
         onClick={handleClick}
-        onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
