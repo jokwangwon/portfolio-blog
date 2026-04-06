@@ -69,7 +69,7 @@ export default function OAuthCallbackPage() {
       <div className="flex flex-col items-center justify-center py-20">
         <p className="text-destructive mb-4">{error}</p>
         <button
-          onClick={() => router.push("/auth/login")}
+          onClick={() => router.push("/login")}
           className="text-sm text-muted-foreground hover:underline"
         >
           로그인 페이지로 돌아가기
