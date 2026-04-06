@@ -314,34 +314,112 @@ CREATE INDEX idx_office_events_created ON office_events(created_at DESC);
 
 ---
 
-## 8. 사용자 인터랙션
+## 8. 에이전트 행동 패턴
 
-### 8.1 MVP 인터랙션
+### 8.1 배회(Wander) 행동
 
-| 동작 | 결과 |
-|------|------|
-| **사무실 관찰** | 에이전트들이 상태에 따라 자동으로 움직임 |
-| **에이전트 클릭** | 오버레이 패널: 이름, 역할, 현재 작업, 최근 커밋 |
-| **구역 호버** | 구역 이름 툴팁 |
+IDLE 상태 에이전트는 자동으로 사무실 내를 배회하여 생동감을 부여한다.
 
-### 8.2 Phase 2 연출 (예정)
+```
+[IDLE] ──(wanderTimer 8-15초)──→ [WALK] ──(도착)──→ [IDLE]
+  │                                                    │
+  └──────────────── wanderCount++ ─────────────────────┘
+  
+wanderCount >= wanderLimit(3-5회) → 자기 데스크로 복귀 → WORK/REST
+```
 
-- 빌드 성공: 전원 잠시 기립 + 축하 이모트
-- 빌드 실패: 관련 캐릭터 머리 위 빨간 느낌표
-- 새벽 시간대: 사무실 조명 어두워짐
+- 배회 목적지: 자기 존 내 랜덤 walkable 타일
+- 배회 간격: 8-15초 랜덤 (pixel-agents의 wanderTimer 패턴 참고)
+- 존 경계 제한: Work Area 에이전트는 Work Area + Lounge만 배회
+
+### 8.2 말풍선 시스템
+
+에이전트 상태에 따라 머리 위에 말풍선/이모지를 표시한다.
+
+| 상태 | 말풍선 | 지속 시간 |
+|------|--------|----------|
+| WORK 진입 | 작업 내용 텍스트 (예: "JWT 인증 구현") | 5초 |
+| REST 진입 | ☕ 이모지 | 상시 |
+| WALK 중 | 없음 | — |
+| 선택됨 | 역할 이름 | 선택 해제까지 |
+
+### 8.3 서브픽셀 이동 보간 (lerp)
+
+캐릭터 이동 시 타일 간 선형 보간으로 부드러운 움직임을 구현한다.
+
+```
+moveProgress += (speed / TILE_SIZE) * dt;  // 0 → 1 보간
+x = from.x + (to.x - from.x) * Math.min(moveProgress, 1);  // lerp
+y = from.y + (to.y - from.y) * Math.min(moveProgress, 1);
+```
 
 ---
 
-## 9. 페이지 배치
+## 9. 듀얼 페이지 아키텍처
 
-### Option A: 독립 페이지 `/office`
-- 전체 화면 픽셀 사무실 경험
+### 9.1 공개 페이지: `/office`
 
-### Option B: 홈페이지 위젯
-- 포트폴리오 랜딩 페이지 하단에 미니 픽셀 사무실 섹션
-- 클릭 시 `/office`로 확장
+방문자(면접관)용. 인증 불필요.
 
-**권장**: Option B (진입점) + Option A (풀 경험) 병행
+| 기능 | 데이터 소스 | 설명 |
+|------|------------|------|
+| **타임랩스 재생** | Git 히스토리 JSON | 30개 커밋을 자동 재생 (200ms 간격) |
+| **실시간 상태** | GitHub API 5분 폴링 | 최근 커밋/PR/Actions 반영 |
+| **배회 행동** | 클라이언트 로직 | IDLE 에이전트 자동 배회 |
+| **에이전트 클릭** | 클라이언트 UI | 오버레이 패널 표시 |
+
+#### 타임랩스 재생 모드
+
+빌드 타임에 Git 히스토리를 JSON으로 추출하여 방문자 진입 시 자동 재생한다.
+
+```
+빌드: scripts/extract-git-history.ts → public/office-history.json
+런타임: useReplayMode() → 200ms 간격으로 이벤트 feed → EventMapper → StateMachine
+UI: play/pause 버튼 + 속도 조절 (1x/2x/5x) + "Based on actual git history" 라벨
+```
+
+### 9.2 관리자 페이지: `/admin/office`
+
+개발자 전용. JWT ADMIN 인증 필수.
+
+| 기능 | 데이터 소스 | 설명 |
+|------|------------|------|
+| **실시간 Hook 이벤트** | SSE (`/api/admin/office/events`) | Edit→타이핑, Read→읽기, Bash→실행 |
+| **하네스 시각화** | Hook + Git pre-commit | lint 성공/실패, test 통과/차단 |
+| **도구별 애니메이션** | Hook 이벤트 매핑 | Read/Grep→읽기, Edit/Write→타이핑 |
+| **감정 표현** | 하네스 결과 | lint 실패→FRUSTRATED, commit 성공→CELEBRATING |
+
+#### 데이터 흐름
+
+```
+Claude Code Hook 실행
+  → .claude/hooks/post-tool-event.sh
+  → POST /api/admin/office/events (JWT 인증)
+  → SSE 브로드캐스트
+  → AdminOffice 컴포넌트 → 에이전트 즉시 반응
+
+Git pre-commit Hook
+  → .githooks/pre-commit (기존 + 이벤트 발행)
+  → POST /api/admin/office/events
+  → DevOps 에이전트 CELEBRATING/FRUSTRATED
+```
+
+#### 보안
+
+- JWT `ADMIN` 역할 필수 (기존 Spring Security 인증 체계 재사용)
+- SSE 엔드포인트에 Bearer 토큰 검증
+- `NODE_ENV === 'development'`에서만 Hook 이벤트 수신 라우트 활성화
+- JSONL 파일 직접 접근 금지 — Hook 이벤트만 사용 (도구명 + 파일경로만 전달, 대화 내용 제외)
+
+### 9.3 페이지 비교
+
+| 항목 | `/office` (공개) | `/admin/office` (비공개) |
+|------|-----------------|------------------------|
+| 인증 | 불필요 | JWT ADMIN 필수 |
+| 데이터 | GitHub API (공개) | Hook SSE (로컬) |
+| 반응 속도 | 5분 폴링 + 타임랩스 | 즉시 (~100ms) |
+| 에이전트 상태 | IDLE/WALK/WORK/REST | + CELEBRATING/FRUSTRATED |
+| 면접 어필 | "Git 히스토리 시각화" | "AI 에이전트 실시간 추적" |
 
 ---
 
@@ -353,7 +431,8 @@ CREATE INDEX idx_office_events_created ON office_events(created_at DESC);
 | **게임 루프** | requestAnimationFrame + delta-time | 프레임 업데이트 |
 | **길찾기** | BFS 4방향 | 캐릭터 이동 경로 |
 | **상태 관리** | Redux Toolkit + TanStack Query | UI 상태 + 서버 상태 |
-| **데이터 소스** | GitHub API (Phase 1: Next.js API Route / Phase 2: Portal API) | 하이브리드 |
+| **공개 데이터** | GitHub API + Git 히스토리 JSON | 방문자용 |
+| **관리자 데이터** | Claude Code Hooks → SSE | 개발자용 실시간 |
 | **에셋** | Phase 1: placeholder / Phase 2: 픽셀아트 스프라이트 | 점진적 |
 
 ---

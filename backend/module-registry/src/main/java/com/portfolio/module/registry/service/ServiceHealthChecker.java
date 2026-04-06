@@ -6,6 +6,7 @@ import com.portfolio.domain.service.repository.ServiceCacheRepository;
 import com.portfolio.domain.service.repository.ServiceRegistryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -15,13 +16,17 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "module.registry.health-check.enabled", havingValue = "true", matchIfMissing = true)
 public class ServiceHealthChecker {
 
     private final ServiceRegistryRepository registryRepository;
     private final ServiceCacheRepository cacheRepository;
     private final RestTemplate restTemplate;
 
-    @Scheduled(fixedDelayString = "${service.health-check.interval:60000}")
+    @Scheduled(
+        initialDelayString = "${service.health-check.initial-delay:30000}",
+        fixedDelayString = "${service.health-check.interval:60000}"
+    )
     public void checkAllServices() {
         registryRepository.findByIsActiveTrue().forEach(this::checkService);
     }

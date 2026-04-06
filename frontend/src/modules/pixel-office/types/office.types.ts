@@ -14,10 +14,20 @@ export interface Agent {
   name: string;
   state: AgentState;
   position: TilePosition;
+  renderPosition: { x: number; y: number }; // sub-pixel lerp position
   targetPosition: TilePosition | null;
   path: TilePosition[];
   direction: Direction;
   color: string;
+  moveProgress: number;
+  bubble: AgentBubble | null;
+  wanderTimer: number; // seconds until next wander
+}
+
+export interface AgentBubble {
+  text: string;
+  icon?: string;
+  expiresAt: number; // timestamp ms
 }
 
 // --- Tile Map ---
