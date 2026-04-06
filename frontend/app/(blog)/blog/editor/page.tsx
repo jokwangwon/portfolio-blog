@@ -31,7 +31,7 @@ export default function NewPostPage() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.replace("/login");
+      router.replace("/auth/login");
     }
   }, [authLoading, isAuthenticated, router]);
 

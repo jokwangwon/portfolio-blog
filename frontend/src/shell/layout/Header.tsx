@@ -54,10 +54,10 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+              <Link href="/auth/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
                 로그인
               </Link>
-              <Link href="/signup" className={buttonVariants({ size: "sm" })}>
+              <Link href="/auth/signup" className={buttonVariants({ size: "sm" })}>
                 회원가입
               </Link>
             </>

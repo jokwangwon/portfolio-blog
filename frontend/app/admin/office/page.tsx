@@ -23,7 +23,7 @@ export default function AdminOfficePage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+      router.push("/auth/login");
     }
   }, [isLoading, isAuthenticated, router]);
 
