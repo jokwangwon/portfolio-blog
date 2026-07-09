@@ -27,21 +27,7 @@ spring:
   flyway:
     validate-on-migrate: false
 
-# OAuth2 Social Login
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${OAUTH_GOOGLE_CLIENT_ID:not-configured}
-            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET:not-configured}
-            scope: email,profile
-            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
-          github:
-            client-id: ${OAUTH_GITHUB_CLIENT_ID:not-configured}
-            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET:not-configured}
-            scope: user:email,read:user
-            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+# OAuth2 Social Login 설정은 application.yml(base)로 이동 — 전 프로필 공통 필요
 
 # AI Backend (내부 서비스)
 ai-backend:
