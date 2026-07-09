@@ -322,6 +322,51 @@ CorsConfigurationSource corsConfigurationSource() {
 
 ---
 
+## 2C. 사용자 프로필 (Users)
+
+### GET /users/me (내 프로필 조회)
+
+**인증**: 필수 (Bearer Token)
+
+**Response** (200 OK):
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "username": "johndoe",
+  "role": "USER",
+  "createdAt": "2026-07-09T10:00:00"
+}
+```
+
+**에러**: `401 Unauthorized` (미인증)
+
+### PUT /users/me/password (비밀번호 변경)
+
+**인증**: 필수 (Bearer Token)
+
+**Request**:
+```json
+{
+  "currentPassword": "OldPass123!",
+  "newPassword": "NewPass456!"
+}
+```
+
+**Validation**:
+- `currentPassword`: 필수
+- `newPassword`: 필수, 8~100자
+
+**Response** (204 No Content)
+
+**에러**:
+- `400 Bad Request` — 현재 비밀번호 불일치 또는 validation 실패
+- `401 Unauthorized` — 미인증
+
+> OAuth2 소셜 로그인 사용자는 로컬 비밀번호가 없으므로 비밀번호 변경 불가 (현재 비밀번호 검증 실패)
+
+---
+
 ## 3. 게시글 (Posts)
 
 ### 3.0 게시글 비즈니스 규칙
