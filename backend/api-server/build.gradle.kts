@@ -4,6 +4,10 @@ plugins {
     java
 }
 
+// Spring Boot BOM이 관리하는 Testcontainers 1.x는 Docker 29+ (최소 API 1.44)와 호환되지 않음
+// https://github.com/testcontainers/testcontainers-java/issues/11210 — 2.0.2+에서 해결
+extra["testcontainers.version"] = "2.0.5"
+
 dependencies {
     // Module Dependencies (All modules)
     implementation(project(":common"))
@@ -43,9 +47,9 @@ dependencies {
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.testcontainers:testcontainers:1.19.3")
-    testImplementation("org.testcontainers:postgresql:1.19.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.19.3")
+    testImplementation("org.testcontainers:testcontainers:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.5")
 }
 
 tasks.bootRun {
