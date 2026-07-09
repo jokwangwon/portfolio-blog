@@ -55,27 +55,24 @@
 
 ## 📋 다음 할 일 (Next Actions)
 
-1. **댓글 UI 개선 이식 (PR #2에서 살린 백로그)**
-   - [ ] 아바타, 인라인 삭제 확인, sonner 토스트 알림을 현행 glassmorphism 댓글 컴포넌트에 맞게 재이식
-   - 참조 커밋: `78fabf4` (댓글 UI), `27d8a44` (sonner 설정 부분) — 구계보라 직접 cherry-pick 시 충돌, 재구현 권장
+> 세션 #19 완성도 평가(구현율 ~75-80%) 기준 우선순위. P0(블로그 상세 버그, frontend Dockerfile, nginx 죽은 라우트)는 완료.
 
-2. **AI Benchmark API**
-   - [ ] FastAPI 독립 프로젝트 생성 (`ai-benchmark-api/`) → docker-compose 주석 해제
-   - [ ] AI Benchmark DB 스키마 (Alembic)
+### P1 — 포트폴리오 가치 최대화
+1. **실배포**: 라이브 URL 확보 (Vercel 프론트 + 백엔드 호스팅 or 홈서버+Cloudflare Tunnel), TLS, CI deploy 잡
+2. **README 현행화**: Next.js 14 배지(실제 16), placeholder 링크(`yourdomain.com`) 제거, 스크린샷/GIF 추가
+3. **유저 프로필 최소 기능**: `GET/PUT /users/me` + 마이페이지 (현재 `GET /auth/me`가 username/authorities만 반환)
 
-3. **ai-backend 품질**
-   - [ ] pytest 테스트 작성 (현재 0개)
-   - [ ] CI에 ai-backend 잡 추가
+### P2 — 차별화 스토리 완성
+4. **AI Benchmark API** (FastAPI `ai-benchmark-api/`) + 랜딩 BenchmarkSection 시각화 — README가 내세우는 핵심 차별화인데 통째로 부재
+5. **Service Registry UI 대시보드** (백엔드만 존재) + 헬스체크 DB 프로브 (현재 UP 하드코딩, Service Contract 미달)
+6. Pixel Office 타임랩스 파이프라인 (`extract-git-history` → office-history.json) + 재생/속도 컨트롤
 
-4. **보안 후속**
-   - [ ] admin office SSE 라우트 서버측 인증 (현재 dev 전용 `NODE_ENV` 가드만)
-
-5. **Service Registry UI**
-   - [ ] 등록된 서비스 목록 대시보드
-
-6. **프론트엔드 테스트 강화**
-   - [ ] 커버리지 측정 (현재 107개 → 목표 70%+)
-   - [ ] E2E 테스트 도입 검토
+### P3 — 품질 부채
+7. 커버리지: security 모듈 17%, 프론트 22.9% → 70% 목표 (헌법 제3조)
+8. 댓글 UI 개선 이식 (PR #2 백로그: 아바타·인라인 삭제 확인·sonner 토스트 — 참조 커밋 78fabf4, 27d8a44) + blog-ui-design.md §12 토스트 시스템
+9. `PUT /tags/{id}` 구현 (스펙 대비 유일한 누락 CRUD), `generate-draft` 프론트 연결 or 제거
+10. ai-backend pytest + CI 잡, admin office SSE 서버측 인증
+11. 문서 후행 정리: 리치 에디터·pixel-engine 설계 문서화 (SDD 원칙)
 
 ---
 
