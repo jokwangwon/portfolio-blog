@@ -39,7 +39,30 @@ export const mockComment = {
   updatedAt: "2026-03-31T00:00:00",
 };
 
+export const mockProfile = {
+  id: 1,
+  email: "test@test.com",
+  username: "testuser",
+  role: "USER",
+  createdAt: "2026-03-31T00:00:00",
+};
+
 export const handlers = [
+  http.get(`${BASE_URL}/users/me`, () => {
+    return HttpResponse.json(mockProfile);
+  }),
+
+  http.put(`${BASE_URL}/users/me/password`, async ({ request }) => {
+    const body = (await request.json()) as Record<string, string>;
+    if (body.currentPassword === "WrongPass999!") {
+      return HttpResponse.json(
+        { message: "Current password does not match" },
+        { status: 400 }
+      );
+    }
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   http.get(`${BASE_URL}/posts`, () => {
     return HttpResponse.json(mockPageResponse);
   }),

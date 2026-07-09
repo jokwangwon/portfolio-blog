@@ -45,9 +45,12 @@ export default function Header() {
                 글쓰기
               </Link>
               <Separator orientation="vertical" className="h-5" />
-              <span className="text-sm text-muted-foreground">
+              <Link
+                href="/mypage"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
                 {user?.username}
-              </span>
+              </Link>
               <Button variant="ghost" size="sm" onClick={logout}>
                 로그아웃
               </Button>
