@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Settings, X, Copy, Check } from "lucide-react";
 
@@ -154,10 +154,10 @@ export default function DevThemePanel() {
 
   const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
 
-  const handleChange = useCallback((variable: string, value: number, config: SliderConfig) => {
+  const handleChange = (variable: string, value: number, config: SliderConfig) => {
     setValues((prev) => ({ ...prev, [variable]: value }));
     applyValue(variable, value, config);
-  }, []);
+  };
 
   const applyValue = (variable: string, value: number, config: SliderConfig) => {
     const root = document.documentElement;
