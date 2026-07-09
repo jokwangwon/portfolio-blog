@@ -1,0 +1,53 @@
+# ==========================================
+# 프로덕션 오버라이드 (GB10 홈서버 + Cloudflare Tunnel)
+#
+# 사용법:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#     --profile backend --profile frontend --profile gateway up -d --build
+#
+# 필수 환경변수 (.env): JWT_SECRET, PUBLIC_URL
+# 터널 연결 시 추가: CLOUDFLARE_TUNNEL_TOKEN (--profile deploy)
+# ==========================================
+
+services:
+  api-server:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in production (openssl rand -base64 64)}
+      APP_FRONTEND_URL: ${PUBLIC_URL:?PUBLIC_URL must be set (e.g. https://blog.example.com)}
+      APP_COOKIE_SECURE: "true"
+      CORS_ALLOWED_ORIGINS: ${PUBLIC_URL}
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    environment:
+      NODE_ENV: production
+      BACKEND_URL: http://api-server:8080
+    # dev 소스 마운트 제거 — 이미지에 빌드된 결과물 사용
+    volumes: !override []
+    restart: always
+
+  ai-backend:
+    restart: always
+
+  nginx:
+    restart: always
+
+  # Cloudflare Tunnel — 외부 노출 + TLS (도메인의 Zero Trust 대시보드에서
+  # Public Hostname → http://nginx:80 으로 라우팅 설정)
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: portfolio-tunnel
+    # 토큰 미설정 시 cloudflared가 기동 실패 로그를 남김 (Zero Trust > Tunnels 에서 발급)
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - nginx
+    networks:
+      - portal-network
+    restart: always
+    profiles:
+      - deploy
