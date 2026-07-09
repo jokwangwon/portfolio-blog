@@ -236,6 +236,7 @@ Set-Cookie: refresh_token=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/
 | DELETE | `/posts/{postId}/comments/{id}` | USER+ | 작성자 본인 또는 ADMIN |
 | POST | `/posts/{id}/like` | USER+ | |
 | DELETE | `/posts/{id}/like` | USER+ | |
+| POST | `/ai/summarize` | USER+ | 블로그 글 요약 생성 |
 
 ### 관리자 전용 (ADMIN)
 
@@ -970,6 +971,68 @@ Content-Type: application/json
 |-----------|------|-----------|
 | `INTERNAL_ERROR` | 500 | 서버 내부 오류 (스택 트레이스 미노출) |
 | `SERVICE_UNAVAILABLE` | 503 | 외부 서비스 연결 실패 |
+
+---
+
+## 6B. AI 기능 엔드포인트
+
+### POST /ai/summarize (블로그 글 요약 생성)
+
+**설명**: LLM(Gemini/Ollama)을 사용하여 블로그 글 본문을 자동 요약합니다.
+Langfuse를 통한 LLM 호출 추적(Observability)을 지원합니다.
+
+**인증**: Bearer Token 필수 (USER+)
+
+**Request**:
+```json
+{
+  "content": "블로그 글 본문 (필수, @NotBlank)",
+  "title": "글 제목 (선택)",
+  "maxLength": 200
+}
+```
+
+| 필드 | 타입 | 필수 | 기본값 | 설명 |
+|------|------|------|--------|------|
+| content | String | O | - | 요약 대상 본문 텍스트 |
+| title | String | X | null | 요약 품질 향상을 위한 글 제목 |
+| maxLength | int | X | 200 | 최대 요약 글자 수 |
+
+**Response** (200 OK):
+```json
+{
+  "summary": "AI가 생성한 요약문",
+  "provider": "gemini",
+  "durationMs": 1523
+}
+```
+
+**에러**:
+| HTTP | errorCode | 설명 |
+|------|-----------|------|
+| 400 | VALIDATION_FAILED | content가 비어있을 때 |
+| 401 | UNAUTHORIZED | 인증 토큰 없음/만료 |
+| 503 | SERVICE_UNAVAILABLE | LLM 제공자 연결 실패 |
+
+**기술 스택**:
+- LangChain4j (`dev.langchain4j:langchain4j:0.36.2`)
+- Google Gemini (`langchain4j-google-ai-gemini`) 또는 Ollama (`langchain4j-ollama`)
+- Langfuse Java SDK (`io.langfuse:langfuse-java:0.0.7`) — LLM 호출 추적
+
+**설정** (`application-dev.yml`):
+```yaml
+ai:
+  provider: gemini          # gemini | ollama
+  gemini-api-key: ${GEMINI_API_KEY}
+  gemini-model: gemini-1.5-flash
+  ollama-host: http://localhost:11434
+  ollama-model: llama3
+
+langfuse:
+  public-key: ${LANGFUSE_PUBLIC_KEY:}
+  secret-key: ${LANGFUSE_SECRET_KEY:}
+  host: https://cloud.langfuse.com
+```
 
 ---
 

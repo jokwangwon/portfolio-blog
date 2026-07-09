@@ -1,4 +1,8 @@
 spring:
+  # Dev startup optimization
+  main:
+    lazy-initialization: true
+
   # DataSource
   datasource:
     url: jdbc:postgresql://${PORTAL_DB_HOST:localhost}:${PORTAL_DB_PORT:5432}/${PORTAL_DB_NAME:portal_db}
@@ -6,10 +10,10 @@ spring:
     password: ${PORTAL_DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 20000
-      idle-timeout: 600000
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 5000
+      idle-timeout: 300000
       max-lifetime: 1800000
 
   # JPA
@@ -19,6 +23,34 @@ spring:
       hibernate:
         format_sql: true
 
+  # Flyway — dev에서 validate 비활성화 (prod/CI에서는 application.yml의 true 유지)
+  flyway:
+    validate-on-migrate: false
+
+# OAuth2 Social Login
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${OAUTH_GOOGLE_CLIENT_ID:not-configured}
+            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET:not-configured}
+            scope: email,profile
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+          github:
+            client-id: ${OAUTH_GITHUB_CLIENT_ID:not-configured}
+            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET:not-configured}
+            scope: user:email,read:user
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+
+# AI Backend (내부 서비스)
+ai-backend:
+  url: ${AI_BACKEND_URL:http://localhost:8081}
+
+# Frontend URL (OAuth2 callback redirect)
+app:
+  frontend-url: ${APP_FRONTEND_URL:http://localhost:3000}
+
 # JWT Configuration
 jwt:
   secret: ${JWT_SECRET:your-secret-key-here-minimum-256-bits-recommended-change-this-in-production}
@@ -27,17 +59,23 @@ jwt:
 
 # CORS Configuration
 cors:
-  allowed-origins: http://localhost:3000,http://localhost:5173
+  allowed-origins: http://localhost:3000,http://localhost:5173,http://100.102.41.122:3000
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
   allowed-headers: "*"
   allow-credentials: true
 
-# Logging
+# Logging — dev 최적화 (TRACE→DEBUG, 보안 민감 파라미터 로그 제거)
 logging:
   level:
-    org.springframework.security: TRACE
+    org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
+
+# Service Health Check — dev에서 비활성화 (외부 서비스 없을 때 타임아웃 방지)
+module:
+  registry:
+    health-check:
+      enabled: false
 
 # SpringDoc OpenAPI
 springdoc:

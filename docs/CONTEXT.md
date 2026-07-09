@@ -3,61 +3,79 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-03-30 (세션 #3)
+**최종 업데이트**: 2026-07-09 (세션 #19)
 
 ---
 
 ## 🎯 현재 프로젝트 상태
 
 ### Phase
-**Phase 1: 백엔드 개발** (진행 중 ~30%)
+**Phase 1B: 프론트엔드 개발** (진행 중)
 
-### 마지막 작업 (세션 #2, 2026-03-26)
-- Pixel Office 아이디어 구체화 및 설계 문서 작성
-- ADR-005 (PixiJS 기술 선택) 작성
-- 문서 일관성 분석 → 7개 문제 중 4개 해결
-- 누락 ADR 3개 (002, 003, 004) 생성
+### 마지막 작업 (세션 #19, 2026-07-09 — 약 3개월 중단 후 재개)
+- **Docker 29 호환성 복구**: Testcontainers 1.19.3 → 2.0.5 (백엔드 통합 테스트 30개 복구, 전체 131개 통과)
+- **프론트엔드 취약점 정리**: npm audit 27건 → 2건, next 16.2.10 업그레이드 (테스트 107개 + 빌드 통과)
+- **docker-compose 정리**: FastAPI 라벨 수정, 미존재 ai-benchmark-api 서비스 주석 처리
+- 미기록 세션 #18 (2026-04-06) 이력 복원: 관리자 Pixel Office SSE + hardening 완료 확인
 
-### 완료된 개발 (세션 #1, 2026-01-07)
-- Spring Boot 멀티 모듈 프로젝트 생성 (7개 모듈)
-- JPA 엔티티 전체 구현 (User, Blog, Benchmark 도메인)
-- Spring Security + JWT 인증 구현
-- 인증 API (회원가입, 로그인, 토큰 갱신, 로그아웃)
-- Docker Compose 설정 (PostgreSQL + TimescaleDB)
+### 직전 작업 (세션 #17–#18, 2026-04-06)
+- **pixel-agents 렌더링 엔진 이식 완료**: PNG 에셋 54개 + 엔진 19파일 + assetLoader + usePixelOffice 어댑터
+- **백엔드 보안 정비**: module-registry GET 인증 추가, AiClient CircuitBreaker/Retry, 벤치마크 @Deprecated
+- **관리자 /admin/office 완료**: 실시간 Hook SSE + 이벤트 로그 사이드바 + 실제 타임랩스(Git 이력) + 커밋 시각화
+
+### 완료된 개발
+
+#### Phase 1A (백엔드) — 완료 ✅
+- Spring Boot 멀티 모듈 프로젝트 (7개 모듈), JPA 엔티티, Security+JWT, Auth API — 세션 #1
+- Blog CRUD, Auth Cookie 리팩토링, Flyway V2-V5 — 세션 #5
+- 서비스 레이어 단위 테스트 69개 + Health Check + JSON 로깅 — 세션 #6
+- module-registry + Controller 테스트 (총 90개) — 세션 #7
+- ServiceHealthChecker + Nginx Gateway + Sentry (총 95개) — 세션 #8
+- 통합 테스트 28개 (Testcontainers), 전체 123개 — 세션 #9
+- JWT jti claim, Flyway 통합, Dockerfile, docker-compose 기동 테스트 — 세션 #10
+
+#### Phase 1B (프론트엔드) — 진행 중
+- Next.js 16.2.1 Shell App + TailwindCSS v4 + Redux Toolkit + TanStack Query — 세션 #10
+- Shell: Header, Footer, ShellLayout, AuthProvider, Providers, API Client — 세션 #10
+- Auth: 로그인, 회원가입 페이지 — 세션 #10
+- Blog: 목록, 상세(마크다운 렌더링), 카테고리 필터, 페이지네이션 — 세션 #10
+- **shadcn/ui v4 (base-nova) 디자인 시스템 도입 — 세션 #11**
+- **블로그 에디터 (생성/수정/삭제) CRUD 완성 — 세션 #11**
+- **블로그 UI 디자인 세분화 문서 작성 — 세션 #11**
+- **Blog 고도화: 좋아요/댓글/검색 — 세션 #12**
+- **프론트엔드 테스트 57개 (Vitest + RTL + MSW) — 세션 #12**
+- **OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD + 프론트 UI) — 세션 #12**
 
 ### 현재 상황
-**아키텍처 전환 완료**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006).
-백엔드 인증 기능까지 구현 완료. Portal API 리네이밍 + Service Registry 구현 필요.
-프론트엔드/AI API 미착수.
+**디자인 강화 3-Stage 전체 완료** (Stage 1 마이크로 인터랙션 ✅ + Stage 2 3D Hero ✅ + Stage 3 Pixel Office ✅) + 관리자 office(SSE)까지 완료. 세션 #19에서 중단 기간 발생한 환경 호환성 문제(Docker 29)와 보안 취약점을 정리하여 **백엔드 131개 + 프론트엔드 107개 테스트 전부 통과** 상태.
+
+**브랜치/PR 정리 완료 (세션 #19)**: PR #8을 main에 병합, 중복 PR #4 close, 구계보 PR #2 close(댓글 UI만 백로그로 이관), develop을 main으로 리셋. 상세는 `docs/sessions/SESSION_2026-07-09.md` 참조.
 
 ---
 
 ## 📋 다음 할 일 (Next Actions)
 
-### 즉시 (Immediate)
-1. **아키텍처 전환 적용**
-   - [x] 아키텍처 문서 재작성 (blog-architecture-context.md, depth-2)
-   - [x] ADR-006 작성 (독립 서비스 전환 결정)
-   - [x] Portal API 리네이밍 (blog → portal) — 세션 #4에서 완료
-   - [ ] module-registry 신규 생성
-   - [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
-   - [ ] Nginx API Gateway 설정
+1. **댓글 UI 개선 이식 (PR #2에서 살린 백로그)**
+   - [ ] 아바타, 인라인 삭제 확인, sonner 토스트 알림을 현행 glassmorphism 댓글 컴포넌트에 맞게 재이식
+   - 참조 커밋: `78fabf4` (댓글 UI), `27d8a44` (sonner 설정 부분) — 구계보라 직접 cherry-pick 시 충돌, 재구현 권장
 
-2. **데이터베이스 분리 + 초기화**
-   - [x] portal_db / ai_bench_db 물리 분리 (서비스별 독립 PostgreSQL 컨테이너) — 세션 #4에서 완료
-   - [ ] Flyway 마이그레이션 (V1__init_portal_schema.sql)
+2. **AI Benchmark API**
+   - [ ] FastAPI 독립 프로젝트 생성 (`ai-benchmark-api/`) → docker-compose 주석 해제
    - [ ] AI Benchmark DB 스키마 (Alembic)
 
-### 다음 (Next)
-3. **기본 인프라**
-   - [ ] Logback JSON 로깅 설정
-   - [ ] Sentry 연동 (무료 티어)
-   - [ ] Health Check 엔드포인트 + Service Contract 구현
+3. **ai-backend 품질**
+   - [ ] pytest 테스트 작성 (현재 0개)
+   - [ ] CI에 ai-backend 잡 추가
 
-4. **프론트엔드 + AI API**
-   - [ ] Next.js Shell App 프로젝트 생성
-   - [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
-   - [ ] OAuth2 소셜 로그인 (Google, GitHub)
+4. **보안 후속**
+   - [ ] admin office SSE 라우트 서버측 인증 (현재 dev 전용 `NODE_ENV` 가드만)
+
+5. **Service Registry UI**
+   - [ ] 등록된 서비스 목록 대시보드
+
+6. **프론트엔드 테스트 강화**
+   - [ ] 커버리지 측정 (현재 107개 → 목표 70%+)
+   - [ ] E2E 테스트 도입 검토
 
 ---
 
@@ -75,6 +93,8 @@
 | 6 | JWT Refresh Token Rotation | 2026-01-07 | [ADR-003](decisions/ADR-003-jwt-refresh-token-rotation.md) |
 | 7 | PixiJS + @pixi/react 채택 (Pixel Office) | 2026-03-26 | [ADR-005](decisions/ADR-005-pixel-office-tech-stack.md) |
 | 8 | **독립 서비스 아키텍처 전환** | 2026-03-30 | [ADR-006](decisions/ADR-006-microservice-architecture.md) |
+| 9 | **멀티 에이전트 합의 시스템** | 2026-03-30 | [ADR-007](decisions/ADR-007-multi-agent-consensus-system.md) |
+| 10 | **Pixel Office Canvas 2D MVP 전환** | 2026-04-06 | [ADR-008](decisions/ADR-008-pixel-office-canvas2d-mvp.md) |
 
 ---
 
@@ -129,24 +149,15 @@
 
 ## 🚧 진행 중인 이슈
 
-### 1. 미커밋 변경사항
-- `backend/api-server/build.gradle.kts` — JPA 설정 보완
-- `PortfolioPortalApplication.java` — 리네이밍 완료 (blog→portal)
-- `application.yml` — 수정됨
-- `SecurityConfig.java` — 수정됨
+### 1. ~~브랜치/PR 중복~~ (세션 #19에서 해결)
+- 히스토리 재작성으로 구계보(develop)와 신계보(main/현 브랜치)가 공존했음
+- 정리: PR #8 → main 병합 / PR #4 close(중복) / PR #2 close(대체됨, 댓글 UI만 백로그) / develop을 main으로 리셋
 
-### 2. 미추적 신규 문서
-- `docs/architecture/pixel-office-design.md`
-- `docs/decisions/ADR-002, 003, 004, 005, 006`
-- `docs/sessions/SESSION_2026-03-26.md`
+### 2. 잔여 npm 취약점 2건 (moderate)
+- next 내부 고정 postcss <8.5.10 (GHSA-qx2v-qp2m-jg93) — next 릴리스 대기, 실질 위험 낮음
 
-### 3. 아키텍처 전환 적용 작업
-- [x] 문서 재작성 (blog-architecture-context.md, depth-2, ADR-006)
-- [x] 코드 리네이밍 (blog → portal) — 세션 #4에서 완료
-- [ ] module-registry 생성
-- [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
-- [ ] Nginx Gateway 설정
-- [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
+### 3. admin office SSE 무인증
+- `frontend/app/api/admin/office/events/route.ts`는 dev 전용 가드(`NODE_ENV`)만 존재, 서버측 인증 없음
 
 ---
 
@@ -197,19 +208,24 @@
 - [x] Spring Security + JWT 인증
 - [x] 인증 API (회원가입/로그인/갱신/로그아웃)
 
-### 미완료
-- [x] Portal API 리네이밍 — 세션 #4에서 완료
-- [ ] module-registry 생성
-- [ ] module-benchmark 제거 (ai-benchmark-api/ 독립 서비스로 완전 분리)
-- [ ] Nginx API Gateway 설정
-- [x] DB 물리 분리 (portal-db:5432 + ai-bench-db:5433) — 세션 #4에서 완료
-- [ ] Flyway 마이그레이션 (V1__init_portal_schema.sql)
-- [ ] 구조화된 JSON 로깅 (Logback)
-- [ ] Sentry 연동
-- [ ] Health Check + Service Contract 구현
-- [ ] Next.js Shell App 프로젝트 생성
+### Phase 1A (완료) ✅
+- [x] Spring Boot 멀티 모듈, JPA 엔티티, Security+JWT, Auth API, Blog CRUD
+- [x] module-registry, ServiceHealthChecker, Health Check, Service Contract
+- [x] Logback JSON 로깅, Sentry 연동
+- [x] Flyway V1 통합, Dockerfile, docker-compose 기동, JWT jti
+- [x] 123개 테스트 (단위 95 + 통합 28)
+
+### Phase 1B (진행 중)
+- [x] Next.js Shell App 프로젝트 생성 + 기본 레이아웃 — 세션 #10
+- [x] Auth 페이지 (로그인, 회원가입) — 세션 #10
+- [x] Blog 조회 (목록, 상세, 카테고리 필터, 페이지네이션) — 세션 #10
+- [x] shadcn/ui 디자인 시스템 도입 (11개 컴포넌트) — 세션 #11
+- [x] Blog 에디터 (생성/수정/삭제, PostEditor 컴포넌트) — 세션 #11
+- [x] Blog 고도화 (좋아요/댓글/검색) — 세션 #12
+- [x] 프론트엔드 테스트 57개 (Vitest + RTL + MSW) — 세션 #12
+- [x] OAuth2 소셜 로그인 Google/GitHub — 세션 #12
 - [ ] AI Benchmark API (FastAPI) 독립 프로젝트 생성
-- [ ] OAuth2 소셜 로그인
+- [ ] Service Registry UI 대시보드
 
 ---
 
@@ -234,33 +250,63 @@
 
 ## 📝 마지막 대화 요약
 
-### 세션 #2 (2026-03-26)
-- Pixel Office 설계 완료 (PixiJS + @pixi/react)
-- 문서 일관성 분석 → 7개 문제 중 4개 해결
-- 누락 ADR 3개 생성, 세션 로그 체계 복구
+### 세션 #11 (2026-03-31)
+- shadcn/ui v4 (base-nova) 디자인 시스템 도입 (11개 컴포넌트)
+- Blog 에디터 (PostEditor + 생성/수정 라우트 + 삭제 Dialog)
+- Blog CRUD 완성 (API 함수 + Mutation hooks)
 
-### 세션 #3 (2026-03-30)
-- CONTEXT.md 현행화
-- **아키텍처 전환**: 모듈러 모놀리스 → 독립 서비스 + 중앙 포털 (ADR-006)
-- 3개 문서 전면 재작성 (blog-architecture-context.md, depth-2, ADR-006)
-- INDEX.md, CONTEXT.md, decisions/README.md 갱신
+### 세션 #12 (2026-03-31)
+- Blog 고도화: 좋아요/댓글/검색 (LikeButton, CommentSection, SearchBar)
+- Vitest + RTL + MSW 프론트엔드 테스트 57개
+- OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD 5개 + 프론트 UI)
+- 모노레포 정리, 시스템 분석 8.3/10
+
+### 세션 #13–#14 (2026-04-02)
+- 하네스 엔지니어링 6개 Layer 전수 점검 (모두 정상)
+- OAuth2 소셜 로그인 4건 버그 수정 (CRITICAL 2, HIGH 1, MEDIUM 1)
+- `.env.local` 환경변수 관리 체계 구축
+- 이슈 보고서 문서화 (`docs/review/oauth2-issue-report.md`)
+- 블로그 에디터 3건 수정: 한글 slug 생성, Tiptap SSR hydration, 슬래시 명령어 "/" 잔존
+
+### 세션 #15 (2026-04-05)
+- 기획 문서 전수 점검 (14개 설계 문서, 구현율 55-60%)
+- 3-Stage 디자인 강화 통합 설계 (`design-enhancement.md`)
+- **Stage 1 완료**: framer-motion, 스크롤 애니메이션 7개 섹션, 마우스 glow, 배경 메쉬 drift, 텍스트 그라데이션
+- 테스트 10개 추가 (총 67개)
+
+### 세션 #16 (2026-04-06)
+- pixel-agents 분석 + 3+1 멀티 에이전트 합의 → ADR-008 (Canvas 2D MVP)
+- Pixel Office MVP 엔진 구현 (39 테스트, TDD)
+- 디자인 시스템 재설계 (SpriteData, Colorize, 어두운 팔레트)
+
+### 세션 #17 (2026-04-06)
+- **pixel-agents 렌더링 엔진 이식**: PNG 에셋 54개 + pixel-engine/ 19파일 + assetLoader + usePixelOffice
+- **백엔드 보안 정비**: module-registry GET 인증, AiClient CircuitBreaker/Retry, 벤치마크 @Deprecated
+- 84개 테스트 통과, Next.js 빌드 성공
+- CREDITS.md MIT 라이선스 고지
+
+### 세션 #18 (2026-04-06, 로그 누락 — #19에서 복원)
+- 관리자 /admin/office: 실시간 Hook SSE + 이벤트 로그 사이드바
+- Pixel Office hardening: 실제 타임랩스(Git 이력), Hook 보안, 테스트, 커밋 시각화
+- 줌/팬 UX 수정 (auto-fit, DPR, 휠 passive listener)
+
+### 세션 #19 (2026-07-09)
+- **Docker 29 호환**: Testcontainers 2.0.5 업그레이드 → 백엔드 통합 테스트 복구 (131개 전부 통과)
+- **취약점 정리**: npm audit 27→2, next 16.2.10 (프론트 107개 테스트 + 빌드 통과)
+- docker-compose 정리 (FastAPI 라벨, 미존재 ai-benchmark-api 주석 처리)
+- 브랜치/PR 중복 문제 발견 및 문서화
 
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### 우선 작업: 아키텍처 전환 코드 적용
-1. Portal API 리네이밍 (blog → portal, 패키지명/프로젝트명)
-2. module-registry 신규 생성 (ServiceRegistryEntry, ServiceCacheEntry)
-3. module-benchmark 독립 서비스로 분리 → ai-benchmark-api/
-4. Nginx API Gateway 설정 (docker-compose에 추가)
-5. DB 분리: portal_db + ai_bench_db 생성
-
-### 이후 우선순위
-1. Flyway 마이그레이션 (V1__init_portal_schema.sql)
-2. Service Contract 구현 (/health, /api/summary)
-3. 구조화된 JSON 로깅 설정 (Logback)
-4. Next.js Shell App 프로젝트 생성
+### 다음 세션(#20) 우선순위
+1. **PR/브랜치 정리** (같은 브랜치 PR 2개 중복 — 사용자 결정 필요)
+2. ai-backend pytest + CI 잡 추가
+3. admin office SSE 서버측 인증
+4. 커서 트레일 + 벤치마크 시각화 (잔여 디자인 항목)
+5. AI Benchmark API (FastAPI)
+6. Service Registry UI 대시보드
 
 ---
 

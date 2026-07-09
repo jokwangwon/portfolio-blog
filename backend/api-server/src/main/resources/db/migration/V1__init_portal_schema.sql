@@ -1,26 +1,22 @@
 -- ==========================================
--- 3D Portfolio Blog Database Schema
--- Database: PostgreSQL 15 + TimescaleDB Extension
--- Migration: V1 - Initial Schema
+-- Portal Database Schema
+-- Database: PostgreSQL 15
+-- Migration: V1 - Initial Portal Schema
 -- ==========================================
-
--- TimescaleDB Extension 활성화
-CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 -- ==========================================
 -- 1. 사용자 및 인증
 -- ==========================================
 
--- Users 테이블
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     username VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,  -- BCrypt 해시
-    role VARCHAR(20) NOT NULL DEFAULT 'USER',  -- USER, ADMIN
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'USER',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    deleted_at TIMESTAMP,  -- Soft Delete
+    deleted_at TIMESTAMP,
 
     CONSTRAINT users_email_check CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
     CONSTRAINT users_role_check CHECK (role IN ('USER', 'ADMIN'))
@@ -30,12 +26,11 @@ COMMENT ON TABLE users IS '사용자 테이블';
 COMMENT ON COLUMN users.password IS 'BCrypt 해시된 비밀번호';
 COMMENT ON COLUMN users.deleted_at IS 'Soft Delete 타임스탬프';
 
--- Refresh Tokens 테이블 (JWT Refresh Token Rotation)
 CREATE TABLE refresh_tokens (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     token VARCHAR(500) NOT NULL UNIQUE,
-    token_family VARCHAR(100) NOT NULL,  -- Rotation Family ID
+    token_family VARCHAR(100) NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     revoked BOOLEAN NOT NULL DEFAULT FALSE,
     revoked_at TIMESTAMP,
@@ -48,11 +43,10 @@ CREATE TABLE refresh_tokens (
 COMMENT ON TABLE refresh_tokens IS 'JWT Refresh Token 저장소';
 COMMENT ON COLUMN refresh_tokens.token_family IS 'Token Rotation Family ID (재사용 감지용)';
 
--- OAuth Accounts 테이블 (소셜 로그인)
 CREATE TABLE oauth_accounts (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    provider VARCHAR(20) NOT NULL,  -- GOOGLE, GITHUB, KAKAO
+    provider VARCHAR(20) NOT NULL,
     provider_id VARCHAR(255) NOT NULL,
     email VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -69,7 +63,6 @@ COMMENT ON TABLE oauth_accounts IS 'OAuth2 소셜 로그인 연동 정보';
 -- 2. 블로그 콘텐츠
 -- ==========================================
 
--- Categories 테이블
 CREATE TABLE categories (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
@@ -80,7 +73,6 @@ CREATE TABLE categories (
 
 COMMENT ON TABLE categories IS '블로그 카테고리';
 
--- Tags 테이블
 CREATE TABLE tags (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
@@ -90,22 +82,21 @@ CREATE TABLE tags (
 
 COMMENT ON TABLE tags IS '블로그 태그';
 
--- Posts 테이블
 CREATE TABLE posts (
     id BIGSERIAL PRIMARY KEY,
     author_id BIGINT NOT NULL,
     category_id BIGINT,
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,  -- Markdown 형식
-    excerpt TEXT,  -- 요약문 (최대 200자)
-    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',  -- DRAFT, PUBLISHED, ARCHIVED
+    content TEXT NOT NULL,
+    excerpt TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
     view_count INT NOT NULL DEFAULT 0,
     like_count INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     published_at TIMESTAMP,
-    deleted_at TIMESTAMP,  -- Soft Delete
+    deleted_at TIMESTAMP,
 
     CONSTRAINT fk_posts_author FOREIGN KEY (author_id)
         REFERENCES users(id) ON DELETE CASCADE,
@@ -121,7 +112,6 @@ COMMENT ON COLUMN posts.content IS 'Markdown 형식 콘텐츠';
 COMMENT ON COLUMN posts.excerpt IS '요약문 (최대 200자)';
 COMMENT ON COLUMN posts.deleted_at IS 'Soft Delete 타임스탬프';
 
--- Post-Tag 중간 테이블 (N:M 관계)
 CREATE TABLE post_tags (
     post_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
@@ -135,16 +125,15 @@ CREATE TABLE post_tags (
 
 COMMENT ON TABLE post_tags IS '게시글-태그 관계 테이블 (N:M)';
 
--- Comments 테이블
 CREATE TABLE comments (
     id BIGSERIAL PRIMARY KEY,
     post_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
-    parent_id BIGINT,  -- 답글인 경우 부모 댓글 ID
+    parent_id BIGINT,
     content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    deleted_at TIMESTAMP,  -- Soft Delete
+    deleted_at TIMESTAMP,
 
     CONSTRAINT fk_comments_post FOREIGN KEY (post_id)
         REFERENCES posts(id) ON DELETE CASCADE,
@@ -157,102 +146,88 @@ CREATE TABLE comments (
 COMMENT ON TABLE comments IS '댓글 테이블 (계층 구조 지원)';
 COMMENT ON COLUMN comments.parent_id IS '답글인 경우 부모 댓글 ID (Self-Referencing)';
 
+CREATE TABLE likes (
+    user_id BIGINT NOT NULL,
+    post_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    PRIMARY KEY (user_id, post_id),
+    CONSTRAINT fk_likes_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_likes_post FOREIGN KEY (post_id)
+        REFERENCES posts(id) ON DELETE CASCADE
+);
+
+COMMENT ON TABLE likes IS '게시글 좋아요 (사용자당 1회)';
+
 -- ==========================================
--- 3. AI 벤치마크
+-- 3. Service Registry (ADR-006)
 -- ==========================================
 
--- AI Models 테이블
-CREATE TABLE ai_models (
+CREATE TABLE service_registry (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,  -- e.g., Llama 3.1 8B
-    slug VARCHAR(255) NOT NULL UNIQUE,
-    type VARCHAR(50) NOT NULL,  -- LLM, Diffusion, etc.
-    quantization VARCHAR(20),  -- Q4, Q5, F16, etc.
-    file_path VARCHAR(500) NOT NULL,
-    file_size BIGINT NOT NULL,  -- bytes
+    service_name VARCHAR(100) UNIQUE NOT NULL,
+    display_name VARCHAR(200) NOT NULL,
+    base_url VARCHAR(500) NOT NULL,
+    health_path VARCHAR(200) NOT NULL DEFAULT '/health',
+    summary_path VARCHAR(200) NOT NULL DEFAULT '/api/summary',
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+COMMENT ON TABLE service_registry IS '독립 서비스 등록 정보 (Service Contract)';
+
+CREATE TABLE service_cache (
+    id BIGSERIAL PRIMARY KEY,
+    service_name VARCHAR(100) NOT NULL REFERENCES service_registry(service_name),
+    status VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
+    summary_data JSONB,
+    last_checked_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    response_time_ms INTEGER,
+    error_message TEXT,
+    consecutive_failures INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-COMMENT ON TABLE ai_models IS 'AI 모델 메타데이터';
-COMMENT ON COLUMN ai_models.quantization IS '양자화 방식 (Q4, Q5, F16 등)';
-COMMENT ON COLUMN ai_models.file_size IS '모델 파일 크기 (bytes)';
-
--- Benchmark Results 테이블
-CREATE TABLE benchmark_results (
-    id BIGSERIAL PRIMARY KEY,
-    model_id BIGINT NOT NULL,
-    user_id BIGINT NOT NULL,
-    prompt_tokens INT NOT NULL,
-    generated_tokens INT NOT NULL,
-    total_duration NUMERIC(10,3) NOT NULL,  -- seconds
-    tokens_per_second NUMERIC(8,2) NOT NULL,
-    first_token_latency NUMERIC(8,3) NOT NULL,  -- TTFT in seconds
-    avg_gpu_utilization NUMERIC(5,2),  -- percentage
-    max_memory_used BIGINT,  -- MB
-    avg_temperature NUMERIC(5,2),  -- celsius
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-
-    CONSTRAINT fk_benchmark_model FOREIGN KEY (model_id)
-        REFERENCES ai_models(id) ON DELETE CASCADE,
-    CONSTRAINT fk_benchmark_user FOREIGN KEY (user_id)
-        REFERENCES users(id) ON DELETE CASCADE
-);
-
-COMMENT ON TABLE benchmark_results IS 'AI 모델 벤치마크 결과';
-COMMENT ON COLUMN benchmark_results.first_token_latency IS 'Time To First Token (TTFT)';
-
--- GPU Metrics 테이블 (TimescaleDB Hypertable)
-CREATE TABLE gpu_metrics (
-    time TIMESTAMPTZ NOT NULL,  -- TimescaleDB time column
-    benchmark_id BIGINT NOT NULL,
-    gpu_utilization NUMERIC(5,2),  -- 0.00 ~ 100.00%
-    memory_used BIGINT,  -- MB
-    memory_total BIGINT,  -- MB
-    temperature NUMERIC(5,2),  -- celsius
-    power_draw NUMERIC(7,2),  -- Watts
-    fan_speed NUMERIC(5,2),  -- 0.00 ~ 100.00%
-
-    CONSTRAINT fk_gpu_metrics_benchmark FOREIGN KEY (benchmark_id)
-        REFERENCES benchmark_results(id) ON DELETE CASCADE
-);
-
-COMMENT ON TABLE gpu_metrics IS 'GPU 메트릭 시계열 데이터 (TimescaleDB Hypertable)';
-COMMENT ON COLUMN gpu_metrics.time IS 'TimescaleDB time column (TIMESTAMPTZ)';
-
--- TimescaleDB Hypertable 생성
-SELECT create_hypertable('gpu_metrics', 'time');
+COMMENT ON TABLE service_cache IS '서비스 상태 캐시 (폴링 결과 저장)';
+COMMENT ON COLUMN service_cache.status IS 'UP, DOWN, DEGRADED, UNKNOWN';
+COMMENT ON COLUMN service_cache.consecutive_failures IS '연속 실패 횟수 (3회 시 is_active=false)';
 
 -- ==========================================
--- 4. 초기 데이터 (Seed Data)
+-- 4. 인덱스
 -- ==========================================
 
--- 기본 카테고리 생성
-INSERT INTO categories (name, slug, description) VALUES
-('Technology', 'technology', 'Tech-related articles and tutorials'),
-('Algorithm', 'algorithm', 'Algorithm study and problem solving'),
-('Project', 'project', 'Personal project showcase'),
-('Troubleshooting', 'troubleshooting', 'Error fixing and solutions');
+-- users
+CREATE INDEX idx_users_email ON users(email) WHERE deleted_at IS NULL;
+CREATE INDEX idx_users_username ON users(username) WHERE deleted_at IS NULL;
 
--- 기본 태그 생성
-INSERT INTO tags (name, slug) VALUES
-('React', 'react'),
-('TypeScript', 'typescript'),
-('Python', 'python'),
-('Spring Boot', 'spring-boot'),
-('FastAPI', 'fastapi'),
-('AI', 'ai'),
-('Three.js', 'threejs');
+-- refresh_tokens
+CREATE UNIQUE INDEX idx_refresh_tokens_token_active ON refresh_tokens(token) WHERE NOT revoked;
+CREATE INDEX idx_refresh_tokens_family ON refresh_tokens(token_family);
+CREATE INDEX idx_refresh_tokens_user ON refresh_tokens(user_id, expires_at DESC);
 
--- 관리자 계정 생성 (비밀번호: Admin123!)
--- BCrypt 해시: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
-INSERT INTO users (email, username, password, role) VALUES
-('admin@example.com', 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN');
+-- oauth_accounts
+CREATE INDEX idx_oauth_user ON oauth_accounts(user_id);
+
+-- posts
+CREATE INDEX idx_posts_author ON posts(author_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_posts_category ON posts(category_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_posts_status ON posts(status, published_at DESC) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX idx_posts_slug ON posts(slug) WHERE deleted_at IS NULL;
+
+-- comments
+CREATE INDEX idx_comments_post_created ON comments(post_id, created_at ASC) WHERE deleted_at IS NULL;
+CREATE INDEX idx_comments_author ON comments(author_id);
+CREATE INDEX idx_comments_parent ON comments(parent_id);
+
+-- service_cache
+CREATE INDEX idx_service_cache_name ON service_cache(service_name, last_checked_at DESC);
 
 -- ==========================================
--- 5. 함수 및 트리거
+-- 5. 트리거 (updated_at 자동 갱신)
 -- ==========================================
 
--- updated_at 자동 업데이트 함수
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -261,50 +236,67 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Posts 테이블에 updated_at 트리거 적용
 CREATE TRIGGER update_posts_updated_at
     BEFORE UPDATE ON posts
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Comments 테이블에 updated_at 트리거 적용
 CREATE TRIGGER update_comments_updated_at
     BEFORE UPDATE ON comments
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
--- Users 테이블에 updated_at 트리거 적용
 CREATE TRIGGER update_users_updated_at
     BEFORE UPDATE ON users
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_service_registry_updated_at
+    BEFORE UPDATE ON service_registry
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- ==========================================
--- 6. 검증 쿼리 (마이그레이션 확인용)
+-- 6. Seed Data
 -- ==========================================
 
--- TimescaleDB Extension 확인
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_extension WHERE extname = 'timescaledb'
-    ) THEN
-        RAISE EXCEPTION 'TimescaleDB extension is not installed';
-    END IF;
-END $$;
+-- 카테고리
+INSERT INTO categories (name, slug, description) VALUES
+    ('Technology', 'technology', '기술 관련 글'),
+    ('Algorithm', 'algorithm', '알고리즘 학습 노트'),
+    ('Projects', 'projects', '프로젝트 소개'),
+    ('GB10 Lab', 'gb10-lab', 'Dell GB10 경험'),
+    ('DevOps', 'devops', 'CI/CD, 인프라 관련'),
+    ('AI & ML', 'ai-ml', 'AI/머신러닝 관련');
 
--- Hypertable 확인
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM timescaledb_information.hypertables
-        WHERE hypertable_name = 'gpu_metrics'
-    ) THEN
-        RAISE EXCEPTION 'gpu_metrics hypertable was not created';
-    END IF;
-END $$;
+-- 태그
+INSERT INTO tags (name, slug) VALUES
+    ('React', 'react'),
+    ('TypeScript', 'typescript'),
+    ('Python', 'python'),
+    ('Spring Boot', 'spring-boot'),
+    ('FastAPI', 'fastapi'),
+    ('AI', 'ai'),
+    ('Three.js', 'threejs'),
+    ('Java', 'java'),
+    ('Spring', 'spring'),
+    ('Next.js', 'nextjs'),
+    ('Docker', 'docker'),
+    ('PostgreSQL', 'postgresql'),
+    ('Rust', 'rust');
 
--- 테이블 개수 확인 (13개 테이블 + TimescaleDB 내부 테이블들)
+-- 관리자 계정 (비밀번호: Admin123!)
+INSERT INTO users (email, username, password, role) VALUES
+    ('admin@example.com', 'admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN');
+
+-- AI Benchmark 서비스 등록
+INSERT INTO service_registry (service_name, display_name, base_url, health_path, summary_path, is_active)
+VALUES ('ai-benchmark', 'AI 모델 벤치마크', 'http://ai-api-server:8000', '/health', '/api/summary', true);
+
+-- ==========================================
+-- 7. 검증
+-- ==========================================
+
 DO $$
 DECLARE
     table_count INT;
@@ -316,7 +308,7 @@ BEGIN
     AND table_name IN (
         'users', 'refresh_tokens', 'oauth_accounts',
         'categories', 'tags', 'posts', 'post_tags', 'comments',
-        'ai_models', 'benchmark_results', 'gpu_metrics'
+        'likes', 'service_registry', 'service_cache'
     );
 
     IF table_count != 11 THEN

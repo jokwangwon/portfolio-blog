@@ -40,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String authoritiesString = jwtTokenProvider.getAuthoritiesFromToken(jwt);
 
                 List<SimpleGrantedAuthority> authorities = Arrays.stream(authoritiesString.split(","))
+                        .filter(StringUtils::hasText)
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 

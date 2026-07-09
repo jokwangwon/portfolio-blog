@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Dev: Human-Readable Console -->
+    <springProfile name="dev">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+
+        <logger name="com.portfolio" level="DEBUG" />
+        <logger name="org.springframework.web" level="DEBUG" />
+    </springProfile>
+
+    <!-- Prod: Structured JSON -->
+    <springProfile name="prod">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdc>true</includeMdc>
+                <includeContext>false</includeContext>
+                <customFields>{"service":"portfolio-portal-api"}</customFields>
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <version>[ignore]</version>
+                    <levelValue>[ignore]</levelValue>
+                </fieldNames>
+            </encoder>
+        </appender>
+
+        <!-- Sentry Appender -->
+        <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+            <minimumEventLevel>WARN</minimumEventLevel>
+            <minimumBreadcrumbLevel>INFO</minimumBreadcrumbLevel>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE" />
+            <appender-ref ref="SENTRY" />
+        </root>
+
+        <logger name="com.portfolio" level="INFO" />
+    </springProfile>
+
+</configuration>

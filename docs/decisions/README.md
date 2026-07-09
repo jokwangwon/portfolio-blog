@@ -29,6 +29,7 @@
 | [ADR-004](ADR-004-test-strategy.md) | 테스트 전략 수립 | 2026-01-07 | ✅ Accepted | #testing #quality |
 | [ADR-005](ADR-005-pixel-office-tech-stack.md) | Pixel Office 2D 렌더링 기술 선택 | 2026-03-26 | ✅ Accepted | #frontend #pixel-art #pixi |
 | [ADR-006](ADR-006-microservice-architecture.md) | 독립 서비스 아키텍처 전환 | 2026-03-30 | ✅ Accepted | #architecture #microservice #db-separation |
+| [ADR-007](ADR-007-multi-agent-consensus-system.md) | 멀티 에이전트 합의 시스템 | 2026-03-30 | ✅ Accepted | #ai-agent #process #quality |
 
 ### 제안 중 (Proposed)
 없음
@@ -114,6 +115,11 @@
 **결정**: PixiJS + @pixi/react를 2D 렌더링 엔진으로 채택
 **이유**: React 아키텍처 일관성 (R3F와 동일 패턴), 번들 효율성, 적절한 추상화 수준
 **영향**: 기존 모듈 구조에 자연스럽게 삽입, 3D+2D WebGL 역량 동시 어필
+
+### ADR-007: 멀티 에이전트 합의 시스템
+**결정**: 검토 에이전트 1 + 분석 에이전트 3 (구현/품질/대안) 합의 프로토콜 채택
+**이유**: 세션 #4에서 3-에이전트 병렬 분석으로 18개 CRITICAL 이슈 탐지 — 단일 에이전트로는 불가능
+**영향**: 아키텍처 결정, SDD 검토, 보안 변경 시 교차 검증 필수화
 
 ---
 

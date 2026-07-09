@@ -15,12 +15,12 @@
 
 ```java
 // 현재 JWT 구조
-Access Token: 1시간 (short-lived)
+Access Token: 15분 (short-lived)
 Refresh Token: 7일 (long-lived)
 
 // 저장 위치
-Access Token → 로컬스토리지
-Refresh Token → 로컬스토리지
+Access Token → 클라이언트 메모리 (XSS 방지)
+Refresh Token → HttpOnly Cookie
 ```
 
 ### 1.2 보안 취약점
@@ -35,7 +35,7 @@ localStorage.getItem('refreshToken');  // 악성 스크립트가 탈취 가능
 ```
 Stateless JWT 특성:
 - Logout 해도 토큰은 만료 시간까지 유효
-- 토큰 탈취 시 1시간~7일 동안 악용 가능
+- 토큰 탈취 시 15분~7일 동안 악용 가능
 - 비밀번호 변경 시에도 기존 토큰 사용 가능
 ```
 
@@ -69,9 +69,9 @@ sequenceDiagram
     C->>A: POST /auth/login (username, password)
     A->>D: 사용자 검증
     A->>D: Refresh Token 저장
-    A->>C: Access Token (1시간) + Refresh Token (HttpOnly Cookie)
+    A->>C: Access Token (15분) + Refresh Token (HttpOnly Cookie)
 
-    Note over C: 1시간 후 Access Token 만료
+    Note over C: 15분 후 Access Token 만료
 
     C->>A: POST /auth/refresh (Cookie: refresh_token)
     A->>D: Refresh Token 검증 및 Blacklist 확인
@@ -143,13 +143,13 @@ public class JwtTokenProvider {
     private String secretKey;
 
     @Value("${jwt.access-token-expiration}")
-    private long accessTokenExpiration;  // 1시간 (3600000ms)
+    private long accessTokenExpiration;  // 15분 (900000ms)
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;  // 7일 (604800000ms)
 
     /**
-     * Access Token 생성 (1시간)
+     * Access Token 생성 (15분)
      */
     public String createAccessToken(Long userId, String username, String role) {
         Instant now = Instant.now();
@@ -621,9 +621,9 @@ export default apiClient;
 ### 5.1 HttpOnly Cookie (XSS 방지)
 ```
 Refresh Token → HttpOnly Cookie
-Access Token → 로컬스토리지 (1시간 후 자동 만료)
+Access Token → 클라이언트 메모리 (15분 후 자동 만료)
 
-→ XSS로 Access Token 탈취되어도 1시간만 유효
+→ XSS로 Access Token 탈취되어도 15분만 유효
 → Refresh Token은 JavaScript로 접근 불가
 ```
 
@@ -677,7 +677,7 @@ if (!isAllowedIp(request.getRemoteAddr(), oldToken.getUserId())) {
 ### 7.1 정상 흐름
 ```
 1. 로그인 → Access Token + Refresh Token 발급
-2. 1시간 후 Access Token 만료 → /auth/refresh 호출
+2. 15분 후 Access Token 만료 → /auth/refresh 호출
 3. 새로운 Access Token + Refresh Token 발급
 4. 기존 Refresh Token 무효화
 ```
@@ -724,7 +724,7 @@ Refresh Token → HttpOnly Cookie (XSS 방지)
 
 ### 예상 효과
 - ✅ XSS 공격 저항성 99% 향상
-- ✅ 토큰 탈취 피해 최소화 (1시간 이내)
+- ✅ 토큰 탈취 피해 최소화 (15분 이내)
 - ✅ 재사용 감지로 공격 조기 차단
 - ✅ 로그아웃 시 즉시 무효화
 

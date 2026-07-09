@@ -1,13 +1,12 @@
 # ADR-007: 멀티 에이전트 합의 기반 의사결정 시스템
 
-**Status**: Accepted
-**Date**: 2026-03-30
-**Deciders**: kwangwon
-**Tags**: ai-agent, process, quality, consensus
+**날짜**: 2026-03-30
+**상태**: ✅ Accepted
+**태그**: #ai-agent #process #quality
 
 ---
 
-## Context (배경)
+## Context
 
 단일 AI 에이전트가 코드 개발, 문서 검토, 기술적 의사결정을 수행할 때 다음 문제가 발생:
 
@@ -15,7 +14,7 @@
 2. **검증 부재**: 자기 출력을 자기가 검증하면 오류 탐지율이 낮음
 3. **세션 #4 경험**: 3개 병렬 분석 에이전트 + 관제 에이전트 패턴으로 18개 CRITICAL 이슈를 체계적으로 발견 — 단일 에이전트로는 불가능했을 교차 검증 효과 확인
 
-## Decision (결정)
+## Decision
 
 **검토 에이전트 1 + 개발/분석 에이전트 3** 구조를 공식 프로세스로 채택:
 
@@ -24,17 +23,10 @@
 - **Agent C (대안 탐색가)**: 대안 기술, 트레이드오프 관점
 - **Reviewer (검토 에이전트)**: 3개 출력 교차 비교 → 합의 도출 → 최종 판단
 
-### 적용 기준
+적용 기준: 아키텍처 결정, SDD 명세 검토, 보안 변경에 필수 적용.
+단순 코드 수정이나 버그 fix에는 적용하지 않음.
 
-| 적용 대상 | 에이전트 수 | 근거 |
-|---|---|---|
-| 아키텍처 결정 | 3+1 (필수) | 구현/품질/대안 관점 필요 |
-| SDD 명세 검토 | 3+1 (필수) | 교차 검증 효과 극대 |
-| 보안 변경 | 3+1 (필수) | 취약점 누락 방지 |
-| 일반 코드 수정 | 1 (직접) | 오버헤드 불필요 |
-| 버그 수정 | 1 (직접) | 오버헤드 불필요 |
-
-## Alternatives Considered (검토한 대안)
+## Alternatives Considered
 
 ### 1. 단일 에이전트 (현행 기본값)
 - **장점**: 빠름, 오버헤드 없음
@@ -51,7 +43,7 @@
 - **단점**: 합의 비용 급증, 컨텍스트 소모 과다
 - **기각 이유**: 3개가 비용 대비 효과 최적점 (수확 체감)
 
-## Consequences (영향)
+## Consequences
 
 ### 긍정적
 - CRITICAL 이슈 탐지율 향상 (세션 #4에서 입증)
@@ -66,18 +58,6 @@
 - 적용 기준 테이블을 명확히 정의하여 과잉 적용 방지
 - 단순 작업은 1-에이전트 직접 처리
 
-## Implementation (구현)
-
-- CLAUDE.md Section 2에 프로토콜 명시
-- 세션 #5에서 프로토콜 정의, 세션 #6~#12에서 실전 적용
-- Claude Code의 Agent 도구를 활용하여 병렬 에이전트 실행
-
-## References (참조)
-
-- [multi-agent-system-design.md](../architecture/multi-agent-system-design.md) — 상세 설계
-- CLAUDE.md Section 2 — 3+1 멀티 에이전트 합의 프로토콜
-- Session #4 (2026-03-30) — 최초 적용 및 효과 입증
-
 ---
 
-**Notes**: 세션 #4에서 3-에이전트 병렬 분석으로 18개 CRITICAL 이슈를 발견한 경험이 이 결정의 직접적 근거.
+**상세 설계**: [multi-agent-system-design.md](../architecture/multi-agent-system-design.md)

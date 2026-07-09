@@ -2,7 +2,7 @@
 
 > **프로젝트 문서 전체 구조 및 읽는 순서**
 
-**최종 업데이트**: 2026-03-30
+**최종 업데이트**: 2026-04-06
 
 ---
 
@@ -19,6 +19,8 @@
 
 ### 3. 기능 설계
 6. **[docs/architecture/pixel-office-design.md](architecture/pixel-office-design.md)** 🟠 - AI 픽셀 오피스 설계 (2D 가상 사무실 대시보드)
+7. **[docs/architecture/blog-ui-design.md](architecture/blog-ui-design.md)** 🟠 - Blog UI 디자인 명세 (컴포넌트, 레이아웃, 디자인 토큰)
+8. **[docs/architecture/portfolio-landing-design.md](architecture/portfolio-landing-design.md)** 🟠 - 포트폴리오 랜딩 페이지 설계 (Route Group 분리, 섹션 스펙)
 
 ### 4. 개선된 설계 (아키텍처 리뷰 반영)
 7. **[docs/architecture/database-consolidation-design.md](architecture/database-consolidation-design.md)** 🔴 - 서비스별 DB 물리 분리 설계
@@ -56,7 +58,11 @@ docs/
 │   ├── database-erd.md               # ERD 다이어그램
 │   ├── observability-design.md       # 🔴 Observability 설계
 │   ├── jwt-security-enhancement.md   # 🟠 JWT 보안 강화
-│   └── pixel-office-design.md        # 🟠 AI 픽셀 오피스 설계
+│   ├── pixel-office-design.md        # 🟠 AI 픽셀 오피스 설계
+│   ├── blog-ui-design.md             # 🟠 Blog UI 디자인 명세
+│   ├── portfolio-landing-design.md   # 🟠 포트폴리오 랜딩 페이지 설계
+│   ├── multi-agent-system-design.md  # 🟠 멀티 에이전트 합의 시스템 설계
+│   └── design-enhancement.md        # 🔴 3-Stage 디자인 강화 통합 설계
 │
 ├── api/                              # API 명세
 │   ├── API_SPECIFICATION.md          # API 엔드포인트 상세 명세
@@ -76,14 +82,17 @@ docs/
 │   ├── ADR-002-observability-first.md
 │   ├── ADR-003-jwt-refresh-token-rotation.md
 │   ├── ADR-004-test-strategy.md
-│   ├── ADR-005-pixel-office-tech-stack.md
-│   └── ADR-006-microservice-architecture.md
+│   ├── ADR-005-pixel-office-tech-stack.md  # Superseded by ADR-008
+│   ├── ADR-006-microservice-architecture.md
+│   ├── ADR-007-multi-agent-consensus-system.md
+│   └── ADR-008-pixel-office-canvas2d-mvp.md  # Canvas 2D MVP 전환
 │
 ├── sessions/                         # 세션별 작업 로그
 │   ├── README.md                     # 세션 로그 가이드
 │   ├── SESSION_2026-01-07.md         # 세션 #1 로그
 │   ├── SESSION_2026-03-26.md         # 세션 #2 로그
-│   └── SESSION_2026-03-30.md         # 세션 #3 로그
+│   ├── SESSION_2026-03-30.md         # 세션 #3~#8 로그
+│   └── SESSION_2026-03-31.md         # 세션 #9~#12 로그
 │
 └── history/                          # 과거 문서 (참고용)
     └── README.md                     # 아카이브 설명
@@ -146,6 +155,12 @@ architecture-review.md (검토 및 개선안)
 | 2026-03-26 | 누락 ADR 생성 (002, 003, 004) | `ADR-002`, `ADR-003`, `ADR-004` |
 | 2026-03-30 | CONTEXT.md 현행화, INDEX.md 갱신 | `CONTEXT.md`, `INDEX.md` |
 | 2026-03-30 | **아키텍처 전환** — 독립 서비스 + 중앙 포털 | `blog-architecture-context.md`, `depth-2`, `ADR-006` |
+| 2026-03-30 | Git 워크플로우 보완 + 멀티 에이전트 시스템 설계 | `DEVELOPMENT_GUIDE.md`, `multi-agent-system-design.md`, `ADR-007` |
+| 2026-03-31 | 프론트엔드 Phase 1B 진행, shadcn/ui 도입, Blog CRUD 완성 | `CONTEXT.md`, 세션 #10~#11 |
+| 2026-03-31 | Blog UI 디자인 명세 문서 작성 | `blog-ui-design.md` |
+| 2026-03-31 | Blog 고도화, 프론트엔드 테스트, OAuth2 소셜 로그인 | `SESSION_2026-03-31.md` |
+| 2026-04-01 | 포트폴리오 랜딩 설계, Route Group 분리 | `portfolio-landing-design.md`, `blog-ui-design.md` |
+| 2026-04-06 | **Pixel Office MVP 전환** — Canvas 2D + 규모 축소 (3+1 에이전트 합의) | `ADR-008`, `pixel-office-design.md`, `design-enhancement.md` |
 
 ---
 

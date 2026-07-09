@@ -2,7 +2,8 @@
 
 > Frontend Blog 모듈의 디자인 컨셉, 컴포넌트별 디자인 스펙, 레이아웃 구조, 디자인 토큰, 반응형 전략을 정의합니다.
 
-**최종 업데이트**: 2026-03-31 (세션 #12)
+**최종 업데이트**: 2026-04-01
+**관련 문서**: `portfolio-landing-design.md` (포트폴리오 랜딩), `light-mode-glass-design.md` (Glass 토큰)
 
 ---
 
@@ -29,8 +30,8 @@
 
 | 모드 | 전략 |
 |------|------|
-| **라이트 모드** | Warm Glass — 따뜻한 앰버 메쉬 위 반투명 유리 카드. `oklch(0.985 0.002 90)` 배경에 Glassmorphism 적용. 상세: `light-mode-glass-design.md` |
-| **다크 모드** | Cool Glass — 깊은 검정 배경 위 Blue/Cyan 메쉬 그라데이션, 반투명 유리 카드, hover 시 빛번짐. 강화 토큰 적용 (glass-bg 8%, border 15%, blur 16px). 상세: `light-mode-glass-design.md` |
+| **라이트 모드** | Notion/Vercel 스타일 — 순백 배경, 옅은 회색 카드, 얇은 테두리, 콘텐츠 중심의 깨끗한 종이 질감 |
+| **다크 모드** | Glassmorphism 강조 — 깊은 검정 배경 위 Blue/Cyan 메쉬 그라데이션, 반투명 유리 카드, hover 시 빛번짐 |
 
 ### 0.4 포인트 컬러: Trust Blue / Cyan
 
@@ -126,32 +127,18 @@
 | `--mesh-glow` | — | `oklch(0.35 0.10 215)` | 다크 메쉬 그라데이션 밝은 층 |
 | `--accent-ice` | `oklch(0.92 0.04 215)` | — | 라이트 미세 hover 힌트 |
 
-#### Glassmorphism 토큰 — 다크 모드 (Cool Glass)
-
-> 강화된 값 적용 (`light-mode-glass-design.md` Section 3 참조)
+#### Glassmorphism 토큰 (다크 모드 전용)
 
 | 토큰 | 값 | 용도 |
 |------|-----|------|
-| `--glass-bg` | `oklch(1 0 0 / 8%)` | Glass 카드 배경 (강화: 5%→8%) |
-| `--glass-bg-hover` | `oklch(1 0 0 / 12%)` | Glass 카드 hover 배경 (강화: 8%→12%) |
-| `--glass-border` | `oklch(1 0 0 / 15%)` | Glass 카드 테두리 (강화: 10%→15%) |
-| `--glass-border-hover` | `oklch(1 0 0 / 22%)` | Glass 카드 hover 테두리 (강화: 15%→22%) |
-| `--glass-blur` | `16px` | `backdrop-blur` (강화: 12→16px) |
-| `--glass-blur-header` | `20px` | Header 고정 시 blur |
+| `--glass-bg` | `oklch(1 0 0 / 5%)` | Glass 카드 배경 (흰색 5% 투명) |
+| `--glass-bg-hover` | `oklch(1 0 0 / 8%)` | Glass 카드 hover 배경 |
+| `--glass-border` | `oklch(1 0 0 / 10%)` | Glass 카드 테두리 (유리 단면) |
+| `--glass-border-hover` | `oklch(1 0 0 / 15%)` | Glass 카드 hover 테두리 |
+| `--glass-blur` | `12px` | `backdrop-blur-md` |
+| `--glass-blur-header` | `16px` | Header 고정 시 blur |
 | `--glass-shadow` | `0 8px 32px oklch(0 0 0 / 20%)` | Glass 카드 그림자 |
 | `--glow-blue` | `0 0 20px oklch(0.546 0.245 262 / 15%)` | 버튼/카드 hover glow |
-
-#### Glassmorphism 토큰 — 라이트 모드 (Warm Glass)
-
-> 상세: `light-mode-glass-design.md` Section 2 참조
-
-| 토큰 | 값 | 용도 |
-|------|-----|------|
-| `--glass-bg-light` | `oklch(1 0 0 / 55%)` | Glass 카드 배경 (메쉬 비침) |
-| `--glass-bg-light-hover` | `oklch(1 0 0 / 70%)` | Glass 카드 hover |
-| `--glass-border-light` | `oklch(0.78 0.12 75 / 25%)` | 앰버 틴트 보더 |
-| `--glass-border-light-hover` | `oklch(0.78 0.12 75 / 45%)` | hover 보더 |
-| `--glass-blur-light` | `12px` | `backdrop-blur-md` |
 
 ### 1.3 디자인 원칙
 
@@ -167,13 +154,19 @@
 
 ## 2. 레이아웃 구조
 
-### 2.1 전체 레이아웃 (ShellLayout)
+> **라우트 구조 변경 (2026-04-01)**: Route Group 분리 적용.
+> 포트폴리오 랜딩(`/`)은 `(portfolio)` 그룹, 블로그(`/blog`)는 `(blog)` 그룹.
+> 상세: `portfolio-landing-design.md` 참조.
+
+### 2.1 블로그 레이아웃 (BlogLayout — `(blog)` Route Group)
+
+기존 ShellLayout을 `(blog)` Route Group의 layout.tsx가 계승.
 
 ```
 ┌──────────────────────────────────────────────────────┐
 │ Header (h-14, border-b, bg-background)               │
 │ ┌─ Logo ──── Nav ──────────── Auth Actions ────────┐ │
-│ │ Portfolio │ 블로그        글쓰기 │ user │ 로그아웃│ │
+│ │ KW │ 블로그                글쓰기 │ user │ 로그아웃│ │
 │ └──────────────────────────────────────────────────┘ │
 ├──────────────────────────────────────────────────────┤
 │                                                      │
@@ -448,7 +441,7 @@
 
 | 요소 | 동작 |
 |------|------|
-| Logo "Portfolio" | → `/` (홈) |
+| Logo "KW" | → `/` (포트폴리오 랜딩) |
 | "블로그" | → `/blog` (목록) |
 | "글쓰기" (Header) | → `/blog/editor` (인증 시만 표시) |
 | PostCard 클릭 | → `/blog/{id}` (상세) |
@@ -541,13 +534,17 @@ import { buttonVariants } from "@/components/ui/button";
 ```
 depth-2-module-structure.md (전체 프론트엔드 아키텍처)
     ↓
-blog-ui-design.md (이 문서 — Blog 모듈 UI 세부 스펙)
-    ↓
-실제 구현 파일:
-    ├─→ src/modules/blog/components/  (PostCard, PostEditor, ...)
-    ├─→ app/blog/                     (라우트 페이지)
-    ├─→ components/ui/                (shadcn 컴포넌트)
-    └─→ app/globals.css               (디자인 토큰)
+├── portfolio-landing-design.md (포트폴리오 랜딩 UI)
+│       ↓
+│   실제 구현: app/(portfolio)/, src/modules/portfolio/
+│
+└── blog-ui-design.md (이 문서 — Blog 모듈 UI 세부 스펙)
+        ↓
+    실제 구현:
+        ├─→ src/modules/blog/components/  (PostCard, PostEditor, ...)
+        ├─→ app/(blog)/blog/              (라우트 페이지)
+        ├─→ components/ui/                (shadcn 컴포넌트)
+        └─→ app/globals.css               (디자인 토큰)
 ```
 
 ---

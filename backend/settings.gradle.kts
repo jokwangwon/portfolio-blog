@@ -7,6 +7,7 @@ include(
     "security",
     "module-blog",
     "module-user",
-    "module-benchmark",
+    "module-registry",
     "api-server"
 )
+// module-ai, module-benchmark → ai-backend 독립 서비스로 이전

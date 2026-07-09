@@ -9,6 +9,11 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+/**
+ * @deprecated Planned for migration to ai-benchmark independent service.
+ * TODO: Move to module-benchmark own domain when multi-datasource is implemented.
+ */
+@Deprecated(since = "2026-04", forRemoval = false)
 @Entity
 @Table(name = "gpu_metrics")
 @Getter
