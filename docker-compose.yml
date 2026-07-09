@@ -160,8 +160,8 @@ services:
       target: development
     container_name: portfolio-frontend
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080/api}
-      VITE_AI_API_BASE_URL: ${VITE_AI_API_BASE_URL:-http://localhost:8000}
+      # next.config.ts rewrites가 SSR/프록시 경로에 사용
+      BACKEND_URL: ${BACKEND_URL:-http://api-server:8080}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:

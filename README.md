@@ -4,8 +4,10 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109-009688.svg)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
+[![Tests](https://img.shields.io/badge/tests-240%20passing-brightgreen.svg)](#테스트)
 
 ---
 
@@ -29,9 +31,10 @@
 
 ### 핵심 차별화 요소
 
-1. **3D 인터랙티브 UI** - React Three Fiber 기반
-2. **로컬 AI 벤치마크** - GB10에서 실행한 LLM 모델 성능 측정
-3. **멀티 백엔드 MSA** - Spring Boot + FastAPI
+1. **3D 인터랙티브 UI** — React Three Fiber 기반 랜딩 + Glassmorphism 라이트/다크 디자인 시스템
+2. **Pixel Office** — 실제 GitHub 활동을 픽셀 아트 가상 사무실로 시각화 (공개 페이지 + 관리자 실시간 SSE)
+3. **멀티 백엔드 MSA** — Spring Boot(포털) + FastAPI(AI 서비스), Service Registry 패턴
+4. **로컬 AI 벤치마크** — GB10에서 실행한 LLM 성능 측정 (🚧 개발 예정)
 
 ### 블로그 콘텐츠
 
@@ -45,27 +48,29 @@
 
 ## 주요 기능
 
-### 블로그 핵심 기능
-- ✅ 게시글 CRUD (마크다운 지원)
-- ✅ 카테고리/태그 분류
-- ✅ 댓글 시스템
-- ✅ 검색 기능
-- ✅ 조회수/좋아요 통계
+### 블로그
+- ✅ 리치 에디터 (Tiptap WYSIWYG — 슬래시 명령, 표, 코드 하이라이팅, 수식(KaTeX), Mermaid 다이어그램, 이미지)
+- ✅ 자동 저장 + 초안 복구, 마크다운 소스 토글
+- ✅ AI 요약 (로컬 Ollama / Gemini 연동 excerpt 자동 생성)
+- ✅ 카테고리/태그 분류, 검색, 페이지네이션
+- ✅ 댓글(대댓글)/좋아요/조회수
 
-### 3D 인터랙티브
-- ✅ 3D 메인 랜딩 페이지
-- ✅ 스크롤 기반 3D 전환 효과
-- ✅ 인터랙티브 네비게이션
+### 포트폴리오 랜딩 & 디자인
+- ✅ 3D Hero (React Three Fiber) + 스크롤 애니메이션 (framer-motion)
+- ✅ Glassmorphism 디자인 시스템 — 라이트(Warm Glass)/다크(Cool Glass) 테마
+- ✅ 7개 섹션 (Hero, About, Tech Stack, Projects, Experience, Blog Preview, Contact)
 
-### AI 모델 벤치마크
-- ✅ 모델 리스트 (필터/정렬)
-- ✅ 실시간 추론 테스트
-- ✅ 성능 메트릭 시각화 (Tokens/sec, VRAM, 온도)
-- ✅ 다중 모델 비교 차트
+### Pixel Office
+- ✅ GitHub 활동 → 픽셀 아트 가상 사무실 시각화 (실제 스프라이트, BFS 길찾기, 상태 머신)
+- ✅ 관리자 페이지: 개발 도구 Hook 이벤트 실시간 SSE 스트리밍
+- ✅ 줌/팬, 에이전트 클릭 상세 패널
+
+### AI 모델 벤치마크 (🚧 개발 예정)
+- 모델 리스트, 추론 테스트, 성능 메트릭 시각화 (Tokens/sec, VRAM)
 
 ### 인증/인가
-- ✅ JWT 기반 인증
-- ✅ 소셜 로그인 (Google, GitHub, Kakao)
+- ✅ JWT 기반 인증 (Refresh Token Rotation, HttpOnly Cookie)
+- ✅ 소셜 로그인 (Google, GitHub)
 - ✅ 역할 기반 권한 관리 (ADMIN, USER)
 
 ---
@@ -73,35 +78,40 @@
 ## 기술 스택
 
 ### Frontend
-- **Framework**: Next.js 14+ (App Router)
-- **UI Library**: React 18
-- **3D**: React Three Fiber, drei
-- **State**: Redux Toolkit
-- **Server State**: TanStack Query (React Query)
-- **Styling**: TailwindCSS
+- **Framework**: Next.js 16 (App Router)
+- **UI Library**: React 19, shadcn/ui (Base UI)
+- **3D / 애니메이션**: React Three Fiber + drei, framer-motion
+- **에디터**: Tiptap 3 (lowlight, KaTeX, Mermaid)
+- **State**: Redux Toolkit / TanStack Query
+- **Styling**: TailwindCSS v4 (oklch 디자인 토큰)
+- **Test**: Vitest + React Testing Library + MSW
 - **Language**: TypeScript
 
 ### Portal API (Backend)
-- **Language**: Java 17+
-- **Framework**: Spring Boot 3.x
-- **Security**: Spring Security + JWT + OAuth2
-- **ORM**: JPA + QueryDSL
+- **Language**: Java 17
+- **Framework**: Spring Boot 3.2 (멀티 모듈 7개)
+- **Security**: Spring Security + JWT (jti, Rotation) + OAuth2
+- **ORM**: JPA, **Migration**: Flyway
+- **Resilience**: Resilience4j (CircuitBreaker/Retry)
 - **Database**: PostgreSQL 15 (`portal-db` 독립 인스턴스)
+- **Test**: JUnit 5 + Testcontainers
 - **Build**: Gradle
 
-### AI Benchmark API
+### AI Backend (내부 서비스)
 - **Language**: Python 3.11+
-- **Framework**: FastAPI
-- **LLM**: llama.cpp, Transformers
-- **GPU**: CUDA 12+ (NVIDIA RTX 4060 Ti)
-- **Database**: TimescaleDB (`ai-bench-db` 독립 인스턴스)
+- **Framework**: FastAPI 0.115
+- **LLM**: LangChain + Ollama(로컬) / Gemini, Notion 연동
 - **Server**: Uvicorn
+
+### AI Benchmark API (🚧 예정)
+- FastAPI + TimescaleDB (`ai-bench-db` 독립 인스턴스), NVIDIA GB10 GPU 메트릭
 
 ### Infrastructure
 - **Containerization**: Docker, Docker Compose
-- **Reverse Proxy**: Nginx
-- **CI/CD**: GitHub Actions
-- **Cloud**: AWS (Phase 2)
+- **Reverse Proxy**: Nginx (API Gateway)
+- **CI/CD**: GitHub Actions (backend/frontend/docs 게이트)
+- **Exposure**: Cloudflare Tunnel (GB10 홈서버)
+- **Observability**: Logback JSON 로깅, Sentry, MDC request 추적
 
 ---
 
@@ -113,12 +123,11 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                         Client (Browser)                         │
 └─────────────────────────────┬───────────────────────────────────┘
-                              │
-                              ▼
+                              ▼  Cloudflare Tunnel (TLS)
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Nginx API Gateway                             │
 │           /api/portal/* → Portal API                            │
-│           /api/ai/*     → AI Benchmark API                      │
+│           /api/ai/*     → AI Benchmark API (🚧 예정)             │
 │           /*            → Frontend (Next.js)                    │
 └──────┬──────────────────────┬──────────────────────┬────────────┘
        │                      │                      │
@@ -127,17 +136,23 @@
 │ Frontend     │   │  Portal API      │   │ AI Benchmark API│
 │ (Next.js)    │   │  (Spring Boot)   │   │ (FastAPI)       │
 │ • 3D UI      │   │  • 블로그 CRUD   │   │ • 모델 추론     │
-│ • Pixel Office│   │  • 인증/인가     │   │ • 벤치마크      │
-│              │   │  • Service Registry│   │ • GPU 메트릭   │
-└──────────────┘   └────────┬─────────┘   └────────┬────────┘
-                            │                      │
-                     ┌──────┘                      └──────┐
-                     ▼                                    ▼
-              ┌─────────────┐                     ┌──────────────┐
-              │  portal-db  │                     │ ai-bench-db  │
-              │ (PostgreSQL)│                     │ (TimescaleDB)│
-              │  독립 컨테이너│                     │  독립 컨테이너│
-              └─────────────┘                     └──────────────┘
+│ • Pixel Office│  │  • 인증/인가     │   │ • 벤치마크      │
+│              │   │  • Service Registry│ │ • GPU 메트릭    │
+└──────────────┘   └───┬──────────┬───┘   │   (🚧 예정)     │
+                       │          │       └────────┬────────┘
+                       │          ▼ REST           │
+                       │   ┌──────────────┐        │
+                       │   │  AI Backend  │        │
+                       │   │  (FastAPI)   │        │
+                       │   │ • 글 요약    │        │
+                       │   │ • Ollama/Gemini │     │
+                       │   └──────────────┘        │
+                       ▼                           ▼
+                ┌─────────────┐            ┌──────────────┐
+                │  portal-db  │            │ ai-bench-db  │
+                │ (PostgreSQL)│            │ (TimescaleDB)│
+                │  독립 컨테이너│            │  독립 컨테이너│
+                └─────────────┘            └──────────────┘
 ```
 
 > 각 서비스는 독립 실행 가능하며, 자기 DB에만 접근합니다. 서비스 간 데이터가 필요하면 REST API를 호출합니다.
@@ -171,8 +186,8 @@
 #### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/yourusername/portfolio-portal.git
-cd portfolio-portal
+git clone https://github.com/jokwangwon/portfolio-blog.git
+cd portfolio-blog
 ```
 
 #### 2. 환경 변수 설정
@@ -212,7 +227,7 @@ docker-compose --profile frontend up -d   # Frontend만
 서비스 URL:
 - **Frontend**: http://localhost:3000
 - **Portal API**: http://localhost:8080
-- **AI Benchmark API**: http://localhost:8000
+- **AI Backend**: http://localhost:8081
 - **pgAdmin**: http://localhost:5050 (tools 프로필 사용 시)
 
 ---
@@ -225,7 +240,7 @@ Docker 대신 직접 실행하고 싶다면:
 
 ```bash
 # PostgreSQL + TimescaleDB만 Docker로 실행
-docker-compose up -d postgres
+docker-compose up -d portal-db ai-bench-db
 ```
 
 #### 2. Backend 실행
@@ -248,16 +263,16 @@ npm run dev
 # http://localhost:3000
 ```
 
-#### 4. AI API 실행 (선택)
+#### 4. AI Backend 실행 (선택 — 글 요약 기능)
 
 ```bash
-cd ai-benchmark-api
+cd ai-backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --port 8081
 
-# http://localhost:8000
+# http://localhost:8081 (로컬 Ollama 또는 GEMINI_API_KEY 필요)
 ```
 
 ---
@@ -282,40 +297,31 @@ cd backend/api-server
 ## 프로젝트 구조
 
 ```
-portfolio-portal/
+portfolio-blog/
 ├── backend/              # Portal API (Spring Boot 멀티 모듈)
-│   ├── common/          # 공통 모듈
+│   ├── common/          # 공통 유틸/예외
 │   ├── domain/          # 엔티티 + 리포지토리
-│   ├── security/        # 인증/인가 (JWT 발급)
+│   ├── security/        # 인증/인가 (JWT, OAuth2)
 │   ├── module-blog/     # 블로그 비즈니스 로직
 │   ├── module-user/     # 사용자 관리
 │   ├── module-registry/ # Service Registry (서비스 등록/상태 관리)
-│   └── api-server/      # 실행 가능한 메인 앱
+│   └── api-server/      # 실행 가능한 메인 앱 (Controller, AI 프록시)
 │
-├── ai-benchmark-api/    # AI Benchmark API (FastAPI, 독립 서비스)
-│   ├── app/
-│   │   ├── api/        # API 라우터
-│   │   ├── services/   # 비즈니스 로직
-│   │   ├── core/       # 공통 인프라
-│   │   ├── contract/   # Service Contract (/health, /api/summary)
-│   │   └── infrastructure/  # LLM, GPU 모니터링
-│   └── tests/          # 테스트
+├── ai-backend/          # AI Backend (FastAPI 내부 서비스 — 글 요약)
+│   ├── app/             # main, llm_service(LangChain), notion_service
+│   └── tests/
 │
 ├── frontend/            # Next.js Shell App
+│   ├── app/             # App Router — (portfolio)/(blog)/(auth)/admin 라우트 그룹
 │   ├── src/
-│   │   ├── app/        # App Router (라우팅)
-│   │   ├── shell/      # Shell 레이아웃, 인증, Registry 연동
-│   │   ├── modules/    # Feature Modules (blog, benchmark, three 등)
-│   │   └── shared/     # 공유 컴포넌트/훅/유틸
-│   └── public/         # 정적 파일
+│   │   ├── shell/       # 레이아웃, 인증, 테마, API 클라이언트
+│   │   ├── modules/     # Feature Modules (blog, portfolio, pixel-office)
+│   │   └── shared/      # 애니메이션/컴포넌트/유틸
+│   └── public/          # 정적 파일 (픽셀 에셋 포함)
 │
 ├── nginx/               # API Gateway 설정
-│   └── nginx.conf
-│
-└── docs/               # 프로젝트 문서
-    ├── architecture/
-    ├── api/
-    └── guides/
+├── scripts/             # 하네스/문서 검증 스크립트
+└── docs/                # 프로젝트 문서 (헌법, 아키텍처, ADR, 세션 로그)
 ```
 
 ---
@@ -326,7 +332,7 @@ portfolio-portal/
 
 프로젝트의 코딩 스타일, Git 워크플로우, API 설계 규칙 등은 다음 문서를 참고하세요:
 
-📖 **[DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md)**
+📖 **[DEVELOPMENT_GUIDE.md](docs/guides/DEVELOPMENT_GUIDE.md)**
 
 주요 내용:
 - 코딩 컨벤션 (Java, TypeScript, Python)
@@ -354,7 +360,7 @@ fix(post): 조회수 증가 버그 수정
 docs(readme): 설치 가이드 추가
 ```
 
-자세한 내용은 [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) 참고
+자세한 내용은 [DEVELOPMENT_GUIDE.md](docs/guides/DEVELOPMENT_GUIDE.md) 참고
 
 ---
 
@@ -365,7 +371,9 @@ docs(readme): 설치 가이드 추가
 개발 서버 실행 후 다음 URL에서 API 문서 확인:
 
 - **Portal API**: http://localhost:8080/swagger-ui.html
-- **AI Benchmark API**: http://localhost:8000/docs
+- **AI Backend**: http://localhost:8081/docs
+
+전체 명세: [docs/api/API_SPECIFICATION.md](docs/api/API_SPECIFICATION.md)
 
 ### 주요 엔드포인트
 
@@ -374,39 +382,39 @@ docs(readme): 설치 가이드 추가
 POST   /api/portal/auth/login
 POST   /api/portal/auth/signup
 POST   /api/portal/auth/refresh
+GET    /api/portal/auth/me
 ```
 
 #### 게시글 (Portal API)
 ```
-GET    /api/portal/posts
+GET    /api/portal/posts            # 목록 (카테고리/페이지네이션)
+GET    /api/portal/posts/search     # 검색
 GET    /api/portal/posts/{id}
 POST   /api/portal/posts
 PUT    /api/portal/posts/{id}
 DELETE /api/portal/posts/{id}
+POST   /api/portal/posts/{id}/like
 ```
 
-#### AI 추론 (AI Benchmark API)
+#### AI (Portal API → AI Backend 프록시)
 ```
-POST   /api/ai/inference/generate
-POST   /api/ai/inference/generate/stream
-POST   /api/ai/benchmark/run
+POST   /api/portal/ai/summarize     # 게시글 excerpt 자동 생성
 ```
 
 ---
 
 ## 테스트
 
+현재 **백엔드 131개** (단위 + Testcontainers 통합) / **프론트엔드 109개** (Vitest + RTL + MSW) 테스트가 CI에서 실행됩니다.
+
 ### Backend
 
 ```bash
 cd backend
-./gradlew test
+./gradlew test              # 전체 (통합 테스트는 Docker 필요)
 
 # 특정 모듈만 테스트
 ./gradlew :module-blog:test
-
-# 통합 테스트
-./gradlew integrationTest
 ```
 
 ### Frontend
@@ -417,46 +425,28 @@ npm test
 
 # 커버리지
 npm run test:coverage
-
-# E2E 테스트 (Playwright)
-npm run test:e2e
-```
-
-### AI API
-
-```bash
-cd ai-benchmark-api
-pytest
-
-# 커버리지
-pytest --cov=app
 ```
 
 ---
 
 ## 배포
 
-### Phase 1: GB10 개발 환경 (현재)
+**GB10 홈서버 + Cloudflare Tunnel** 구성으로 배포합니다. AI Backend가 로컬 Ollama(GB10 GPU)에 의존하므로 전체 스택을 단일 호스트에서 운영하고, Cloudflare Tunnel이 TLS와 외부 노출을 담당합니다 (포트포워딩 불필요).
 
 ```bash
-# Docker Compose로 전체 스택 실행
-cd infrastructure
-docker-compose up -d
+# 프로덕션 스택 기동 (Nginx 게이트웨이 포함)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile backend --profile frontend --profile gateway up -d
 
-# Cloudflare Tunnel로 외부 노출
-cloudflared tunnel --url http://localhost:3000
+# Cloudflare Tunnel 연결 (도메인 설정 후)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile deploy up -d cloudflared
+
+# 도메인 없이 임시 검증 (trycloudflare)
+cloudflared tunnel --url http://localhost:80
 ```
 
-### Phase 2: AWS 프로덕션 (예정)
+상세 절차: [docs/guides/DEPLOYMENT_GUIDE.md](docs/guides/DEPLOYMENT_GUIDE.md)
 
-| 서비스 | AWS 리소스 |
-|--------|-----------|
-| Frontend | Vercel 또는 S3 + CloudFront |
-| Portal API | ECS 또는 EC2 |
-| AI Benchmark API | EC2 GPU 인스턴스 (g4dn.xlarge) |
-| PostgreSQL + TimescaleDB | RDS PostgreSQL (TimescaleDB Extension) |
-
-CI/CD: GitHub Actions
+> 라이브 URL은 도메인 확보 후 여기에 게시 예정
 
 ---
 
@@ -482,18 +472,16 @@ CI/CD: GitHub Actions
 
 - **개발자**: 조광원
 - **이메일**: tgdata200@gmail.com
-- **블로그**: https://yourdomain.com
-- **GitHub**: https://github.com/yourusername
+- **GitHub**: https://github.com/jokwangwon
+- **블로그**: 도메인 확보 후 게시 예정
 
 ---
 
 ## 감사의 말
 
-- Dell Pro Max GB10
-- Spring Boot Team
-- Next.js Team
-- FastAPI Team
-- llama.cpp Contributors
+- Spring Boot / Next.js / FastAPI 팀
+- [pixel-agents](CREDITS.md) — Pixel Office 렌더링 엔진 원작 (MIT)
+- Ollama Contributors
 
 ---
 

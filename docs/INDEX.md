@@ -30,6 +30,7 @@
 ### 5. 개발 가이드
 10. **[docs/guides/DEVELOPMENT_GUIDE.md](guides/DEVELOPMENT_GUIDE.md)** - 코딩 컨벤션, Git 규칙, API 설계
 11. **[docs/guides/TEST_STRATEGY.md](guides/TEST_STRATEGY.md)** 🟠 - 테스트 전략 (70% 커버리지 목표)
+12. **[docs/guides/DEPLOYMENT_GUIDE.md](guides/DEPLOYMENT_GUIDE.md)** 🟠 - 배포 가이드 (GB10 + Cloudflare Tunnel)
 
 ### 6. 원칙 문서 (상세 규칙)
 12. **[docs/constitution/ARCHITECTURE_PRINCIPLES.md](constitution/ARCHITECTURE_PRINCIPLES.md)** - 아키텍처 10대 원칙
