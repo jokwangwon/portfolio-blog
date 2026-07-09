@@ -35,8 +35,12 @@
 | 2026-03-31 | #12 | Blog 고도화(좋아요/댓글/검색), 프론트엔드 테스트 57개, OAuth2 소셜 로그인 | [SESSION_2026-03-31.md](SESSION_2026-03-31.md) |
 | 2026-04-02 | #13–#14 | 하네스 엔지니어링 점검, OAuth2 4건 수정, 에디터 3건 수정 (slug/SSR/슬래시) | [SESSION_2026-04-02.md](SESSION_2026-04-02.md) |
 | 2026-04-05 | #15 | 기획 점검, 3-Stage 디자인 강화 설계, Stage 1 애니메이션 구현 | [SESSION_2026-04-05.md](SESSION_2026-04-05.md) |
+| 2026-04-06 | #16 | pixel-agents 분석, ADR-008 (Canvas 2D MVP), Pixel Office MVP 엔진 (TDD 39개) | [SESSION_2026-04-06.md](SESSION_2026-04-06.md) |
+| 2026-04-06 | #17 | pixel-agents 렌더링 엔진 이식 (PNG 54개 + 19파일), 백엔드 보안 3건 | [SESSION_2026-04-06_s17.md](SESSION_2026-04-06_s17.md) |
+| 2026-04-06 | #18 | (로그 누락) 관리자 Pixel Office SSE, 줌/팬 수정, Pixel Office hardening — [#19 로그에 복원](SESSION_2026-07-09.md) | — |
+| 2026-07-09 | #19 | 재개 점검: Docker 29 호환 (Testcontainers 2.0.5), npm 취약점 27→2, compose 정리 | [SESSION_2026-07-09.md](SESSION_2026-07-09.md) |
 
-**총 세션**: 15개
+**총 세션**: 19개
 
 ---
 

@@ -3,7 +3,7 @@
 > **AI 에이전트가 세션 시작 시 가장 먼저 읽어야 하는 문서**
 > 현재 프로젝트 상태, 진행 중인 작업, 다음 할 일을 기록
 
-**최종 업데이트**: 2026-04-06 (세션 #17)
+**최종 업데이트**: 2026-07-09 (세션 #19)
 
 ---
 
@@ -12,10 +12,16 @@
 ### Phase
 **Phase 1B: 프론트엔드 개발** (진행 중)
 
-### 마지막 작업 (세션 #17, 2026-04-06)
+### 마지막 작업 (세션 #19, 2026-07-09 — 약 3개월 중단 후 재개)
+- **Docker 29 호환성 복구**: Testcontainers 1.19.3 → 2.0.5 (백엔드 통합 테스트 30개 복구, 전체 131개 통과)
+- **프론트엔드 취약점 정리**: npm audit 27건 → 2건, next 16.2.10 업그레이드 (테스트 107개 + 빌드 통과)
+- **docker-compose 정리**: FastAPI 라벨 수정, 미존재 ai-benchmark-api 서비스 주석 처리
+- 미기록 세션 #18 (2026-04-06) 이력 복원: 관리자 Pixel Office SSE + hardening 완료 확인
+
+### 직전 작업 (세션 #17–#18, 2026-04-06)
 - **pixel-agents 렌더링 엔진 이식 완료**: PNG 에셋 54개 + 엔진 19파일 + assetLoader + usePixelOffice 어댑터
 - **백엔드 보안 정비**: module-registry GET 인증 추가, AiClient CircuitBreaker/Retry, 벤치마크 @Deprecated
-- 84개 테스트 통과, Next.js 빌드 성공
+- **관리자 /admin/office 완료**: 실시간 Hook SSE + 이벤트 로그 사이드바 + 실제 타임랩스(Git 이력) + 커밋 시각화
 
 ### 완료된 개발
 
@@ -41,27 +47,34 @@
 - **OAuth2 소셜 로그인 Google/GitHub (백엔드 TDD + 프론트 UI) — 세션 #12**
 
 ### 현재 상황
-**디자인 강화 Stage 3 완료**: Stage 1(마이크로 인터랙션) ✅ + Stage 2(3D Hero) ✅ + Stage 3(Pixel Office) ✅. pixel-agents 오픈소스 렌더링 엔진을 이식하여 실제 PNG 스프라이트로 업그레이드. 백엔드 보안 3건 정비 완료 (module-registry 인증, AiClient resilience4j, 벤치마크 deprecation).
+**디자인 강화 3-Stage 전체 완료** (Stage 1 마이크로 인터랙션 ✅ + Stage 2 3D Hero ✅ + Stage 3 Pixel Office ✅) + 관리자 office(SSE)까지 완료. 세션 #19에서 중단 기간 발생한 환경 호환성 문제(Docker 29)와 보안 취약점을 정리하여 **백엔드 131개 + 프론트엔드 107개 테스트 전부 통과** 상태.
+
+**브랜치/PR 정리 완료 (세션 #19)**: PR #8을 main에 병합, 중복 PR #4 close, 구계보 PR #2 close(댓글 UI만 백로그로 이관), develop을 main으로 리셋. 상세는 `docs/sessions/SESSION_2026-07-09.md` 참조.
 
 ---
 
 ## 📋 다음 할 일 (Next Actions)
 
-### 디자인 강화 로드맵 (design-enhancement.md 기준)
-1. ~~**Stage 1**: 마이크로 인터랙션 & 애니메이션~~ ✅ 완료
-2. ~~**Stage 2**: 3D Hero, 프로젝트 카드 리디자인~~ ✅ 완료
-3. **Stage 3**: Pixel Office MVP (Canvas 2D, 3존, 3에이전트, 4상태) ← **다음**
+1. **댓글 UI 개선 이식 (PR #2에서 살린 백로그)**
+   - [ ] 아바타, 인라인 삭제 확인, sonner 토스트 알림을 현행 glassmorphism 댓글 컴포넌트에 맞게 재이식
+   - 참조 커밋: `78fabf4` (댓글 UI), `27d8a44` (sonner 설정 부분) — 구계보라 직접 cherry-pick 시 충돌, 재구현 권장
 
-### Phase 1B 잔여
-1. **AI Benchmark API**
-   - [ ] FastAPI 독립 프로젝트 생성
+2. **AI Benchmark API**
+   - [ ] FastAPI 독립 프로젝트 생성 (`ai-benchmark-api/`) → docker-compose 주석 해제
    - [ ] AI Benchmark DB 스키마 (Alembic)
 
-2. **Service Registry UI**
+3. **ai-backend 품질**
+   - [ ] pytest 테스트 작성 (현재 0개)
+   - [ ] CI에 ai-backend 잡 추가
+
+4. **보안 후속**
+   - [ ] admin office SSE 라우트 서버측 인증 (현재 dev 전용 `NODE_ENV` 가드만)
+
+5. **Service Registry UI**
    - [ ] 등록된 서비스 목록 대시보드
 
-3. **프론트엔드 테스트 강화**
-   - [ ] 커버리지 향상 (현재 57개 + 10개 = 67개 → 목표 70%+)
+6. **프론트엔드 테스트 강화**
+   - [ ] 커버리지 측정 (현재 107개 → 목표 70%+)
    - [ ] E2E 테스트 도입 검토
 
 ---
@@ -136,11 +149,15 @@
 
 ## 🚧 진행 중인 이슈
 
-### 없음
-세션 #12 작업은 모두 커밋 완료 (develop 브랜치, origin에 push 됨):
-- `3a853cb` feat: Add blog likes, comments, and search features
-- `e71f7ae` test: Add frontend test suite with Vitest + RTL + MSW
-- `ef52a35` feat: Add OAuth2 social login (Google, GitHub)
+### 1. ~~브랜치/PR 중복~~ (세션 #19에서 해결)
+- 히스토리 재작성으로 구계보(develop)와 신계보(main/현 브랜치)가 공존했음
+- 정리: PR #8 → main 병합 / PR #4 close(중복) / PR #2 close(대체됨, 댓글 UI만 백로그) / develop을 main으로 리셋
+
+### 2. 잔여 npm 취약점 2건 (moderate)
+- next 내부 고정 postcss <8.5.10 (GHSA-qx2v-qp2m-jg93) — next 릴리스 대기, 실질 위험 낮음
+
+### 3. admin office SSE 무인증
+- `frontend/app/api/admin/office/events/route.ts`는 dev 전용 가드(`NODE_ENV`)만 존재, 서버측 인증 없음
 
 ---
 
@@ -268,15 +285,26 @@
 - 84개 테스트 통과, Next.js 빌드 성공
 - CREDITS.md MIT 라이선스 고지
 
+### 세션 #18 (2026-04-06, 로그 누락 — #19에서 복원)
+- 관리자 /admin/office: 실시간 Hook SSE + 이벤트 로그 사이드바
+- Pixel Office hardening: 실제 타임랩스(Git 이력), Hook 보안, 테스트, 커밋 시각화
+- 줌/팬 UX 수정 (auto-fit, DPR, 휠 passive listener)
+
+### 세션 #19 (2026-07-09)
+- **Docker 29 호환**: Testcontainers 2.0.5 업그레이드 → 백엔드 통합 테스트 복구 (131개 전부 통과)
+- **취약점 정리**: npm audit 27→2, next 16.2.10 (프론트 107개 테스트 + 빌드 통과)
+- docker-compose 정리 (FastAPI 라벨, 미존재 ai-benchmark-api 주석 처리)
+- 브랜치/PR 중복 문제 발견 및 문서화
+
 ---
 
 ## 💡 다음 세션을 위한 메모
 
-### 다음 세션(#18) 우선순위
-1. ~~Stage 1~~ ✅ ~~Stage 2~~ ✅ ~~Stage 3~~ ✅ ~~pixel-agents 이식~~ ✅ ~~백엔드 보안~~ ✅
-2. 관리자 /admin/office (Hook SSE + 실시간)
-3. Git 히스토리 JSON 추출 스크립트 (타임랩스 실데이터)
-4. 커서 트레일 + 벤치마크 시각화
+### 다음 세션(#20) 우선순위
+1. **PR/브랜치 정리** (같은 브랜치 PR 2개 중복 — 사용자 결정 필요)
+2. ai-backend pytest + CI 잡 추가
+3. admin office SSE 서버측 인증
+4. 커서 트레일 + 벤치마크 시각화 (잔여 디자인 항목)
 5. AI Benchmark API (FastAPI)
 6. Service Registry UI 대시보드
 
