@@ -57,10 +57,12 @@
 
 > 세션 #19 완성도 평가(구현율 ~75-80%) 기준 우선순위. P0(블로그 상세 버그, frontend Dockerfile, nginx 죽은 라우트)는 완료.
 
-### P1 — 포트폴리오 가치 최대화
-1. **실배포**: 라이브 URL 확보 (Vercel 프론트 + 백엔드 호스팅 or 홈서버+Cloudflare Tunnel), TLS, CI deploy 잡
-2. **README 현행화**: Next.js 14 배지(실제 16), placeholder 링크(`yourdomain.com`) 제거, 스크린샷/GIF 추가
-3. **유저 프로필 최소 기능**: `GET/PUT /users/me` + 마이페이지 (현재 `GET /auth/me`가 username/authorities만 반환)
+### P1 — 포트폴리오 가치 최대화 (세션 #19에서 대부분 완료)
+1. **실배포**: ~~인프라 준비~~ ✅ (docker-compose.prod.yml + cloudflared + DEPLOYMENT_GUIDE.md, 스택 기동 검증 완료)
+   - [ ] **남은 것: 도메인 구매 → Cloudflare Tunnel 토큰 발급 → `--profile deploy` 기동** (사용자 작업)
+   - [ ] CI deploy 잡 (선택)
+2. ~~README 현행화~~ ✅ — 스크린샷/GIF 추가는 남음 (배포 후 라이브 URL과 함께)
+3. ~~유저 프로필 최소 기능~~ ✅ (/users/me API + /mypage)
 
 ### P2 — 차별화 스토리 완성
 4. **AI Benchmark API** (FastAPI `ai-benchmark-api/`) + 랜딩 BenchmarkSection 시각화 — README가 내세우는 핵심 차별화인데 통째로 부재
