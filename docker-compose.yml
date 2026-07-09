@@ -103,7 +103,7 @@ services:
       - backend
 
   # ==========================================
-  # AI Backend (Spring Boot — 내부 서비스)
+  # AI Backend (Python/FastAPI — 내부 서비스)
   # ==========================================
   ai-backend:
     build:
@@ -111,7 +111,6 @@ services:
       dockerfile: Dockerfile
     container_name: portfolio-ai-backend
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       AI_PROVIDER: ${AI_PROVIDER:-ollama}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
@@ -128,26 +127,28 @@ services:
 
   # ==========================================
   # AI Benchmark API Server (FastAPI)
+  # NOTE: ./ai-benchmark-api 프로젝트가 아직 없어 비활성화 (Phase 1B 잔여 작업)
+  #       프로젝트 생성 후 주석 해제
   # ==========================================
-  ai-api-server:
-    build:
-      context: ./ai-benchmark-api
-      dockerfile: Dockerfile
-    container_name: portfolio-ai-api
-    environment:
-      DATABASE_URL: postgresql://${AI_BENCH_DB_USER:-postgres}:${AI_BENCH_DB_PASSWORD:-postgres}@ai-bench-db:5432/${AI_BENCH_DB_NAME:-ai_bench_db}
-      OLLAMA_HOST: ${OLLAMA_HOST:-host.docker.internal:11434}
-      LOG_LEVEL: ${AI_API_LOG_LEVEL:-INFO}
-    ports:
-      - "${AI_API_PORT:-8000}:8000"
-    depends_on:
-      ai-bench-db:
-        condition: service_healthy
-    networks:
-      - portal-network
-    restart: unless-stopped
-    profiles:
-      - backend
+  # ai-api-server:
+  #   build:
+  #     context: ./ai-benchmark-api
+  #     dockerfile: Dockerfile
+  #   container_name: portfolio-ai-api
+  #   environment:
+  #     DATABASE_URL: postgresql://${AI_BENCH_DB_USER:-postgres}:${AI_BENCH_DB_PASSWORD:-postgres}@ai-bench-db:5432/${AI_BENCH_DB_NAME:-ai_bench_db}
+  #     OLLAMA_HOST: ${OLLAMA_HOST:-host.docker.internal:11434}
+  #     LOG_LEVEL: ${AI_API_LOG_LEVEL:-INFO}
+  #   ports:
+  #     - "${AI_API_PORT:-8000}:8000"
+  #   depends_on:
+  #     ai-bench-db:
+  #       condition: service_healthy
+  #   networks:
+  #     - portal-network
+  #   restart: unless-stopped
+  #   profiles:
+  #     - backend
 
   # ==========================================
   # Frontend (Next.js)
