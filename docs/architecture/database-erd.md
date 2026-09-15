@@ -1,5 +1,7 @@
 # 데이터베이스 ERD (Entity Relationship Diagram)
 
+> 향후 글 버전·수정 이력·AI 작업 구조는 [저장·AI 데이터 설계](knowledge-storage-ai-design.md)를 참고한다. 이 ERD의 현재 구현과 구분하며 신규 테이블은 아직 미적용이다.
+
 > **데이터베이스 스키마 시각화**
 > 테이블 간 관계, 외래키, 인덱스를 명확히 표현
 

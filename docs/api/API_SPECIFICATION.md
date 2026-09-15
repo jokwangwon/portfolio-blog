@@ -1,5 +1,7 @@
 # API 명세서 (API Specification)
 
+> 향후 버전 조건 저장·수정 이력·영속 AI 작업 API는 [저장·AI 데이터 설계](../architecture/knowledge-storage-ai-design.md)의 제안 계약이다. 현재 OpenAPI에 구현된 경로로 추가하지 않았다.
+
 > 2026-09-13 공개 정책: 운영 `app.public-read-only=true`에서는 회원가입·OAuth2·댓글·좋아요를
 > 차단한다. 게시글/분류/AI 쓰기는 ADMIN만 허용한다. 개발 프로필의 USER+ 설명과 구분한다.
 > 공개 조회는 PUBLISHED + PUBLIC인 글만 허용한다. DRAFT/ARCHIVED 또는 PRIVATE 상세는 작성자만 200, 그 외에는 404.
