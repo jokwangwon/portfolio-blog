@@ -6,6 +6,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import MermaidBlock from "./MermaidBlock";
+import ProtectedImage from "./ProtectedImage";
 import type { Components } from "react-markdown";
 
 // rehype-sanitize 스키마: 기본 허용 + code 블록 class (highlight.js용)
@@ -92,11 +93,10 @@ export default function MarkdownRenderer({
           ? srcStr
           : undefined;
       return (
-        <img
+        <ProtectedImage
           src={safeSrc}
           alt={alt || ""}
           className="rounded-lg max-w-full h-auto my-4"
-          loading="lazy"
         />
       );
     },

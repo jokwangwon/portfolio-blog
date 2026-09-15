@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import MarkdownRenderer from "./MarkdownRenderer";
+import { convertInlineImages } from "../api/attachmentApi";
 import { useAutoSave, loadDraft, clearDraft, type DraftData } from "../hooks/useAutoSave";
 
 const RichEditor = dynamic(() => import("./editor/RichEditor"), {
@@ -48,6 +49,7 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   const [draftBanner, setDraftBanner] = useState<DraftData | null>(null);
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uploadBusy, setUploadBusy] = useState(false);
   const [actionBusy, setActionBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
@@ -58,7 +60,7 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   const [baseline, setBaseline] = useState(initialSnapshot.current);
   const snapshot = fingerprint({ title, content, excerpt, categoryId, tagIds, visibility });
   const dirty = snapshot !== baseline;
-  const blocked = !checked || !!draftBanner || busy || isPending || actionBusy;
+  const blocked = !checked || !!draftBanner || busy || isPending || actionBusy || uploadBusy;
 
   useEffect(() => {
     const saved = loadDraft(postId);
@@ -102,10 +104,12 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
     requestInFlight.current = true;
     setBusy(true); setSubmitError(""); setMessage("");
     try {
-      const post = await onSubmit({ title: title.trim(), content, excerpt: excerpt || undefined,
+      const converted = /data:image\//i.test(content) ? await convertInlineImages(content) : content;
+      const post = await onSubmit({ title: title.trim(), content: converted, excerpt: excerpt || undefined,
         categoryId, tagIds, visibility, status: published ? "PUBLISHED" : status });
       markSaved();
-      setBaseline(snapshot);
+      if (converted !== content) setContent(converted);
+      setBaseline(fingerprint({ title, content: converted, excerpt, categoryId, tagIds, visibility }));
       setMessage(post.status === "PUBLISHED" ? (post.visibility === "PRIVATE" ? "비공개 글을 저장했습니다." : "공개 글을 저장했습니다.") : "서버에 임시저장했습니다. 계속 작성할 수 있습니다.");
       onSaved?.(post);
     } catch {
@@ -114,7 +118,7 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
       requestInFlight.current = false;
       setBusy(false);
     }
-  }, [blocked, title, content, excerpt, saveDraft, onSubmit, categoryId, tagIds, visibility, published, markSaved, snapshot, onSaved]);
+  }, [blocked, title, content, excerpt, saveDraft, onSubmit, categoryId, tagIds, visibility, published, markSaved, onSaved]);
 
   useEffect(() => {
     const save = (event: KeyboardEvent) => {
@@ -147,6 +151,7 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
           </div>
         </div>
       )}
+      {uploadBusy && <p role="status" className="text-sm text-muted-foreground">이미지를 업로드하는 중… 완료되면 글을 저장할 수 있습니다.</p>}
       <fieldset disabled={blocked} className="space-y-5 min-w-0" aria-busy={busy || isPending}>
         <div className="space-y-2">
           <div className="flex justify-between items-center gap-3"><Label htmlFor="title">제목</Label><span className="text-xs text-muted-foreground">{title.length}/255</span></div>
@@ -170,7 +175,7 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
               </section>
             ) : mode === "source" ? (
               <Textarea aria-label="마크다운 본문" value={content} onChange={e => setContent(e.target.value)} placeholder="마크다운으로 작성하세요…" className="min-h-[400px] border-0 rounded-none font-mono text-sm leading-relaxed p-4" />
-            ) : <RichEditor content={content} onChange={setContent} />}
+            ) : <RichEditor content={content} onChange={setContent} disabled={blocked} onBusyChange={setUploadBusy} />}
           </div>
         </div>
         <details className="rounded-xl border border-border p-4">

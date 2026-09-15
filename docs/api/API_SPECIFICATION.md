@@ -1,5 +1,16 @@
 # API 명세서 (API Specification)
 
+## 이미지 첨부 (2026-09-15 구현)
+
+| 경로 | 동작 | 권한/응답 |
+|---|---|---|
+| `POST /attachments` | multipart `file` 업로드 | 인증 필수, 운영 ADMIN. 201 `{id,url,mediaType,byteSize,width,height}` |
+| `GET /attachments/{id}` | 이미지 바이너리 | 소유자 또는 연결된 글이 미삭제·PUBLISHED·PUBLIC. 나머지 404 |
+
+PNG/JPEG만 지원하며 입력/재인코딩 결과 10MiB, 한 변 8192px, 총 2000만 화소 제한이다. 손상/미지원/치수 초과는 400, 바이트 초과는 413이다. 실제 이미지 판독 후 메타데이터를 제거한다. 조회는 `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`를 반환한다.
+
+업로드 URL은 `/api/portal/attachments/{UUID}`이며 미연결 상태는 소유자만 조회한다. 글 생성/수정 시 실제 Markdown/HTML 이미지 참조를 연결하고 제거된 참조는 연결을 해제한다. 타인 소유/다른 글에 연결된 첨부, 실제 이미지 위치의 data/blob URL과 비정규 첨부 주소는 400이다. 코드 예시의 주소는 첨부로 처리하지 않는다. 공개 여부는 조회 시 현재 글에서 판단한다. [상세 계약](../architecture/image-attachments-design.md).
+
 > 향후 버전 조건 저장·수정 이력·영속 AI 작업 API는 [저장·AI 데이터 설계](../architecture/knowledge-storage-ai-design.md)의 제안 계약이다. 현재 OpenAPI에 구현된 경로로 추가하지 않았다.
 
 > 2026-09-13 공개 정책: 운영 `app.public-read-only=true`에서는 회원가입·OAuth2·댓글·좋아요를

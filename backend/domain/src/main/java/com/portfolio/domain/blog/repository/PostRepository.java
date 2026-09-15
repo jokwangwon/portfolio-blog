@@ -13,6 +13,11 @@ import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Post p WHERE p.id = :id AND p.deletedAt IS NULL")
+    Optional<Post> findForUpdate(@Param("id") Long id);
+
+
     Optional<Post> findBySlugAndDeletedAtIsNull(String slug);
 
     Optional<Post> findByIdAndDeletedAtIsNull(Long id);

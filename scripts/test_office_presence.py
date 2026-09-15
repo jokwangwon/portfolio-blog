@@ -1,4 +1,5 @@
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -230,6 +231,51 @@ class PresenceTests(unittest.TestCase):
         self.assertNotIn('publicTitle', self.store.snapshot()['sessions'][0])
         private = ''.join(p.read_text() for p in self.store.records.glob('*.json'))
         self.assertNotIn('PRIVATE', private)
+
+
+    def codex_cli(self, directory, session, kind='UserPromptSubmit', allowed=None):
+        args = ['office-presence.py', '--state-dir', str(self.root / 'state')]
+        if allowed is not None:
+            args += ['--allow-project', str(allowed)]
+        args += ['codex-hook']
+        data = {'session_id': session, 'turn_id': 'turn-a', 'cwd': str(directory),
+                'hook_event_name': kind}
+        with patch.object(office, 'ROOT', self.root / 'project'):
+            with patch.object(office.sys, 'argv', args), patch.object(office.sys, 'stdin', io.StringIO(json.dumps(data))):
+                with patch.object(office, 'agent_parent', return_value=os.getpid()):
+                    office.main()
+
+    def test_explicit_second_project_hook_shares_attendance_without_merging_sessions(self):
+        second = self.root / 'second-project'; second.mkdir()
+        self.codex_cli(self.root / 'project', 'PRIVATE-FIRST')
+        self.codex_cli(second, 'PRIVATE-SECOND', allowed=second)
+        self.codex_cli(second, 'PRIVATE-SECOND', 'PostToolUse', allowed=second)
+        sessions = self.store.snapshot()['sessions']
+        self.assertEqual(len(sessions), 2)
+        self.assertEqual({s['projectName'] for s in sessions}, {'project', 'second-project'})
+        self.assertNotIn(str(self.root), json.dumps(sessions))
+        self.assertNotIn('PRIVATE', json.dumps(sessions))
+        self.codex_cli(second, 'PRIVATE-SECOND', 'Stop', allowed=second)
+        self.assertEqual(len(self.store.snapshot()['sessions']), 1)
+        self.assertEqual(self.store.snapshot()['sessions'][0]['projectName'], 'project')
+
+    def test_second_project_is_not_implicitly_allowed(self):
+        second = self.root / 'second-project'; second.mkdir()
+        self.codex_cli(second, 'PRIVATE-SECOND')
+        self.assertEqual(self.store.snapshot()['sessions'], [])
+
+    def test_explicit_project_does_not_allow_other_sibling_projects(self):
+        second = self.root / 'second-project'; second.mkdir()
+        third = self.root / 'third-project'; third.mkdir()
+        self.codex_cli(third, 'PRIVATE-THIRD', allowed=second)
+        self.assertEqual(self.store.snapshot()['sessions'], [])
+
+    def test_explicit_project_requires_existing_absolute_directory(self):
+        for invalid in ['relative-project', self.root / 'missing', self.root / 'file']:
+            (self.root / 'file').touch()
+            with self.subTest(invalid=invalid), patch.object(office.sys, 'stderr', io.StringIO()):
+                with self.assertRaises(SystemExit):
+                    self.codex_cli(self.root / 'project', 'PRIVATE', allowed=invalid)
 
 
 if __name__ == '__main__':

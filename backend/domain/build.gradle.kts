@@ -19,6 +19,4 @@ dependencies {
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
 
-    // Hibernate Types (for JSON support)
-    implementation("io.hypersistence:hypersistence-utils-hibernate-60:3.7.0")
 }

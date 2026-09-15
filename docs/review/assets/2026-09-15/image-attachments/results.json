@@ -1,0 +1,25 @@
+{
+  "postId": 1,
+  "attachment": {
+    "id": "572edf5c-7589-4165-88e8-ccd5eaaa69b2",
+    "url": "/api/portal/attachments/572edf5c-7589-4165-88e8-ccd5eaaa69b2",
+    "mediaType": "image/png",
+    "byteSize": 3848,
+    "width": 640,
+    "height": 220
+  },
+  "privateOwnerImage": true,
+  "visitorPrivate404": true,
+  "publicImage200": true,
+  "privateImmediately404": true,
+  "detach404": true,
+  "filePasteDrop": true,
+  "legacyExplicitConversion": true,
+  "codeExamplePreserved": true,
+  "mobileNoOverflow": true,
+  "anonymousUpload401": true,
+  "svg400": true,
+  "noJsErrors": true,
+  "restartPersisted": true,
+  "separateDatabaseAndVolumeRestore": true
+}

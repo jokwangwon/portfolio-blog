@@ -14,3 +14,17 @@ else
   printf 'Backup failed; incomplete archive retained at %s\n' "$backup_file" >&2
   exit 1
 fi
+
+# DB first, then immutable attachment files. Unattached uploads may also be included.
+if docker exec portfolio-api-server test -d /app/data/attachments; then
+  attachment_file="${completed_file%.dump}.attachments.tar.gz"
+  if docker exec portfolio-api-server tar -C /app/data/attachments -czf - . > "$attachment_file.partial"; then
+    mv -- "$attachment_file.partial" "$attachment_file"
+    printf 'Attachment backup created: %s\n' "$attachment_file"
+  else
+    printf 'Attachment backup failed; DB dump retained: %s\n' "$completed_file" >&2
+    exit 1
+  fi
+else
+  printf 'Attachment directory not present; database backup only.\n'
+fi

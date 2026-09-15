@@ -46,6 +46,9 @@ class PostServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private AttachmentService attachmentService;
+
     @InjectMocks
     private PostService postService;
 
@@ -107,7 +110,7 @@ class PostServiceTest {
         @Test
         @DisplayName("ID로 게시글을 조회하면 조회수가 증가한다")
         void incrementViewCount() {
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
             int before = post.getViewCount();
 
             PostResponse result = postService.getPost(1L);
@@ -119,7 +122,7 @@ class PostServiceTest {
         @Test
         @DisplayName("존재하지 않는 게시글 조회 시 예외를 던진다")
         void throwWhenNotFound() {
-            given(postRepository.findByIdAndDeletedAtIsNull(anyLong())).willReturn(Optional.empty());
+            given(postRepository.findForUpdate(anyLong())).willReturn(Optional.empty());
 
             assertThatThrownBy(() -> postService.getPost(999L))
                     .isInstanceOf(ResourceNotFoundException.class);
@@ -260,7 +263,7 @@ class PostServiceTest {
             ReflectionTestUtils.setField(request, "content", "Updated content");
             ReflectionTestUtils.setField(request, "status", "PUBLISHED");
 
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
 
             PostResponse result = postService.updatePost(1L, request, "testuser");
 
@@ -274,7 +277,7 @@ class PostServiceTest {
             ReflectionTestUtils.setField(request, "title", "Hack");
             ReflectionTestUtils.setField(request, "content", "Hacked");
 
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
 
             assertThatThrownBy(() -> postService.updatePost(1L, request, "otheruser"))
                     .isInstanceOf(ForbiddenException.class);
@@ -294,7 +297,7 @@ class PostServiceTest {
             ReflectionTestUtils.setField(request, "content", "C");
             ReflectionTestUtils.setField(request, "status", "PUBLISHED");
 
-            given(postRepository.findByIdAndDeletedAtIsNull(2L)).willReturn(Optional.of(draftPost));
+            given(postRepository.findForUpdate(2L)).willReturn(Optional.of(draftPost));
 
             PostResponse result = postService.updatePost(2L, request, "testuser");
 
@@ -310,7 +313,7 @@ class PostServiceTest {
         @Test
         @DisplayName("본인 게시글을 소프트 삭제한다")
         void softDeleteOwnPost() {
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
             given(userRepository.findByUsername("testuser")).willReturn(Optional.of(author));
 
             postService.deletePost(1L, "testuser");
@@ -326,7 +329,7 @@ class PostServiceTest {
                     .password("encoded").role(UserRole.USER).build();
             ReflectionTestUtils.setField(otherUser, "id", 2L);
 
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
             given(userRepository.findByUsername("otheruser")).willReturn(Optional.of(otherUser));
 
             assertThatThrownBy(() -> postService.deletePost(1L, "otheruser"))
@@ -341,7 +344,7 @@ class PostServiceTest {
                     .password("encoded").role(UserRole.ADMIN).build();
             ReflectionTestUtils.setField(admin, "id", 99L);
 
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
             given(userRepository.findByUsername("admin")).willReturn(Optional.of(admin));
 
             postService.deletePost(1L, "admin");
@@ -357,7 +360,7 @@ class PostServiceTest {
         @Test
         @DisplayName("게시글에 좋아요를 추가한다")
         void likePost() {
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
             given(userRepository.findByUsername("testuser")).willReturn(Optional.of(author));
             given(likeRepository.existsByUserIdAndPostId(1L, 1L)).willReturn(false);
 
@@ -371,7 +374,7 @@ class PostServiceTest {
         @Test
         @DisplayName("중복 좋아요 시 예외를 던진다")
         void throwWhenAlreadyLiked() {
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
             given(userRepository.findByUsername("testuser")).willReturn(Optional.of(author));
             given(likeRepository.existsByUserIdAndPostId(1L, 1L)).willReturn(true);
 
@@ -385,7 +388,7 @@ class PostServiceTest {
         void unlikePost() {
             ReflectionTestUtils.setField(post, "likeCount", 1);
 
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
             given(userRepository.findByUsername("testuser")).willReturn(Optional.of(author));
             given(likeRepository.existsByUserIdAndPostId(1L, 1L)).willReturn(true);
 
@@ -398,7 +401,7 @@ class PostServiceTest {
         @Test
         @DisplayName("좋아요하지 않은 게시글 취소 시 예외를 던진다")
         void throwWhenNotLiked() {
-            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
+            given(postRepository.findForUpdate(1L)).willReturn(Optional.of(post));
             given(userRepository.findByUsername("testuser")).willReturn(Optional.of(author));
             given(likeRepository.existsByUserIdAndPostId(1L, 1L)).willReturn(false);
 

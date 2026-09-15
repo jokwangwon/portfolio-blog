@@ -3,10 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Link from "next/link";
 import PostEditor from "./PostEditor";
 import { clearDraft, loadDraft } from "../hooks/useAutoSave";
+import { convertInlineImages } from "../api/attachmentApi";
+vi.mock("../api/attachmentApi", () => ({ convertInlineImages: vi.fn() }));
 import type { PostResponse } from "@/src/types/api";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("next/dynamic", () => ({ default: () => function Editor({ content, onChange }: { content: string; onChange: (s: string) => void }) { return <textarea aria-label="본문 편집" value={content} onChange={e => onChange(e.target.value)} />; } }));
+vi.mock("next/dynamic", () => ({ default: () => function Editor({ content, onChange, onBusyChange }: { content: string; onChange: (s: string) => void; onBusyChange?: (busy: boolean) => void }) { return <><textarea aria-label="본문 편집" value={content} onChange={e => onChange(e.target.value)} /><button onClick={() => onBusyChange?.(true)}>업로드 시작 테스트</button></>; } }));
 vi.mock("./MarkdownRenderer", () => ({ default: ({ content }: { content: string }) => <article>{content}</article> }));
 const savedPost = { id: 7, title: "제목", content: "본문", status: "DRAFT", tags: [], author: { id: 1, username: "admin" }, updatedAt: "2026-09-13T00:00:00" } as PostResponse;
 function write() { fireEvent.change(screen.getByLabelText("제목"), { target: { value: "제목" } }); fireEvent.change(screen.getByLabelText("본문 편집"), { target: { value: "본문" } }); }
@@ -14,6 +16,38 @@ beforeEach(() => { localStorage.clear(); clearDraft(); clearDraft(7); });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe("글 작성 저장 흐름", () => {
+  it("이미지 업로드 중 서버 저장과 키보드 저장을 잠근다", () => {
+    const onSubmit = vi.fn();
+    render(<PostEditor categories={[]} tags={[]} isPending={false} onSubmit={onSubmit} />);
+    write();
+    fireEvent.click(screen.getByRole("button", { name: "업로드 시작 테스트" }));
+    expect(screen.getByRole("button", { name: "임시저장" })).toBeDisabled();
+    fireEvent.keyDown(window, { key: "s", ctrlKey: true });
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+  it("기존 인라인 이미지 변환 후 글 저장 실패 시 원래 본문과 복구본을 유지한다", async () => {
+    const content = "![image](data:image/png;base64,aGVsbG8=)";
+    const converted = "![image](/api/portal/attachments/12345678-1234-1234-1234-123456789abc)";
+    vi.mocked(convertInlineImages).mockResolvedValue(converted);
+    const onSubmit = vi.fn().mockRejectedValue(new Error("offline"));
+    render(<PostEditor categories={[]} tags={[]} isPending={false} onSubmit={onSubmit} />);
+    write(); fireEvent.change(screen.getByLabelText("본문 편집"), { target: { value: content } });
+    fireEvent.click(screen.getByRole("button", { name: "임시저장" }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ content: converted })));
+    expect(await screen.findByRole("alert")).toHaveTextContent("서버에 저장하지 못했습니다");
+    expect(screen.getByLabelText("본문 편집")).toHaveValue(content);
+    expect(loadDraft()?.content).toBe(content);
+  });
+  it("인라인 이미지 변환 성공 후 저장 본문을 확정하고 복구본을 정리한다", async () => {
+    const converted = "![image](/api/portal/attachments/12345678-1234-1234-1234-123456789abc)";
+    vi.mocked(convertInlineImages).mockResolvedValue(converted);
+    const onSubmit = vi.fn().mockResolvedValue({ ...savedPost, content: converted });
+    render(<PostEditor categories={[]} tags={[]} isPending={false} onSubmit={onSubmit} />);
+    write(); fireEvent.change(screen.getByLabelText("본문 편집"), { target: { value: "![image](data:image/png;base64,aGVsbG8=)" } });
+    fireEvent.click(screen.getByRole("button", { name: "임시저장" }));
+    await waitFor(() => expect(screen.getByLabelText("본문 편집")).toHaveValue(converted));
+    expect(loadDraft()).toBeNull();
+  });
   it("비공개 완성 글을 저장하고 실패해도 공개 범위를 복구본에 보존한다", async () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error("offline"));
     render(<PostEditor categories={[]} tags={[]} isPending={false} onSubmit={onSubmit} />);

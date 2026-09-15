@@ -54,7 +54,7 @@ public class SecurityConfig {
                             "/oauth2/**", "/api/portal/posts/*/like", "/api/portal/posts/*/comments/**")
                     .denyAll()
                     .requestMatchers(HttpMethod.POST, "/api/portal/posts", "/api/portal/categories/**",
-                            "/api/portal/tags/**", "/api/portal/ai/**").hasRole("ADMIN")
+                            "/api/portal/tags/**", "/api/portal/ai/**", "/api/portal/attachments").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/api/portal/posts/**", "/api/portal/categories/**",
                             "/api/portal/tags/**").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/api/portal/posts/**", "/api/portal/categories/**",
@@ -84,6 +84,7 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/portal/posts/my").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/portal/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/portal/attachments/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/tags/**").permitAll()
                         .requestMatchers("/health").permitAll()

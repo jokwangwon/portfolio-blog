@@ -294,6 +294,8 @@ def run_task(store, source, activity, command, public_title=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--state-dir', type=Path, default=STATE)
+    parser.add_argument('--allow-project', type=Path, action='append', default=[],
+                        help='명시적으로 연결할 추가 프로젝트의 절대 경로 (반복 가능)')
     sub = parser.add_subparsers(dest='mode', required=True)
     for mode in ('on', 'off', 'status', 'serve', 'hook', 'codex-hook'):
         sub.add_parser(mode)
@@ -303,7 +305,10 @@ def main():
     run.add_argument('--public-title', type=clean_public_title, help='공개 칠판 제목 (최대 48자, 생략 시 일반 상태)')
     run.add_argument('command', nargs=argparse.REMAINDER)
     args = parser.parse_args()
-    store = Store(args.state_dir)
+    for project in args.allow_project:
+        if not project.is_absolute() or not project.is_dir() or not clean_project_name(project.resolve().name):
+            parser.error('--allow-project에는 존재하는 프로젝트 디렉터리의 절대 경로가 필요합니다.')
+    store = Store(args.state_dir, [ROOT, *args.allow_project])
     if args.mode in {'on', 'off'}:
         store.set_enabled(args.mode == 'on')
         print('Office 방송 ' + ('켜짐' if store.enabled() else '꺼짐'))

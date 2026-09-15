@@ -54,6 +54,67 @@ tags:
     description: AI benchmark operations
 
 paths:
+  /attachments:
+    post:
+      tags: [Posts]
+      summary: Upload a PNG or JPEG attachment (production ADMIN)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Owner-only upload; bind through post content. Input and output max 10 MiB, side max 8192px, area max 20000000px.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+        '400':
+          description: Invalid, unsupported or oversized dimensions
+        '401':
+          description: Authentication required
+        '403':
+          description: ADMIN required in production
+        '413':
+          description: File exceeds size limit
+  /attachments/{id}:
+    get:
+      tags: [Posts]
+      summary: Read attachment using current post visibility
+      description: Owner or undeleted PUBLISHED PUBLIC post; otherwise 404. Cache-Control no-store and X-Content-Type-Options nosniff.
+      security:
+        - {}
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Re-encoded image without source metadata
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Not found or not readable
   # ==========================================
   # Service Contract (모든 서비스 필수)
   # ==========================================
@@ -884,9 +945,35 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT Access Token (Authorization: Bearer {token})
+      description: "JWT Access Token (Authorization: Bearer {token})"
 
   schemas:
+    Attachment:
+      type: object
+      required: [id, url, mediaType, byteSize, width, height]
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          description: Canonical /api/portal/attachments/{UUID} URL
+        mediaType:
+          type: string
+          enum: [image/png, image/jpeg]
+        byteSize:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 10485760
+        width:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        height:
+          type: integer
+          minimum: 1
+          maximum: 8192
     # ==========================================
     # Post Schemas
     # ==========================================

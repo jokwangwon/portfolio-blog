@@ -29,6 +29,7 @@ public class PostService {
     private final TagRepository tagRepository;
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
+    private final AttachmentService attachmentService;
 
     public Page<PostResponse> getPublishedPosts(Pageable pageable) {
         return postRepository.findAllByStatusAndDeletedAtIsNull(PostStatus.PUBLISHED, pageable)
@@ -68,7 +69,7 @@ public class PostService {
 
     @Transactional
     public PostResponse getPost(Long id, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        Post post = postRepository.findForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
         if (!post.isPubliclyReadable()
                 && !post.getAuthor().getUsername().equals(username)) {
@@ -130,12 +131,13 @@ public class PostService {
         }
 
         postRepository.save(post);
+        attachmentService.synchronize(post, post.getContent());
         return PostResponse.from(post);
     }
 
     @Transactional
     public PostResponse updatePost(Long id, PostRequest request, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        Post post = postRepository.findForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
 
         if (!post.getAuthor().getUsername().equals(username)) {
@@ -171,12 +173,13 @@ public class PostService {
             post.archive();
         }
 
+        attachmentService.synchronize(post, post.getContent());
         return PostResponse.from(post);
     }
 
     @Transactional
     public void deletePost(Long id, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        Post post = postRepository.findForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
 
         User requester = userRepository.findByUsername(username)
@@ -191,7 +194,7 @@ public class PostService {
 
     @Transactional
     public void likePost(Long postId, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
+        Post post = postRepository.findForUpdate(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
         if (!post.isPubliclyReadable()) throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         User user = userRepository.findByUsername(username)
@@ -207,7 +210,7 @@ public class PostService {
 
     @Transactional
     public void unlikePost(Long postId, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
+        Post post = postRepository.findForUpdate(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
         if (!post.isPubliclyReadable()) throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         User user = userRepository.findByUsername(username)
