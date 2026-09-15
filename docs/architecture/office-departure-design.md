@@ -9,3 +9,12 @@
 - 서버 스냅샷·훅·DB·공개 범위에는 변경이 없다. 퇴근 시간은 브라우저의 일시적 표현이며 이력으로 저장하지 않는다.
 
 검증: 종료 직후 유지/이동/최종 제거, 좌석 반납, 중복 이벤트, 종료 중 복귀, 다중 직원, no-path/시간 제한, 방송 off/연결 장애, 동작 줄이기, 대기→작업 복귀, 소등 시점, 모바일/라이트·다크. 기존 미배포 BlogPreviewSection 제외 후 frontend만 배포한다.
+
+
+## 구현·운영 검증
+
+- Attendance에서 종료 캐릭터만 별도 관리하고 기존 OfficeState.walkToTile을 재사용했다. 퇴근 완료 시 좌석/선택 해제, 같은 세션 복귀 시 기존 캐릭터 재사용. 대기는 정지 자세와 기다림 말풍선, 상단 대기 인원으로 표시한다.
+- Frontend 40 files / 220 tests 통과. 새 수용 테스트는 구현 전 5개 실패를 확인한 뒤 구현했다. 전체 기존 회귀·수정 파일 lint·운영 빌드/TypeScript 통과.
+- 격리 브라우저: 두 명 중 한 명 퇴근, 잠깐 멈춤과 실제 통로 이동을 스크린샷으로 확인. 마지막 퇴근 후 소등, 대기, 퇴근 취소·복귀, 연결 장애/방송 off 즉시 비우기, 동작 줄이기, 모바일 다크 가로 넘침/JS 오류 없음.
+- [로컬 검증 결과](../review/assets/2026-09-15/office-departure/results.json), [공개 검증](../review/assets/2026-09-15/office-departure/public-results.json), [이미지·소스 manifest](../review/assets/2026-09-15/office-departure/release.json).
+- 운영 frontend `office-departure`/latest 반영. 이전 이미지는 `before-office-departure`, 정확한 소스는 `backups/releases/office-departure-2026-09-15-source.tar.gz` (0600). 서버/DB/수집기 변경 없음. 이전 frontend 태그로 복구 가능하다.

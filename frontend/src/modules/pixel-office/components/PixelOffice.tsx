@@ -20,6 +20,8 @@ import { renderSeasonOrnament } from "../season/renderSeasonOrnament";
 const DEFAULT_ZOOM = 2; // will be auto-calculated to fit container
 
 export default function PixelOffice() {
+  const [departing, setDeparting] = useState(0);
+  const departingRef = useRef(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const panRef = useRef({ x: 0, y: 0 });
@@ -55,6 +57,7 @@ export default function PixelOffice() {
     presence,
     assetError,
     sessionAgentId,
+    advanceAttendance,
   } = usePixelOffice();
 
 
@@ -96,6 +99,8 @@ export default function PixelOffice() {
     const stop = startGameLoop(canvas, {
       update(dt) {
         officeState.update(dt);
+        const count = advanceAttendance(dt, motion.matches);
+        if (departingRef.current !== count) { departingRef.current = count; setDeparting(count); }
         companion.current.update(dt,motion.matches);
       },
       render(display) {
@@ -137,7 +142,7 @@ export default function PixelOffice() {
     });
 
     return stop;
-  }, [officeState, zoom, season, calendar.night]);
+  }, [officeState, zoom, season, calendar.night, advanceAttendance]);
 
   // Click handler
   const handleClick = useCallback(
@@ -223,9 +228,12 @@ export default function PixelOffice() {
 
   const selectedChar = getSelectedCharacter();
   const connected = presence.connection === "connected";
-  const empty = connected && presence.sessions.length === 0;
+  const leaving = connected && presence.enabled ? departing : 0;
+  const waiting = presence.sessions.filter(session => session.activity === "waiting").length;
+  const empty = connected && presence.sessions.length === 0 && leaving === 0;
   const status = !connected ? "연결 확인 중" : !presence.enabled ? "방송 꺼짐"
-    : empty ? "출근한 직원 없음" : `출근 ${presence.sessions.length}명`;
+    : empty ? "출근한 직원 없음" : [presence.sessions.length ? `출근 ${presence.sessions.length}명` : "",
+      waiting ? `응답 대기 ${waiting}명` : "", leaving ? `퇴근 중 ${leaving}명` : ""].filter(Boolean).join(" · ");
   if (assetError) return <p role="alert">사무실을 불러오지 못했습니다. 페이지를 새로고침해 주세요.</p>;
 
   return (
@@ -248,7 +256,7 @@ export default function PixelOffice() {
           <div className={styles.status} role="status" aria-live="polite"><span className={styles.statusDot} aria-hidden="true"/>{status}</div>
           <span className={styles.roomLabel}>{connected ? "실시간 작업 세션" : "연결 확인 중"}</span>
         </div>
-      <div className={styles.canvasRoom} ref={containerRef} data-office-light={empty ? "off" : connected ? "on" : "unknown"}>
+      <div className={styles.canvasRoom} ref={containerRef} data-office-departing={leaving} data-office-waiting={waiting} data-office-light={empty ? "off" : connected ? "on" : "unknown"}>
       <canvas
         ref={canvasRef}
         onClick={handleClick}

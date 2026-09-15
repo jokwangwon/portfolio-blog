@@ -29,8 +29,12 @@ export function usePixelOffice(legacy = false) {
   }, [legacy]);
 
   useEffect(() => {
-    if (officeState && !legacy) attendance.current.sync(officeState, presence.sessions);
+    if (officeState && !legacy) attendance.current.sync(officeState, presence.sessions, presence.connection === "connected" && presence.enabled);
   }, [officeState, presence, legacy]);
+
+  const advanceAttendance = useCallback((dt: number, reducedMotion: boolean) =>
+    officeState && !legacy ? attendance.current.update(officeState, dt, reducedMotion) : 0,
+    [officeState, legacy]);
 
   const getSession = useCallback((id: number) =>
     presence.sessions.find(s => attendance.current.idFor(s.id) === id), [presence]);
@@ -49,6 +53,6 @@ export function usePixelOffice(legacy = false) {
   }, [selectedAgentId, officeState, legacy, getSession]);
 
   return { officeState, isLoading, assetError, selectedAgentId, setSelectedAgentId,
-    getAgentName, getAgentRole, getSelectedCharacter, presence,
+    getAgentName, getAgentRole, getSelectedCharacter, presence, advanceAttendance,
     sessionAgentId: (id: string) => attendance.current.idFor(id) };
 }

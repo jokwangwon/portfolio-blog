@@ -1,0 +1,12 @@
+{
+  "waitingVisible": true,
+  "departurePauseAndWalk": true,
+  "remainingStaffKeepLightsOn": true,
+  "lastDepartureBeforeLightsOff": true,
+  "returnCancelsDeparture": true,
+  "unavailableClears": true,
+  "broadcastOffClears": true,
+  "reducedMotionSkipsDeparture": true,
+  "mobileDarkNoOverflow": true,
+  "jsErrors": []
+}
