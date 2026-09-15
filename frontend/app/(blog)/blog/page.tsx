@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { canWritePosts } from "@/src/shell/auth/publicAccess";
 import {
   usePosts,
   useSearchPosts,
@@ -19,7 +20,7 @@ export default function BlogPage() {
   const [page, setPage] = useState(0);
   const [categoryId, setCategoryId] = useState<number | undefined>();
   const [searchKeyword, setSearchKeyword] = useState("");
-  const { isAuthenticated } = useAuth();
+  const { user } = useAuth();
 
   const isSearching = searchKeyword.trim().length > 0;
 
@@ -53,10 +54,10 @@ export default function BlogPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">블로그</h1>
-          <p className="text-sm text-muted-foreground mt-1">개발 경험과 기술을 공유합니다</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">기록</h1>
+          <p className="text-sm text-muted-foreground mt-1">개발하며 해결한 문제, 공부한 내용과 독서 노트를 쌓아갑니다.</p>
         </div>
-        {isAuthenticated && (
+        {canWritePosts(user) && (
           <Link href="/blog/editor" className={buttonVariants()}>
             글쓰기
           </Link>

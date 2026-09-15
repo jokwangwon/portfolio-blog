@@ -1,47 +1,49 @@
 package com.portfolio.portal.health;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 class HealthControllerTest {
-
-    private final HealthController controller = new HealthController();
+    private final DataSource source = mock(DataSource.class);
+    private final HealthController controller = new HealthController(source);
 
     @Test
-    @DisplayName("/health 응답에 status=UP이 포함된다")
-    void healthReturnsUp() {
-        Map<String, Object> result = controller.health();
-
-        assertThat(result.get("status")).isEqualTo("UP");
+    void healthyDatabaseReturnsUpAndClosesConnection() throws Exception {
+        Connection connection = mock(Connection.class);
+        when(source.getConnection()).thenReturn(connection);
+        when(connection.isValid(2)).thenReturn(true);
+        var response = controller.health();
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).containsEntry("status", "UP")
+                .containsEntry("service", "portfolio-portal-api").containsKey("timestamp");
+        verify(connection).close();
     }
 
     @Test
-    @DisplayName("/health 응답에 service 이름이 포함된다")
-    void healthContainsServiceName() {
-        Map<String, Object> result = controller.health();
-
-        assertThat(result.get("service")).isEqualTo("portfolio-portal-api");
+    void connectionFailureReturns503WithoutExceptionDetails() throws Exception {
+        when(source.getConnection()).thenThrow(new SQLException("private connection details"));
+        var response = controller.health();
+        assertThat(response.getStatusCode().value()).isEqualTo(503);
+        assertThat(response.getBody()).containsEntry("status", "DOWN");
+        assertThat(response.getBody().toString()).doesNotContain("private connection details");
     }
 
     @Test
-    @DisplayName("/health 응답에 timestamp가 포함된다")
-    void healthContainsTimestamp() {
-        Map<String, Object> result = controller.health();
-
-        assertThat(result).containsKey("timestamp");
+    void invalidConnectionReturns503AndClosesConnection() throws Exception {
+        Connection connection = mock(Connection.class);
+        when(source.getConnection()).thenReturn(connection);
+        when(connection.isValid(2)).thenReturn(false);
+        assertThat(controller.health().getStatusCode().value()).isEqualTo(503);
+        verify(connection).close();
     }
 
     @Test
-    @DisplayName("/api/summary 응답에 서비스 정보가 포함된다")
     void summaryContainsServiceInfo() {
-        Map<String, Object> result = controller.summary();
-
-        assertThat(result.get("service")).isEqualTo("portfolio-portal-api");
-        assertThat(result.get("version")).isNotNull();
-        assertThat(result).containsKey("endpoints");
+        assertThat(controller.summary()).containsEntry("service", "portfolio-portal-api")
+                .containsKeys("version", "endpoints");
     }
 }

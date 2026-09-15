@@ -8,14 +8,14 @@ import ContactSection from "@/src/modules/portfolio/components/ContactSection";
 
 export default function PortfolioPage() {
   return (
-    <>
+    <div className="bg-background">
       <HeroSection />
+      <ProjectsSection />
       <AboutSection />
       <TechStackSection />
-      <ProjectsSection />
       <ExperienceSection />
       <BlogPreviewSection />
       <ContactSection />
-    </>
+    </div>
   );
 }

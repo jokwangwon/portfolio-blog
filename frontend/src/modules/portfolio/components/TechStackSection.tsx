@@ -7,7 +7,6 @@ import { techStack, techCategories } from "../data/techStack";
 import { MotionSection } from "@/src/shared/animations/MotionSection";
 import { staggerContainer, scaleIn } from "@/src/shared/animations/variants";
 import { useReducedMotion } from "@/src/shared/animations/useReducedMotion";
-import ProficiencyBar from "./ProficiencyBar";
 
 export default function TechStackSection() {
   const [activeCategory, setActiveCategory] = useState<string>("Backend");
@@ -18,7 +17,10 @@ export default function TechStackSection() {
   return (
     <MotionSection id="tech-stack" className="py-24 md:py-32 bg-muted/30 dark:bg-muted/10">
       <div className="max-w-5xl mx-auto px-6">
-        <h2 className="text-3xl font-bold tracking-tight mb-12">Tech Stack</h2>
+        <h2 className="text-3xl font-bold tracking-tight mb-4">Tech Stack</h2>
+        <p className="text-muted-foreground mb-8">
+          프로젝트에서 사용한 기술과 적용한 부분입니다.
+        </p>
 
         <div className="flex flex-wrap gap-2 mb-8">
           {techCategories.map((cat) => (
@@ -49,9 +51,9 @@ export default function TechStackSection() {
               <span className="text-sm font-medium text-foreground block mb-2 text-center">
                 {tech.name}
               </span>
-              {tech.proficiency != null && (
-                <ProficiencyBar value={tech.proficiency} />
-              )}
+              <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                {tech.usage}
+              </p>
             </motion.div>
           ))}
         </motion.div>

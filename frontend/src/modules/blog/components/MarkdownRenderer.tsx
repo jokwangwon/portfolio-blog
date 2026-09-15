@@ -126,7 +126,7 @@ export default function MarkdownRenderer({
   };
 
   return (
-    <div className={`prose prose-neutral dark:prose-invert max-w-none ${className}`}>
+    <div className={`article-content max-w-none ${className}`}>
       <Markdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema], rehypeHighlight]}

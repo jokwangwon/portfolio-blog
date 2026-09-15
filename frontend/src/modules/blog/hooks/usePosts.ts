@@ -45,10 +45,11 @@ export function usePostDetail(id: number) {
   });
 }
 
-export function useMyPosts(params: MyPostListParams = {}) {
+export function useMyPosts(params: MyPostListParams = {}, enabled = true) {
   return useQuery({
     queryKey: ["posts", "my", params],
     queryFn: () => fetchMyPosts(params),
+    enabled,
   });
 }
 

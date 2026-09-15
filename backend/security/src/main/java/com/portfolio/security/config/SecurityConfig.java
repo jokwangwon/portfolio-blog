@@ -42,8 +42,25 @@ public class SecurityConfig {
     @org.springframework.beans.factory.annotation.Value("${cors.allowed-origins:http://localhost:3000}")
     private String corsAllowedOrigins;
 
+    @org.springframework.beans.factory.annotation.Value("${app.public-read-only:false}")
+    private boolean publicReadOnly;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        if (publicReadOnly) {
+            // Enforce the public launch policy before the normal route rules.
+            http.authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/portal/auth/signup", "/api/portal/auth/oauth-session",
+                            "/oauth2/**", "/api/portal/posts/*/like", "/api/portal/posts/*/comments/**")
+                    .denyAll()
+                    .requestMatchers(HttpMethod.POST, "/api/portal/posts", "/api/portal/categories/**",
+                            "/api/portal/tags/**", "/api/portal/ai/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/portal/posts/**", "/api/portal/categories/**",
+                            "/api/portal/tags/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/api/portal/posts/**", "/api/portal/categories/**",
+                            "/api/portal/tags/**").hasRole("ADMIN")
+                    .requestMatchers("/api/portal/posts/my").hasRole("ADMIN"));
+        }
         http
                 // CSRF 비활성화 (JWT 사용)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -65,6 +82,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/portal/auth/logout").permitAll()
                         .requestMatchers("/api/portal/auth/oauth-session").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers("/api/portal/posts/my").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/portal/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/portal/tags/**").permitAll()
@@ -110,6 +128,7 @@ public class SecurityConfig {
                 // JWT 인증 필터 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+        if (publicReadOnly) http.oauth2Login(AbstractHttpConfigurer::disable);
         return http.build();
     }
 

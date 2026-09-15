@@ -3,8 +3,8 @@
 import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import MarkdownRenderer from "@/src/modules/blog/components/MarkdownRenderer";
+import { PUBLIC_READ_ONLY, canWritePosts } from "@/src/shell/auth/publicAccess";
 import { usePostDetail, useDeletePost } from "@/src/modules/blog/hooks/usePosts";
 import { useAuth } from "@/src/shell/auth/useAuth";
 import { formatDateTime } from "@/src/shared/utils/format";
@@ -38,7 +38,7 @@ export default function PostDetailPage({
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const isAuthor =
-    isAuthenticated && user && post && user.username === post.author.username;
+    isAuthenticated && canWritePosts(user) && user && post && user.username === post.author.username;
 
   function handleDelete() {
     deletePost.mutate(postId, {
@@ -93,7 +93,7 @@ export default function PostDetailPage({
           <span>{post.author.username}</span>
           <span>{formatDateTime(post.publishedAt || post.createdAt)}</span>
           <span>조회 {post.viewCount}</span>
-          <LikeButton postId={post.id} likeCount={post.likeCount} />
+          {!PUBLIC_READ_ONLY && <LikeButton postId={post.id} likeCount={post.likeCount} />}
         </div>
 
         {isAuthor && (
@@ -140,11 +140,9 @@ export default function PostDetailPage({
 
       <Separator className="mb-8" />
 
-      <div className="prose prose-neutral max-w-none">
-        <Markdown remarkPlugins={[remarkGfm]}>{post.content}</Markdown>
-      </div>
+      <MarkdownRenderer content={post.content} />
 
-      <CommentSection postId={post.id} />
+      {!PUBLIC_READ_ONLY && post.status === "PUBLISHED" && <CommentSection postId={post.id} />}
     </article>
   );
 }

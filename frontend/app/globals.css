@@ -59,7 +59,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: "Pretendard Variable", var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -601,3 +601,20 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Shared by the published article and author preview. */
+.article-content { font-size: 1rem; line-height: 1.8; overflow-wrap: anywhere; }
+.article-content h1, .article-content h2, .article-content h3,
+.article-content h4, .article-content h5, .article-content h6 { font-weight: 650; line-height: 1.4; margin: 1.8em 0 .65em; }
+.article-content h1 { font-size: 1.875rem; }
+.article-content h2 { font-size: 1.5rem; }
+.article-content h3 { font-size: 1.25rem; }
+.article-content p { margin: 1em 0; }
+.article-content > :first-child { margin-top: 0; }
+.article-content ul, .article-content ol { padding-left: 1.5rem; margin: 1em 0; }
+.article-content ul { list-style: disc; }
+.article-content ol { list-style: decimal; }
+.article-content li { margin: .35em 0; }
+.article-content li > p { margin: .35em 0; }
+.article-content pre { line-height: 1.6; overflow-wrap: normal; max-width: 100%; }
+.article-content hr { border-top: 1px solid var(--border); margin: 2em 0; }

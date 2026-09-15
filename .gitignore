@@ -194,3 +194,9 @@ site/
 !.gitkeep
 !.editorconfig
 !DEVELOPMENT_GUIDE.md
+
+# Private production database backups
+/backups/
+
+# Local Office session records and public heartbeat (never source assets)
+.office-presence/

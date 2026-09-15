@@ -15,8 +15,8 @@ import {
   useSummarizePost,
 } from "@/src/modules/blog/hooks/usePosts";
 import PostEditor from "@/src/modules/blog/components/PostEditor";
+import { canWritePosts } from "@/src/shell/auth/publicAccess";
 import Loading from "@/src/shared/components/Loading";
-import { clearDraft } from "@/src/modules/blog/hooks/useAutoSave";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -48,6 +48,7 @@ export default function EditPostPage({
   if (authLoading || postLoading || catLoading || tagsLoading)
     return <Loading />;
   if (!isAuthenticated) return null;
+  if (!canWritePosts(user)) return <p>글 관리는 관리자만 사용할 수 있습니다.</p>;
 
   if (!post) {
     return (
@@ -85,16 +86,10 @@ export default function EditPostPage({
         initialData={post}
         categories={categories ?? []}
         tags={tags ?? []}
-        onSubmit={(data) => {
-          updatePost.mutate(
-            { id: postId, request: data },
-            {
-              onSuccess: () => {
-                clearDraft(postId);
-                router.push(`/blog/${postId}`);
-              },
-            }
-          );
+        key={postId}
+        onSubmit={(data) => updatePost.mutateAsync({ id: postId, request: data })}
+        onSaved={(saved) => {
+          if (saved.status === "PUBLISHED") router.push(`/blog/${saved.id}`);
         }}
         isPending={updatePost.isPending}
         onCreateCategory={async (name) => {

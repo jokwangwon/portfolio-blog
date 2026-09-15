@@ -65,15 +65,27 @@ public class PostService {
 
     @Transactional
     public PostResponse getPost(Long id) {
+        return getPost(id, null);
+    }
+
+    @Transactional
+    public PostResponse getPost(Long id, String username) {
         Post post = postRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
-        post.incrementViewCount();
+        if (post.getStatus() != PostStatus.PUBLISHED
+                && !post.getAuthor().getUsername().equals(username)) {
+            throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
+        }
+        if (post.getStatus() == PostStatus.PUBLISHED) post.incrementViewCount();
         return PostResponse.from(post);
     }
 
     public PostResponse getPostBySlug(String slug) {
         Post post = postRepository.findBySlugAndDeletedAtIsNull(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
+        if (post.getStatus() != PostStatus.PUBLISHED) {
+            throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
+        }
         return PostResponse.from(post);
     }
 

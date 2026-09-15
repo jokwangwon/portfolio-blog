@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["100.102.41.122"],
   async rewrites() {
     return [
+      { source: "/oauth2/:path*", destination: `${backendUrl}/oauth2/:path*` },
       {
         source: "/api/portal/:path*",
         destination: `${backendUrl}/api/portal/:path*`,

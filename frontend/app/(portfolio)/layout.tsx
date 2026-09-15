@@ -10,7 +10,7 @@ export default function PortfolioLayout({
   return (
     <>
       <PortfolioHeader />
-      <main className="flex-1">
+      <main className="flex-1 break-keep [overflow-wrap:anywhere]">
         <PageTransition>{children}</PageTransition>
       </main>
       <Footer />

@@ -1,0 +1,27 @@
+app:
+  public-read-only: true
+  cookie-secure: true
+
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+
+spring:
+  datasource:
+    hikari:
+      connection-timeout: 3000
+      validation-timeout: 2000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

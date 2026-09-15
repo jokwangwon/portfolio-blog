@@ -1,6 +1,7 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
+import { Button } from "@/components/ui/button";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -47,7 +48,7 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({ codeBlock: false }),
+      StarterKit.configure({ codeBlock: false, link: false }),
       Placeholder.configure({ placeholder: "내용을 입력하세요... ( / 로 명령어 사용)" }),
       CodeBlockLowlight.configure({ lowlight }),
       Image.configure({ allowBase64: true }),
@@ -76,6 +77,7 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
       onChange(md);
     },
     editorProps: {
+      attributes: { role: "textbox", "aria-label": "본문 편집", "aria-multiline": "true" },
       handleKeyDown: (_view, event) => {
         // Slash command trigger
         if (event.key === "/") {
@@ -205,7 +207,7 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
   useEffect(() => {
     if (editor && content !== lastContentRef.current) {
       lastContentRef.current = content;
-      editor.commands.setContent(content);
+      editor.commands.setContent(content, { emitUpdate: false });
     }
   }, [content, editor]);
 
@@ -327,6 +329,14 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
 
   return (
     <div ref={containerRef} className="relative">
+      <div role="group" aria-label="본문 서식" className="flex flex-wrap gap-1 border-b border-input px-2 py-1">
+        <Button variant="ghost" className="min-h-10" aria-pressed={editor.isActive("heading", { level: 2 })} onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>제목</Button>
+        <Button variant="ghost" className="min-h-10 font-bold" aria-pressed={editor.isActive("bold")} onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().toggleBold().run()}>굵게</Button>
+        <Button variant="ghost" className="min-h-10" aria-pressed={editor.isActive("bulletList")} onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().toggleBulletList().run()}>목록</Button>
+        <Button variant="ghost" className="min-h-10" aria-pressed={editor.isActive("codeBlock")} onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>코드</Button>
+        <Button variant="ghost" className="min-h-10" onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().undo().run()}>되돌리기</Button>
+        <Button variant="ghost" className="min-h-10" onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().redo().run()}>다시 실행</Button>
+      </div>
       <BubbleToolbar editor={editor} />
       <TableMenu editor={editor} />
       <div
@@ -351,9 +361,6 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         )}
         <div
           className="cursor-text"
-          role="textbox"
-          tabIndex={-1}
-          onKeyDown={() => editor.commands.focus()}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               editor.chain().focus("end").run();
@@ -375,9 +382,9 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         />
       )}
       <div className="px-4 py-2 text-xs text-muted-foreground border-t border-input flex gap-4 flex-wrap">
-        <span><kbd className="px-1 rounded bg-muted">⌘B</kbd> 볼드</span>
-        <span><kbd className="px-1 rounded bg-muted">⌘I</kbd> 이탤릭</span>
-        <span><kbd className="px-1 rounded bg-muted">⌘E</kbd> 코드</span>
+        <span><kbd className="px-1 rounded bg-muted">Ctrl/Cmd+B</kbd> 볼드</span>
+        <span><kbd className="px-1 rounded bg-muted">Ctrl/Cmd+I</kbd> 이탤릭</span>
+        <span><kbd className="px-1 rounded bg-muted">Ctrl/Cmd+E</kbd> 코드</span>
         <span><kbd className="px-1 rounded bg-muted">/</kbd> 명령어</span>
         <span><kbd className="px-1 rounded bg-muted">Tab</kbd> 들여쓰기</span>
         <span><kbd className="px-1 rounded bg-muted">Shift+Enter</kbd> 줄바꿈</span>
