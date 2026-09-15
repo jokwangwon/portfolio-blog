@@ -21,6 +21,7 @@ export interface DraftData {
   categoryId?: number;
   tagIds: number[];
   status: "DRAFT" | "PUBLISHED";
+  visibility?: "PUBLIC" | "PRIVATE";
   savedAt: number;
 }
 
@@ -35,6 +36,7 @@ function parseDraft(raw: string | null): DraftData | null {
         typeof data.excerpt !== "string" || !Array.isArray(data.tagIds) ||
         !data.tagIds.every((id: unknown) => typeof id === "number") ||
         (data.categoryId !== undefined && typeof data.categoryId !== "number") ||
+        (data.visibility !== undefined && !["PUBLIC", "PRIVATE"].includes(data.visibility)) ||
         !["DRAFT", "PUBLISHED"].includes(data.status) || !Number.isFinite(data.savedAt)) return null;
     return data;
   } catch { return null; }
@@ -64,7 +66,7 @@ export function listLocalDrafts(): Array<DraftData & { key: string }> {
   return [...combined.values()].sort((a, b) => b.savedAt - a.savedAt);
 }
 function signature(data: DraftData) {
-  return JSON.stringify([data.title, data.content, data.excerpt, data.categoryId, data.tagIds, data.status]);
+  return JSON.stringify([data.title, data.content, data.excerpt, data.categoryId, data.tagIds, data.status, data.visibility]);
 }
 
 export function useAutoSave(getData: () => DraftData, postId?: number, { enabled = true, dirty = true }: { enabled?: boolean; dirty?: boolean } = {}) {

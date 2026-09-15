@@ -110,6 +110,7 @@ Table posts {
   content text [not null, note: 'Markdown 형식']
   excerpt varchar(200) [null, note: '요약문, 미제공 시 앱에서 자동 생성']
   status varchar(20) [not null, default: 'DRAFT', note: 'DRAFT, PUBLISHED, ARCHIVED']
+  visibility varchar(20) [not null, default: 'PUBLIC', note: 'PUBLIC/PRIVATE — 작성 상태와 독립']
   view_count int [not null, default: 0]
   like_count int [not null, default: 0]
   created_at timestamp [not null, default: `now()`]

@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/src/shell/state/store";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchPosts,
@@ -38,18 +39,23 @@ export function usePosts(params: PostListParams = {}) {
 }
 
 export function usePostDetail(id: number) {
+  const { user, isLoading } = useAppSelector(state => state.auth);
   return useQuery({
-    queryKey: ["posts", id],
-    queryFn: () => fetchPostById(id),
-    enabled: id > 0,
+    queryKey: ["posts", id, user?.username ?? null],
+    queryFn: ({ signal }) => fetchPostById(id, signal),
+    enabled: id > 0 && !isLoading,
+    staleTime: 0,
+    gcTime: 0,
   });
 }
 
 export function useMyPosts(params: MyPostListParams = {}, enabled = true) {
+  const { user, isLoading } = useAppSelector(state => state.auth);
   return useQuery({
-    queryKey: ["posts", "my", params],
-    queryFn: () => fetchMyPosts(params),
-    enabled,
+    queryKey: ["posts", "my", user?.username ?? null, params],
+    queryFn: ({ signal }) => fetchMyPosts(params, signal),
+    enabled: enabled && !!user && !isLoading,
+    gcTime: 0,
   });
 }
 

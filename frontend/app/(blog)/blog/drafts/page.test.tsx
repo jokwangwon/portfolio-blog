@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithProviders, authenticatedState, unauthenticatedState } from "@/src/test/test-utils";
@@ -7,9 +7,22 @@ import { mockPageResponse, mockPost } from "@/src/test/mocks/handlers";
 import DraftsPage from "./page";
 
 describe("Drafts page", () => {
-  it("requests drafts and links to the editor", async () => {
+  it("작성 상태와 공개 범위를 독립적으로 필터링한다", async () => {
+    const requests: URLSearchParams[] = [];
     server.use(http.get("/api/portal/posts/my", ({ request }) => {
-      expect(new URL(request.url).searchParams.get("status")).toBe("DRAFT");
+      requests.push(new URL(request.url).searchParams);
+      return HttpResponse.json(mockPageResponse);
+    }));
+    renderWithProviders(<DraftsPage />, { preloadedState: authenticatedState });
+    await screen.findByRole("link", { name: /Test Post/ });
+    fireEvent.change(screen.getByLabelText("작성 상태"), { target: { value: "PUBLISHED" } });
+    fireEvent.change(screen.getByLabelText("공개 범위"), { target: { value: "PRIVATE" } });
+    await waitFor(() => expect(requests.some(params => params.get("status") === "PUBLISHED" && params.get("visibility") === "PRIVATE")).toBe(true));
+  });
+
+  it("requests all owned records and links to the editor", async () => {
+    server.use(http.get("/api/portal/posts/my", ({ request }) => {
+      expect(new URL(request.url).searchParams.get("status")).toBeNull();
       return HttpResponse.json({ ...mockPageResponse, content: [{ ...mockPost, status: "DRAFT" }] });
     }));
     renderWithProviders(<DraftsPage />, { preloadedState: authenticatedState });
@@ -18,7 +31,7 @@ describe("Drafts page", () => {
   it("shows an empty state", async () => {
     server.use(http.get("/api/portal/posts/my", () => HttpResponse.json({ ...mockPageResponse, content: [], totalPages: 0 })));
     renderWithProviders(<DraftsPage />, { preloadedState: authenticatedState });
-    expect(await screen.findByText("임시저장한 글이 없습니다.")).toBeInTheDocument();
+    expect(await screen.findByText("선택한 조건에 맞는 기록이 없습니다.")).toBeInTheDocument();
   });
   it("shows fetch errors instead of an empty state", async () => {
     server.use(http.get("/api/portal/posts/my", () => new HttpResponse(null, { status: 500 })));

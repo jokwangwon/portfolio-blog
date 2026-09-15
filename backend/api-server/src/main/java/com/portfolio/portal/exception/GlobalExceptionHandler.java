@@ -8,6 +8,8 @@ import com.portfolio.portal.ai.AiServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -31,6 +33,11 @@ public class GlobalExceptionHandler {
                 .toList();
 
         return ResponseEntity.badRequest().body(errorBody("VALIDATION_ERROR", "입력값 검증 실패", errors));
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<Map<String, Object>> handleMalformedRequest(Exception ex) {
+        return ResponseEntity.badRequest().body(errorBody("BAD_REQUEST", "요청 형식이 올바르지 않습니다", null));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

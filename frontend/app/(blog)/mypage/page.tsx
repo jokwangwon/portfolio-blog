@@ -45,7 +45,7 @@ export default function MyPage() {
             href="/blog/drafts"
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
-            임시저장 글 보기
+            내 기록 보기
           </Link>
         </div>
 

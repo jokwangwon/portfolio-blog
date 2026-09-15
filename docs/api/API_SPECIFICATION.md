@@ -1,5 +1,14 @@
 # API 명세서 (API Specification)
 
+> 2026-09-13 공개 정책: 운영 `app.public-read-only=true`에서는 회원가입·OAuth2·댓글·좋아요를
+> 차단한다. 게시글/분류/AI 쓰기는 ADMIN만 허용한다. 개발 프로필의 USER+ 설명과 구분한다.
+> 공개 조회는 PUBLISHED + PUBLIC인 글만 허용한다. DRAFT/ARCHIVED 또는 PRIVATE 상세는 작성자만 200, 그 외에는 404.
+> `GET /posts/my`는 인증 필수(운영 ADMIN), status(DRAFT/PUBLISHED/ARCHIVED)와 visibility(PUBLIC/PRIVATE)의 독립 필터·페이지네이션 지원.
+> 2026-09-15: 글 요청·응답에 `visibility: PUBLIC | PRIVATE` 추가. 생성 생략은 PUBLIC, 수정 생략은 기존 값 유지. 잘못된 공개 범위는 400.
+> 목록·검색·분류·태그·댓글에 비공개 필터 적용, 글 응답은 `Cache-Control: no-store`. 비공개 열람은 조회 수에 반영하지 않는다.
+> `/health`는 DB 연결 정상 200 UP, 연결 실패 503 DOWN. 상세 설계: [공개 준비](../architecture/public-release-design.md).
+
+
 > **REST API 설계 문서**
 > OpenAPI 3.0 기반 Frontend-Backend 계약
 
@@ -1099,12 +1108,11 @@ langfuse:
 }
 ```
 
-**status 값**: `UP` | `DOWN` | `DEGRADED`
+**포털 /health status 값**: `UP` | `DOWN`
 - `UP`: 정상 (DB 연결 포함)
 - `DOWN`: DB 연결 실패 등 핵심 기능 장애
-- `DEGRADED`: 부분 장애 (핵심은 OK, 부가 기능 실패)
 
-**에러 시에도 200 반환** (상태값으로 구분). 서비스 자체가 죽으면 타임아웃 처리.
+**DB 연결 실패 시 503 반환**. 응답에는 `status`, `service`, `timestamp`만 포함하고 내부 연결 정보는 노출하지 않는다. 서비스 자체가 죽으면 타임아웃 처리.
 
 ### GET /api/summary (서비스 요약)
 
@@ -1228,3 +1236,15 @@ export default apiClient;
 **이 명세서는 Frontend-Backend 간 계약입니다.**
 **변경 시 반드시 양측 팀(또는 개발자)에게 공지하세요.**
 **OpenAPI 파일(`openapi.yaml`)과 항상 동기화하세요.**
+
+## 공개 Office 작업 상태 (2026-09-15)
+
+GET `/api/office`: `connection`(connected/unavailable), `enabled`, `updatedAt`(epoch ms/null), `sessions` 배열. 세션 필드는 임의 UUID `id`, `source`(claude/codex/local), `activity`(working/reading/editing/running/testing/waiting), `startedAt`과 아래의 선택적 공개 필드만 허용한다.
+
+GET `/api/office/events`: 같은 스냅샷을 SSE `presence` 이벤트로 약 2초마다 전달. 캐시 없음, 요청 종료 시 타이머 정리. 수집기 하트비트가 15초 초과하면 unavailable 및 빈 배열. 공개 POST/PUT/DELETE 미지원(405).
+
+수집기는 웹 API와 분리된 로컬 프로세스이며 읽기 전용 상태 파일만 공유한다. [운영 안내](../guides/OFFICE_PRESENCE.md), [명세](../architecture/office-presence-design.md). Portal DB/블로그 API 변경 없음.
+
+Office 세션 확장(2026-09-15): 선택적 `publicTitle`(최대 48 Unicode 코드포인트, 일반 문자/숫자/기본 문장부호). 명시적 공개 입력만 전달하며 미지정·유효하지 않은 제목은 필드 생략. 연결 상태 및 기존 클라이언트 계약 유지. [계절·칠판 명세](../architecture/office-season-board-design.md).
+
+Office 프로젝트 확장(2026-09-15): 세션의 선택적 `projectName`은 허용된 프로젝트 루트의 폴더명(최대64자, 일반 문자/숫자/공백 및 `._()-`)이다. 선택적 `recentProject={projectName,lastActiveAt}`는 마지막 실제 활동의 프로젝트 한 건과 epoch ms 시각이다. 현재 인원에 포함하지 않으며 방송 off/연결 장애에서는 생략한다. 절대·하위 경로/원문/명령 필드는 재구성 과정에서 제외한다. 기존 projectName/recentProject 없는 스냅샷과 호환한다.

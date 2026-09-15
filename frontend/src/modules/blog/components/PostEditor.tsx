@@ -30,8 +30,8 @@ interface PostEditorProps {
   onSummarize?: (content: string, title: string) => Promise<string>;
   isSummarizing?: boolean;
 }
-const fingerprint = (data: { title: string; content: string; excerpt?: string; categoryId?: number; tagIds: number[] }) =>
-  JSON.stringify([data.title, data.content, data.excerpt || "", data.categoryId, data.tagIds]);
+const fingerprint = (data: { title: string; content: string; excerpt?: string; categoryId?: number; tagIds: number[]; visibility?: "PUBLIC" | "PRIVATE" }) =>
+  JSON.stringify([data.title, data.content, data.excerpt || "", data.categoryId, data.tagIds, data.visibility ?? "PUBLIC"]);
 
 export default function PostEditor({ initialData, categories, tags, onSubmit, onSaved, isPending,
   onCreateCategory, onDeleteCategory, onCreateTag, onDeleteTag, onSummarize, isSummarizing }: PostEditorProps) {
@@ -43,6 +43,7 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   const [excerpt, setExcerpt] = useState(initialData?.excerpt ?? "");
   const [categoryId, setCategoryId] = useState<number | undefined>(initialData?.category?.id);
   const [tagIds, setTagIds] = useState(initialData?.tags.map(t => t.id) ?? []);
+  const [visibility, setVisibility] = useState<"PUBLIC" | "PRIVATE">(initialData?.visibility ?? "PUBLIC");
   const [mode, setMode] = useState<"edit" | "source" | "preview">("edit");
   const [draftBanner, setDraftBanner] = useState<DraftData | null>(null);
   const [checked, setChecked] = useState(false);
@@ -53,9 +54,9 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const requestInFlight = useRef(false);
-  const initialSnapshot = useRef(fingerprint({ title, content, excerpt, categoryId, tagIds }));
+  const initialSnapshot = useRef(fingerprint({ title, content, excerpt, categoryId, tagIds, visibility }));
   const [baseline, setBaseline] = useState(initialSnapshot.current);
-  const snapshot = fingerprint({ title, content, excerpt, categoryId, tagIds });
+  const snapshot = fingerprint({ title, content, excerpt, categoryId, tagIds, visibility });
   const dirty = snapshot !== baseline;
   const blocked = !checked || !!draftBanner || busy || isPending || actionBusy;
 
@@ -66,8 +67,8 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   }, [postId]);
 
   const getData = useCallback((): DraftData => ({ title, content, excerpt, categoryId, tagIds,
-    status: published ? "PUBLISHED" : "DRAFT", savedAt: Date.now() }),
-  [title, content, excerpt, categoryId, tagIds, published]);
+    status: published ? "PUBLISHED" : "DRAFT", visibility, savedAt: Date.now() }),
+  [title, content, excerpt, categoryId, tagIds, published, visibility]);
   const { saveDraft, markSaved, lastSavedAt, error: storageError } = useAutoSave(getData, postId, {
     enabled: checked && !draftBanner, dirty,
   });
@@ -81,8 +82,9 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   function restoreDraft() {
     if (!draftBanner) return;
     setTitle(draftBanner.title); setContent(draftBanner.content); setExcerpt(draftBanner.excerpt);
-    setCategoryId(draftBanner.categoryId); setTagIds(draftBanner.tagIds); setDraftBanner(null);
-    setMessage("브라우저 복구본을 불러왔습니다. 서버에 저장하려면 임시저장을 눌러 주세요.");
+    setCategoryId(draftBanner.categoryId); setTagIds(draftBanner.tagIds);
+    setVisibility(draftBanner.visibility ?? initialData?.visibility ?? "PUBLIC"); setDraftBanner(null);
+    setMessage("브라우저 복구본을 불러왔습니다. 공개 범위를 확인한 뒤 서버에 저장해 주세요.");
   }
   function dismissDraft() {
     if (!window.confirm("이 브라우저의 복구본을 버리고 현재 서버 내용으로 시작할까요?")) return;
@@ -101,10 +103,10 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
     setBusy(true); setSubmitError(""); setMessage("");
     try {
       const post = await onSubmit({ title: title.trim(), content, excerpt: excerpt || undefined,
-        categoryId, tagIds, status: published ? "PUBLISHED" : status });
+        categoryId, tagIds, visibility, status: published ? "PUBLISHED" : status });
       markSaved();
       setBaseline(snapshot);
-      setMessage(post.status === "PUBLISHED" ? "발행한 글을 저장했습니다." : "서버에 임시저장했습니다. 계속 작성할 수 있습니다.");
+      setMessage(post.status === "PUBLISHED" ? (post.visibility === "PRIVATE" ? "비공개 글을 저장했습니다." : "공개 글을 저장했습니다.") : "서버에 임시저장했습니다. 계속 작성할 수 있습니다.");
       onSaved?.(post);
     } catch {
       setSubmitError("서버에 저장하지 못했습니다. 내용은 이 화면에 남아 있습니다. 연결 상태를 확인하고 다시 시도해 주세요.");
@@ -112,7 +114,7 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
       requestInFlight.current = false;
       setBusy(false);
     }
-  }, [blocked, title, content, excerpt, saveDraft, onSubmit, categoryId, tagIds, published, markSaved, snapshot, onSaved]);
+  }, [blocked, title, content, excerpt, saveDraft, onSubmit, categoryId, tagIds, visibility, published, markSaved, snapshot, onSaved]);
 
   useEffect(() => {
     const save = (event: KeyboardEvent) => {
@@ -211,16 +213,24 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
         {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
         {storageError && <p role="alert" className="text-sm text-destructive">{storageError}</p>}
         <p role="status" className="text-xs text-muted-foreground">
-          {(!dirty && message) || (dirty ? (lastSavedAt ? `브라우저 복구본 보관: ${new Date(lastSavedAt).toLocaleTimeString("ko-KR")} · 서버에는 아직 저장하지 않았습니다.` : "변경 내용을 브라우저에 보관하고 있습니다…") : published ? "현재 공개된 글입니다." : "임시저장한 글은 방문자에게 공개되지 않습니다.")}
+          {(!dirty && message) || (dirty ? (lastSavedAt ? `브라우저 복구본 보관: ${new Date(lastSavedAt).toLocaleTimeString("ko-KR")} · 서버에는 아직 저장하지 않았습니다.` : "변경 내용을 브라우저에 보관하고 있습니다…") : published ? (initialData?.visibility === "PRIVATE" ? "현재 비공개 글입니다." : "현재 공개된 글입니다.") : "임시저장한 글은 방문자에게 공개되지 않습니다.")}
         </p>
+        <div className="space-y-2">
+          <Label htmlFor="post-visibility">공개 범위</Label>
+          <select id="post-visibility" value={visibility} disabled={blocked} onChange={event => { setVisibility(event.target.value as "PUBLIC" | "PRIVATE"); setMessage(""); }} className="block w-full min-h-11 rounded-lg border border-input bg-background px-3 text-sm">
+            <option value="PUBLIC">공개 — 누구나 읽을 수 있음</option>
+            <option value="PRIVATE">비공개 — 나만 읽을 수 있음</option>
+          </select>
+          <p className="text-xs text-muted-foreground">공개 범위는 저장할 때 적용됩니다. 초안은 선택과 관계없이 나만 볼 수 있습니다.</p>
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button variant="ghost" className="min-h-11" disabled={blocked} onClick={() => { if (canLeave()) router.push("/blog/drafts"); }}>임시저장 목록</Button>
+          <Button variant="ghost" className="min-h-11" disabled={blocked} onClick={() => { if (canLeave()) router.push("/blog/drafts"); }}>내 기록</Button>
           <div className="flex flex-wrap gap-2">
             {!published && <Button variant="outline" className="min-h-11" disabled={blocked || !title.trim() || !content.trim()} onClick={() => void handleSubmit("DRAFT")}>{busy ? "저장 중…" : "임시저장"}</Button>}
-            <Button className="min-h-11" disabled={blocked || !title.trim() || !content.trim()} onClick={() => void handleSubmit("PUBLISHED")}>{busy ? "저장 중…" : published ? "변경 사항 저장" : "발행하기"}</Button>
+            <Button className="min-h-11" disabled={blocked || !title.trim() || !content.trim()} onClick={() => void handleSubmit("PUBLISHED")}>{busy ? "저장 중…" : visibility === "PRIVATE" ? "비공개 저장" : published ? "변경 사항 저장" : "발행하기"}</Button>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">{published ? "저장하면 공개된 글에 반영됩니다." : "발행하면 누구나 읽을 수 있습니다."} Ctrl/Cmd+S로 {published ? "변경 사항을 저장" : "임시저장"}할 수 있습니다.</p>
+        <p className="text-xs text-muted-foreground">{visibility === "PRIVATE" ? "비공개로 저장한 글은 본인만 읽을 수 있습니다." : published ? "저장하면 누구나 읽을 수 있습니다." : "발행하면 누구나 읽을 수 있습니다."} Ctrl/Cmd+S로 {published ? "변경 사항을 저장" : "임시저장"}할 수 있습니다.</p>
       </div>
     </div>
   );

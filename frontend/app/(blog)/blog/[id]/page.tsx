@@ -85,6 +85,7 @@ export default function PostDetailPage({
           ))}
         </div>
 
+        {post.visibility === "PRIVATE" && <Badge variant="outline" className="mb-3">비공개 · 나만 볼 수 있는 글</Badge>}
         <h1 className="text-3xl font-bold text-foreground mb-4">
           {post.title}
         </h1>
@@ -93,7 +94,7 @@ export default function PostDetailPage({
           <span>{post.author.username}</span>
           <span>{formatDateTime(post.publishedAt || post.createdAt)}</span>
           <span>조회 {post.viewCount}</span>
-          {!PUBLIC_READ_ONLY && <LikeButton postId={post.id} likeCount={post.likeCount} />}
+          {!PUBLIC_READ_ONLY && post.visibility !== "PRIVATE" && <LikeButton postId={post.id} likeCount={post.likeCount} />}
         </div>
 
         {isAuthor && (
@@ -142,7 +143,7 @@ export default function PostDetailPage({
 
       <MarkdownRenderer content={post.content} />
 
-      {!PUBLIC_READ_ONLY && post.status === "PUBLISHED" && <CommentSection postId={post.id} />}
+      {!PUBLIC_READ_ONLY && post.visibility !== "PRIVATE" && post.status === "PUBLISHED" && <CommentSection postId={post.id} />}
     </article>
   );
 }

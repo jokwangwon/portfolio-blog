@@ -46,7 +46,7 @@ export default function Header() {
               {canWritePosts(user) && (
                 <>
                   <Link href="/blog/drafts" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-                    임시저장
+                    내 기록
                   </Link>
                   <Link href="/blog/editor" className={buttonVariants({ variant: "ghost", size: "sm" })}>
                     글쓰기

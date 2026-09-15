@@ -43,6 +43,8 @@ export interface TagResponse {
   slug: string;
 }
 
+export type PostVisibility = "PUBLIC" | "PRIVATE";
+
 export interface PostResponse {
   id: number;
   title: string;
@@ -50,6 +52,7 @@ export interface PostResponse {
   content: string;
   excerpt?: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  visibility?: PostVisibility;
   viewCount: number;
   likeCount: number;
   author: Author;
@@ -84,6 +87,7 @@ export interface PostRequest {
   categoryId?: number;
   tagIds?: number[];
   status?: "DRAFT" | "PUBLISHED";
+  visibility?: PostVisibility;
 }
 
 export interface LikeResponse {

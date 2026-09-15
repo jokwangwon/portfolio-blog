@@ -1,5 +1,6 @@
 package com.portfolio.module.blog.dto;
 
+import com.portfolio.domain.blog.PostVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -25,5 +26,7 @@ public class PostRequest {
 
     private List<Long> tagIds;
 
-    private String status; // DRAFT, PUBLISHED
+    private String status; // DRAFT, PUBLISHED, ARCHIVED
+
+    private PostVisibility visibility; // create: PUBLIC default; update: null preserves existing value
 }

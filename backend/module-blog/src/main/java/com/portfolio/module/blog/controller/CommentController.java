@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +26,7 @@ public class CommentController {
     public ResponseEntity<Page<CommentResponse>> getComments(
             @PathVariable Long postId,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(commentService.getComments(postId, pageable));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(commentService.getComments(postId, pageable));
     }
 
     @PostMapping
@@ -43,7 +44,7 @@ public class CommentController {
             @PathVariable Long id,
             @Valid @RequestBody CommentRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(commentService.updateComment(postId, id, request, userDetails.getUsername()));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(commentService.updateComment(postId, id, request, userDetails.getUsername()));
     }
 
     @DeleteMapping("/{id}")

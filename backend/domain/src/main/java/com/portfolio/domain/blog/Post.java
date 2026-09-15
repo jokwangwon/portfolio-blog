@@ -46,6 +46,10 @@ public class Post extends SoftDeletableEntity {
     @Column(nullable = false, length = 20)
     private PostStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PostVisibility visibility = PostVisibility.PUBLIC;
+
     @Column(name = "view_count", nullable = false)
     private Integer viewCount = 0;
 
@@ -65,7 +69,7 @@ public class Post extends SoftDeletableEntity {
 
     @Builder
     public Post(User author, Category category, String title, String slug,
-                String content, String excerpt, PostStatus status) {
+                String content, String excerpt, PostStatus status, PostVisibility visibility) {
         this.author = author;
         this.category = category;
         this.title = title;
@@ -73,6 +77,7 @@ public class Post extends SoftDeletableEntity {
         this.content = content;
         this.excerpt = excerpt;
         this.status = status != null ? status : PostStatus.DRAFT;
+        this.visibility = visibility != null ? visibility : PostVisibility.PUBLIC;
         this.viewCount = 0;
         this.likeCount = 0;
     }
@@ -98,6 +103,14 @@ public class Post extends SoftDeletableEntity {
     public void draft() {
         this.status = PostStatus.DRAFT;
         this.publishedAt = null;
+    }
+
+    public void changeVisibility(PostVisibility visibility) {
+        if (visibility != null) this.visibility = visibility;
+    }
+
+    public boolean isPubliclyReadable() {
+        return getDeletedAt() == null && status == PostStatus.PUBLISHED && visibility == PostVisibility.PUBLIC;
     }
 
     public void incrementViewCount() {

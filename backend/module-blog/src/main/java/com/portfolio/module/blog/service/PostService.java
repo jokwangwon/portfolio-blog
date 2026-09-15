@@ -51,16 +51,14 @@ public class PostService {
     }
 
     public Page<PostResponse> getMyPosts(String username, String status, Pageable pageable) {
+        return getMyPosts(username, status, null, pageable);
+    }
+
+    public Page<PostResponse> getMyPosts(String username, String status, PostVisibility visibility, Pageable pageable) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
-
-        if (status != null && !status.isBlank()) {
-            PostStatus postStatus = PostStatus.valueOf(status.toUpperCase());
-            return postRepository.findAllByAuthorAndStatus(author.getId(), postStatus, pageable)
-                    .map(PostResponse::from);
-        }
-        return postRepository.findAllByAuthor(author.getId(), pageable)
-                .map(PostResponse::from);
+        PostStatus state = status == null || status.isBlank() ? null : PostStatus.valueOf(status.toUpperCase(java.util.Locale.ROOT));
+        return postRepository.findOwnedWithFilters(author.getId(), state, visibility, pageable).map(PostResponse::from);
     }
 
     @Transactional
@@ -72,18 +70,18 @@ public class PostService {
     public PostResponse getPost(Long id, String username) {
         Post post = postRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
-        if (post.getStatus() != PostStatus.PUBLISHED
+        if (!post.isPubliclyReadable()
                 && !post.getAuthor().getUsername().equals(username)) {
             throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         }
-        if (post.getStatus() == PostStatus.PUBLISHED) post.incrementViewCount();
+        if (post.isPubliclyReadable()) post.incrementViewCount();
         return PostResponse.from(post);
     }
 
     public PostResponse getPostBySlug(String slug) {
         Post post = postRepository.findBySlugAndDeletedAtIsNull(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
-        if (post.getStatus() != PostStatus.PUBLISHED) {
+        if (!post.isPubliclyReadable()) {
             throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         }
         return PostResponse.from(post);
@@ -119,6 +117,7 @@ public class PostService {
                 .content(request.getContent())
                 .excerpt(excerpt)
                 .status(status)
+                .visibility(request.getVisibility())
                 .build();
 
         if (status == PostStatus.PUBLISHED) {
@@ -157,6 +156,7 @@ public class PostService {
         }
 
         post.update(request.getTitle(), post.getSlug(), request.getContent(), excerpt, category);
+        post.changeVisibility(request.getVisibility());
 
         if (request.getTagIds() != null) {
             List<Tag> tags = tagRepository.findByIdIn(request.getTagIds());
@@ -193,6 +193,7 @@ public class PostService {
     public void likePost(Long postId, String username) {
         Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
+        if (!post.isPubliclyReadable()) throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
 
@@ -208,6 +209,7 @@ public class PostService {
     public void unlikePost(Long postId, String username) {
         Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
+        if (!post.isPubliclyReadable()) throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
 

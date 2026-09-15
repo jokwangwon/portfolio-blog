@@ -1,5 +1,7 @@
 package com.portfolio.module.blog.controller;
 
+import com.portfolio.domain.blog.PostVisibility;
+import org.springframework.http.CacheControl;
 import com.portfolio.module.blog.dto.PostRequest;
 import com.portfolio.module.blog.dto.PostResponse;
 import com.portfolio.module.blog.service.PostService;
@@ -37,29 +39,30 @@ public class PostController {
         } else {
             posts = postService.getPublishedPosts(pageable);
         }
-        return ResponseEntity.ok(posts);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(posts);
     }
 
     @GetMapping("/my")
     public ResponseEntity<Page<PostResponse>> getMyPosts(
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) PostVisibility visibility,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal UserDetails userDetails) {
-        Page<PostResponse> posts = postService.getMyPosts(userDetails.getUsername(), status, pageable);
-        return ResponseEntity.ok(posts);
+        Page<PostResponse> posts = postService.getMyPosts(userDetails.getUsername(), status, visibility, pageable);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(posts);
     }
 
     @GetMapping("/search")
     public ResponseEntity<Page<PostResponse>> searchPosts(
             @RequestParam String keyword,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(postService.searchPosts(keyword, pageable));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(postService.searchPosts(keyword, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPost(@PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(postService.getPost(id, userDetails == null ? null : userDetails.getUsername()));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(postService.getPost(id, userDetails == null ? null : userDetails.getUsername()));
     }
 
     @PostMapping
@@ -67,7 +70,7 @@ public class PostController {
             @Valid @RequestBody PostRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         PostResponse response = postService.createPost(request, userDetails.getUsername());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).cacheControl(CacheControl.noStore()).body(response);
     }
 
     @PutMapping("/{id}")
@@ -75,7 +78,7 @@ public class PostController {
             @PathVariable Long id,
             @Valid @RequestBody PostRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(postService.updatePost(id, request, userDetails.getUsername()));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(postService.updatePost(id, request, userDetails.getUsername()));
     }
 
     @DeleteMapping("/{id}")
@@ -91,7 +94,7 @@ public class PostController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
         postService.likePost(id, userDetails.getUsername());
-        return ResponseEntity.ok(Map.of("liked", true, "postId", id));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("liked", true, "postId", id));
     }
 
     @DeleteMapping("/{id}/like")
@@ -99,6 +102,6 @@ public class PostController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails) {
         postService.unlikePost(id, userDetails.getUsername());
-        return ResponseEntity.ok(Map.of("liked", false, "postId", id));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("liked", false, "postId", id));
     }
 }

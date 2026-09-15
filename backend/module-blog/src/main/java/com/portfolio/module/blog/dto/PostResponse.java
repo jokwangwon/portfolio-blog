@@ -16,6 +16,7 @@ public class PostResponse {
     private String content;
     private String excerpt;
     private String status;
+    private String visibility;
     private Integer viewCount;
     private Integer likeCount;
     private AuthorDto author;
@@ -33,6 +34,7 @@ public class PostResponse {
                 .content(post.getContent())
                 .excerpt(post.getExcerpt())
                 .status(post.getStatus().name())
+                .visibility(post.getVisibility().name())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .author(new AuthorDto(post.getAuthor().getId(), post.getAuthor().getUsername()))
@@ -55,6 +57,7 @@ public class PostResponse {
                 .slug(post.getSlug())
                 .excerpt(post.getExcerpt())
                 .status(post.getStatus().name())
+                .visibility(post.getVisibility().name())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .author(new AuthorDto(post.getAuthor().getId(), post.getAuthor().getUsername()))

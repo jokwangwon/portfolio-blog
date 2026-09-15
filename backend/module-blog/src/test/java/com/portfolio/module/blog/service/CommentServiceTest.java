@@ -216,6 +216,7 @@ class CommentServiceTest {
         @Test
         @DisplayName("게시글의 댓글 목록을 페이징 조회한다")
         void returnPagedComments() {
+            given(postRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.of(post));
             PageRequest pageable = PageRequest.of(0, 10);
             given(commentRepository.findRootCommentsByPostId(1L, pageable))
                     .willReturn(new PageImpl<>(List.of(comment)));
