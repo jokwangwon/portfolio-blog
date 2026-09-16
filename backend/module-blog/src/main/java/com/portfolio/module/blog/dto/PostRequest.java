@@ -22,6 +22,10 @@ public class PostRequest {
     @Size(max = 200, message = "요약문은 200자 이하여야 합니다")
     private String excerpt;
 
+    @jakarta.validation.constraints.Min(0)
+    @jakarta.validation.constraints.Max(9007199254740991L)
+    private Long expectedEditVersion;
+
     private Long categoryId;
 
     private List<Long> tagIds;

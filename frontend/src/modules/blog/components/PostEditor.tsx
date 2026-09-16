@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import MarkdownRenderer from "./MarkdownRenderer";
+import { fetchPostById } from "../api/blogApi";
 import { convertInlineImages } from "../api/attachmentApi";
 import { useAutoSave, loadDraft, clearDraft, type DraftData } from "../hooks/useAutoSave";
 
@@ -38,6 +39,9 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   onCreateCategory, onDeleteCategory, onCreateTag, onDeleteTag, onSummarize, isSummarizing }: PostEditorProps) {
   const router = useRouter();
   const postId = initialData?.id;
+  const [expectedEditVersion, setExpectedEditVersion] = useState(initialData?.editVersion);
+  const [conflict, setConflict] = useState(false);
+  const [latestPost, setLatestPost] = useState<PostResponse | null>(null);
   const published = initialData?.status === "PUBLISHED";
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [content, setContent] = useState(initialData?.content ?? "");
@@ -69,8 +73,8 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   }, [postId]);
 
   const getData = useCallback((): DraftData => ({ title, content, excerpt, categoryId, tagIds,
-    status: published ? "PUBLISHED" : "DRAFT", visibility, savedAt: Date.now() }),
-  [title, content, excerpt, categoryId, tagIds, published, visibility]);
+    status: published ? "PUBLISHED" : "DRAFT", visibility, expectedEditVersion, savedAt: Date.now() }),
+  [title, content, excerpt, categoryId, tagIds, published, visibility, expectedEditVersion]);
   const { saveDraft, markSaved, lastSavedAt, error: storageError } = useAutoSave(getData, postId, {
     enabled: checked && !draftBanner, dirty,
   });
@@ -83,6 +87,8 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
 
   function restoreDraft() {
     if (!draftBanner) return;
+    setExpectedEditVersion(draftBanner.expectedEditVersion);
+    if (postId && (draftBanner.expectedEditVersion === undefined || draftBanner.expectedEditVersion !== initialData?.editVersion)) setConflict(true);
     setTitle(draftBanner.title); setContent(draftBanner.content); setExcerpt(draftBanner.excerpt);
     setCategoryId(draftBanner.categoryId); setTagIds(draftBanner.tagIds);
     setVisibility(draftBanner.visibility ?? initialData?.visibility ?? "PUBLIC"); setDraftBanner(null);
@@ -95,7 +101,7 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
   }
 
   const handleSubmit = useCallback(async (status: "DRAFT" | "PUBLISHED") => {
-    if (blocked || requestInFlight.current) return;
+    if (blocked || conflict || requestInFlight.current) return;
     if (!title.trim() || !content.trim() || title.length > 255 || excerpt.length > 200) {
       setSubmitError("제목(255자 이하)과 본문을 입력하고 요약을 200자 이하로 작성해 주세요.");
       return;
@@ -106,19 +112,23 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
     try {
       const converted = /data:image\//i.test(content) ? await convertInlineImages(content) : content;
       const post = await onSubmit({ title: title.trim(), content: converted, excerpt: excerpt || undefined,
-        categoryId, tagIds, visibility, status: published ? "PUBLISHED" : status });
+        categoryId, tagIds, visibility, expectedEditVersion, status: published ? "PUBLISHED" : status });
       markSaved();
+      setExpectedEditVersion(post.editVersion);
       if (converted !== content) setContent(converted);
       setBaseline(fingerprint({ title, content: converted, excerpt, categoryId, tagIds, visibility }));
       setMessage(post.status === "PUBLISHED" ? (post.visibility === "PRIVATE" ? "비공개 글을 저장했습니다." : "공개 글을 저장했습니다.") : "서버에 임시저장했습니다. 계속 작성할 수 있습니다.");
       onSaved?.(post);
-    } catch {
-      setSubmitError("서버에 저장하지 못했습니다. 내용은 이 화면에 남아 있습니다. 연결 상태를 확인하고 다시 시도해 주세요.");
+    } catch (error) {
+      const code = (error as { response?: { data?: { code?: string } } })?.response?.data?.code;
+      if (code === "POST_EDIT_CONFLICT" || code === "POST_EDIT_VERSION_REQUIRED") {
+        setConflict(true); setLatestPost(null); saveDraft();
+      } else setSubmitError("서버에 저장하지 못했습니다. 내용은 이 화면에 남아 있습니다. 연결 상태를 확인하고 다시 시도해 주세요.");
     } finally {
       requestInFlight.current = false;
       setBusy(false);
     }
-  }, [blocked, title, content, excerpt, saveDraft, onSubmit, categoryId, tagIds, visibility, published, markSaved, onSaved]);
+  }, [blocked, conflict, expectedEditVersion, title, content, excerpt, saveDraft, onSubmit, categoryId, tagIds, visibility, published, markSaved, onSaved]);
 
   useEffect(() => {
     const save = (event: KeyboardEvent) => {
@@ -151,6 +161,27 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
           </div>
         </div>
       )}
+      {conflict && <section className="rounded-xl border border-amber-500/50 bg-muted p-4 space-y-3" aria-label="저장 충돌 해결">
+        <p role="alert">다른 곳에서 글이 변경되었습니다. 이 화면의 내용은 유지됩니다. 최신 글과 비교한 뒤 필요한 내용을 반영해 주세요.</p>
+        <Button variant="outline" disabled={blocked} onClick={() => void runAction(async () => {
+          setLatestPost(null);
+          if (postId) {
+            const latest = await fetchPostById(postId);
+            if (!Number.isSafeInteger(latest.editVersion)) throw new Error("Missing version");
+            setLatestPost(latest);
+          }
+        })}>최신 글 비교</Button>
+        {latestPost && <div className="space-y-3">
+          <p className="text-sm">최신 제목: {latestPost.title}</p>
+          <p className="text-sm">{latestPost.visibility === "PRIVATE" ? "비공개" : "공개"} · {latestPost.status} · {latestPost.category?.name || "미분류"} · {latestPost.tags.map(tag => `#${tag.name}`).join(" ")}</p>
+          <Textarea aria-label="최신 서버 본문" readOnly value={latestPost.content} className="min-h-40" />
+          <p className="text-sm">최신 요약: {latestPost.excerpt || "없음"}</p>
+          <Button disabled={blocked} onClick={() => {
+            setExpectedEditVersion(latestPost.editVersion); setConflict(false); setLatestPost(null);
+            setMessage("비교한 버전으로 계속 편집합니다. 내용과 공개 범위를 확인한 뒤 저장해 주세요.");
+          }}>비교한 버전으로 계속 편집</Button>
+        </div>}
+      </section>}
       {uploadBusy && <p role="status" className="text-sm text-muted-foreground">이미지를 업로드하는 중… 완료되면 글을 저장할 수 있습니다.</p>}
       <fieldset disabled={blocked} className="space-y-5 min-w-0" aria-busy={busy || isPending}>
         <div className="space-y-2">
@@ -231,8 +262,8 @@ export default function PostEditor({ initialData, categories, tags, onSubmit, on
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Button variant="ghost" className="min-h-11" disabled={blocked} onClick={() => { if (canLeave()) router.push("/blog/drafts"); }}>내 기록</Button>
           <div className="flex flex-wrap gap-2">
-            {!published && <Button variant="outline" className="min-h-11" disabled={blocked || !title.trim() || !content.trim()} onClick={() => void handleSubmit("DRAFT")}>{busy ? "저장 중…" : "임시저장"}</Button>}
-            <Button className="min-h-11" disabled={blocked || !title.trim() || !content.trim()} onClick={() => void handleSubmit("PUBLISHED")}>{busy ? "저장 중…" : visibility === "PRIVATE" ? "비공개 저장" : published ? "변경 사항 저장" : "발행하기"}</Button>
+            {!published && <Button variant="outline" className="min-h-11" disabled={blocked || conflict || !title.trim() || !content.trim()} onClick={() => void handleSubmit("DRAFT")}>{busy ? "저장 중…" : "임시저장"}</Button>}
+            <Button className="min-h-11" disabled={blocked || conflict || !title.trim() || !content.trim()} onClick={() => void handleSubmit("PUBLISHED")}>{busy ? "저장 중…" : visibility === "PRIVATE" ? "비공개 저장" : published ? "변경 사항 저장" : "발행하기"}</Button>
           </div>
         </div>
         <p className="text-xs text-muted-foreground">{visibility === "PRIVATE" ? "비공개로 저장한 글은 본인만 읽을 수 있습니다." : published ? "저장하면 누구나 읽을 수 있습니다." : "발행하면 누구나 읽을 수 있습니다."} Ctrl/Cmd+S로 {published ? "변경 사항을 저장" : "임시저장"}할 수 있습니다.</p>

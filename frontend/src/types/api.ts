@@ -46,6 +46,9 @@ export interface TagResponse {
 export type PostVisibility = "PUBLIC" | "PRIVATE";
 
 export interface PostResponse {
+  editVersion?: number;
+  editedAt?: string;
+  contentFormat?: string;
   id: number;
   title: string;
   slug: string;
@@ -81,6 +84,7 @@ export interface PageResponse<T> {
 // === Blog Requests ===
 
 export interface PostRequest {
+  expectedEditVersion?: number;
   title: string;
   content: string;
   excerpt?: string;

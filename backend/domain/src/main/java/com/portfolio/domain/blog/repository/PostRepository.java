@@ -18,6 +18,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findForUpdate(@Param("id") Long id);
 
 
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
+    int incrementViews(@Param("id") Long id);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE Post p SET p.likeCount = p.likeCount + :delta WHERE p.id = :id AND p.likeCount + :delta >= 0")
+    int changeLikes(@Param("id") Long id, @Param("delta") int delta);
+
     Optional<Post> findBySlugAndDeletedAtIsNull(String slug);
 
     Optional<Post> findByIdAndDeletedAtIsNull(Long id);

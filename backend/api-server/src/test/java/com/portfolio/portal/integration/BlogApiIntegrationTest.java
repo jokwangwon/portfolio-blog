@@ -76,7 +76,7 @@ class BlogApiIntegrationTest extends IntegrationTestBase {
                         .header("Authorization", "Bearer " + userAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
-                                "title", "Archived post", "content", "Private content", "status", "ARCHIVED"))))
+                                "expectedEditVersion", 0, "title", "Archived post", "content", "Private content", "status", "ARCHIVED"))))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/portal/posts/" + postId)).andExpect(status().isNotFound());
     }
@@ -228,7 +228,7 @@ class BlogApiIntegrationTest extends IntegrationTestBase {
                         .header("Authorization", "Bearer " + userAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                Map.of("title", "Updated Title", "content", "Updated content", "status", "PUBLISHED"))))
+                                Map.of("expectedEditVersion", 0, "title", "Updated Title", "content", "Updated content", "status", "PUBLISHED"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Updated Title"));
     }

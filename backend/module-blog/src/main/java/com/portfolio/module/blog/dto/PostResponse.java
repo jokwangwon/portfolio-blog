@@ -8,8 +8,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class PostResponse {
+    private long editVersion;
+    private LocalDateTime editedAt;
+    private String contentFormat;
     private Long id;
     private String title;
     private String slug;
@@ -29,6 +32,7 @@ public class PostResponse {
     public static PostResponse from(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
+                .editVersion(post.getEditVersion()).editedAt(post.getEditedAt()).contentFormat(post.getContentFormat())
                 .title(post.getTitle())
                 .slug(post.getSlug())
                 .content(post.getContent())
@@ -53,6 +57,7 @@ public class PostResponse {
     public static PostResponse summary(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
+                .editVersion(post.getEditVersion()).editedAt(post.getEditedAt()).contentFormat(post.getContentFormat())
                 .title(post.getTitle())
                 .slug(post.getSlug())
                 .excerpt(post.getExcerpt())
@@ -67,6 +72,7 @@ public class PostResponse {
                 .tags(post.getTags().stream()
                         .map(t -> new TagDto(t.getId(), t.getName(), t.getSlug()))
                         .toList())
+                .updatedAt(post.getUpdatedAt())
                 .createdAt(post.getCreatedAt())
                 .publishedAt(post.getPublishedAt())
                 .build();

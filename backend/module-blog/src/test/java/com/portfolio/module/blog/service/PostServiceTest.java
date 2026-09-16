@@ -116,7 +116,8 @@ class PostServiceTest {
             PostResponse result = postService.getPost(1L);
 
             assertThat(result.getTitle()).isEqualTo("Test Post");
-            assertThat(post.getViewCount()).isEqualTo(before + 1);
+            assertThat(result.getViewCount()).isEqualTo(before + 1);
+            verify(postRepository).incrementViews(1L);
         }
 
         @Test
@@ -137,6 +138,7 @@ class PostServiceTest {
         @DisplayName("새 게시글을 생성한다")
         void createNewPost() {
             PostRequest request = new PostRequest();
+            ReflectionTestUtils.setField(request, "expectedEditVersion", 0L);
             ReflectionTestUtils.setField(request, "title", "New Post");
             ReflectionTestUtils.setField(request, "content", "New content for testing");
             ReflectionTestUtils.setField(request, "categoryId", 1L);
@@ -163,6 +165,7 @@ class PostServiceTest {
         void autoGenerateExcerpt() {
             String longContent = "A".repeat(300);
             PostRequest request = new PostRequest();
+            ReflectionTestUtils.setField(request, "expectedEditVersion", 0L);
             ReflectionTestUtils.setField(request, "title", "Long Post");
             ReflectionTestUtils.setField(request, "content", longContent);
             ReflectionTestUtils.setField(request, "status", "DRAFT");
@@ -184,6 +187,7 @@ class PostServiceTest {
         @DisplayName("PUBLISHED 상태로 생성하면 publishedAt이 설정된다")
         void setPublishedAt() {
             PostRequest request = new PostRequest();
+            ReflectionTestUtils.setField(request, "expectedEditVersion", 0L);
             ReflectionTestUtils.setField(request, "title", "Published Post");
             ReflectionTestUtils.setField(request, "content", "Content");
             ReflectionTestUtils.setField(request, "status", "PUBLISHED");
@@ -205,6 +209,7 @@ class PostServiceTest {
         @DisplayName("중복 슬러그 시 suffix를 붙여 고유 슬러그를 생성한다")
         void createWithDuplicateSlugAddsSuffix() {
             PostRequest request = new PostRequest();
+            ReflectionTestUtils.setField(request, "expectedEditVersion", 0L);
             ReflectionTestUtils.setField(request, "title", "Test Post");
             ReflectionTestUtils.setField(request, "content", "Content");
             ReflectionTestUtils.setField(request, "status", "DRAFT");
@@ -230,6 +235,7 @@ class PostServiceTest {
             ReflectionTestUtils.setField(tag, "id", 1L);
 
             PostRequest request = new PostRequest();
+            ReflectionTestUtils.setField(request, "expectedEditVersion", 0L);
             ReflectionTestUtils.setField(request, "title", "Tagged Post");
             ReflectionTestUtils.setField(request, "content", "Content");
             ReflectionTestUtils.setField(request, "tagIds", List.of(1L));
@@ -259,6 +265,7 @@ class PostServiceTest {
         @DisplayName("본인 게시글을 수정한다")
         void updateOwnPost() {
             PostRequest request = new PostRequest();
+            ReflectionTestUtils.setField(request, "expectedEditVersion", 0L);
             ReflectionTestUtils.setField(request, "title", "Updated Title");
             ReflectionTestUtils.setField(request, "content", "Updated content");
             ReflectionTestUtils.setField(request, "status", "PUBLISHED");
@@ -274,6 +281,7 @@ class PostServiceTest {
         @DisplayName("타인 게시글 수정 시 예외를 던진다")
         void throwWhenNotOwner() {
             PostRequest request = new PostRequest();
+            ReflectionTestUtils.setField(request, "expectedEditVersion", 0L);
             ReflectionTestUtils.setField(request, "title", "Hack");
             ReflectionTestUtils.setField(request, "content", "Hacked");
 
@@ -293,6 +301,7 @@ class PostServiceTest {
             ReflectionTestUtils.setField(draftPost, "id", 2L);
 
             PostRequest request = new PostRequest();
+            ReflectionTestUtils.setField(request, "expectedEditVersion", 0L);
             ReflectionTestUtils.setField(request, "title", "Draft");
             ReflectionTestUtils.setField(request, "content", "C");
             ReflectionTestUtils.setField(request, "status", "PUBLISHED");
@@ -364,11 +373,10 @@ class PostServiceTest {
             given(userRepository.findByUsername("testuser")).willReturn(Optional.of(author));
             given(likeRepository.existsByUserIdAndPostId(1L, 1L)).willReturn(false);
 
-            int beforeLike = post.getLikeCount();
             postService.likePost(1L, "testuser");
 
             verify(likeRepository).save(any(Like.class));
-            assertThat(post.getLikeCount()).isEqualTo(beforeLike + 1);
+            verify(postRepository).changeLikes(1L, 1);
         }
 
         @Test
@@ -395,7 +403,7 @@ class PostServiceTest {
             postService.unlikePost(1L, "testuser");
 
             verify(likeRepository).deleteByUserIdAndPostId(1L, 1L);
-            assertThat(post.getLikeCount()).isEqualTo(0);
+            verify(postRepository).changeLikes(1L, -1);
         }
 
         @Test

@@ -449,7 +449,7 @@ paths:
             default: 20
       responses:
         '200':
-          description: 본인 기록의 Spring Page 응답. Cache-Control no-store.
+          description: 본문을 제외한 PostSummary의 Spring Page 응답. Cache-Control no-store.
         '400':
           description: 잘못된 상태 또는 공개 범위
         '401':
@@ -482,7 +482,7 @@ paths:
     put:
       tags: [Posts]
       summary: 게시글 수정
-      description: 게시글 내용 수정 (작성자 또는 관리자만)
+      description: 작성자만 수정. expectedEditVersion을 현재 버전과 비교하여 오래된 저장을 차단한다.
       operationId: updatePost
       security:
         - bearerAuth: []
@@ -506,6 +506,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PostDetail'
+        '400':
+          description: 유효하지 않은 입력 또는 버전 누락 (POST_EDIT_VERSION_REQUIRED)
+        '409':
+          description: 편집 버전 불일치 (POST_EDIT_CONFLICT). 최신 글을 비교한 후 다시 저장한다.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1016,6 +1020,19 @@ components:
           type: string
           enum: [PUBLIC, PRIVATE]
           description: 작성 상태와 독립적인 공개 범위
+        editVersion:
+          type: integer
+          format: int64
+          minimum: 0
+          description: 실제 편집 시에만 증가하는 버전
+        editedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: 기존 V3 글은 null. 실제 편집 시 갱신
+        contentFormat:
+          type: string
+          enum: [MARKDOWN_V1]
         viewCount:
           type: integer
           example: 150
@@ -1080,7 +1097,14 @@ components:
 
     PostUpdateRequest:
       type: object
+      required: [title, content, expectedEditVersion]
       properties:
+        expectedEditVersion:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9007199254740991
+          description: 편집을 시작하거나 명시적으로 비교한 글의 editVersion
         title:
           type: string
           minLength: 1

@@ -1,0 +1,8 @@
+{
+  "/health": 200,
+  "/blog": 200,
+  "/office": 200,
+  "/api/portal/posts": 200,
+  "anonymousWrite": 401,
+  "jsErrors": []
+}

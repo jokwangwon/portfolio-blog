@@ -1,0 +1,18 @@
+{
+  "images": {
+    "portfolio-api-server": "sha256:ff122b3854295cd4a79f15ec58f9eadbb88a55159b78f619b1e144b1f8647eb0",
+    "portfolio-frontend": "sha256:6c8c8adba9bffb65c8d00a0f36852583d695ecab0bf09159d153277f59ab4ef2"
+  },
+  "sourceArchive": "backups/releases/edit-conflicts-2026-09-16-source.tar.gz",
+  "sourceSha256": "fa7b236c72b88a74ce9232b479b094197837714708c51c7cd9a60dc36fe51406",
+  "backendTests": 173,
+  "frontendTests": 223,
+  "frontendTestFiles": 40,
+  "requiredVersionInProduction": true,
+  "flyway": "V4 successful",
+  "backupPrefix": "backups/portal-20260916T065135Z-I2lVHw",
+  "compatibilityEnvironmentTestPassed": true,
+  "excludedExistingChanges": [
+    "frontend/src/modules/portfolio/components/BlogPreviewSection.tsx"
+  ]
+}

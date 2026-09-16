@@ -31,6 +31,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       APP_PUBLIC_READ_ONLY: "true"
+      APP_BLOG_REQUIRE_EDIT_VERSION: "true"
       OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-not-configured}
       OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-not-configured}
       OAUTH_GITHUB_CLIENT_ID: ${OAUTH_GITHUB_CLIENT_ID:-not-configured}

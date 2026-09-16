@@ -15,6 +15,7 @@ function removeFallback(key: string) {
   if (!fallbackDrafts.size) window.removeEventListener("beforeunload", protectFallbackDrafts);
 }
 export interface DraftData {
+  expectedEditVersion?: number;
   title: string;
   content: string;
   excerpt: string;
@@ -36,6 +37,7 @@ function parseDraft(raw: string | null): DraftData | null {
         typeof data.excerpt !== "string" || !Array.isArray(data.tagIds) ||
         !data.tagIds.every((id: unknown) => typeof id === "number") ||
         (data.categoryId !== undefined && typeof data.categoryId !== "number") ||
+        (data.expectedEditVersion !== undefined && (!Number.isSafeInteger(data.expectedEditVersion) || data.expectedEditVersion < 0)) ||
         (data.visibility !== undefined && !["PUBLIC", "PRIVATE"].includes(data.visibility)) ||
         !["DRAFT", "PUBLISHED"].includes(data.status) || !Number.isFinite(data.savedAt)) return null;
     return data;
@@ -66,7 +68,7 @@ export function listLocalDrafts(): Array<DraftData & { key: string }> {
   return [...combined.values()].sort((a, b) => b.savedAt - a.savedAt);
 }
 function signature(data: DraftData) {
-  return JSON.stringify([data.title, data.content, data.excerpt, data.categoryId, data.tagIds, data.status, data.visibility]);
+  return JSON.stringify([data.title, data.content, data.excerpt, data.categoryId, data.tagIds, data.status, data.visibility, data.expectedEditVersion]);
 }
 
 export function useAutoSave(getData: () => DraftData, postId?: number, { enabled = true, dirty = true }: { enabled?: boolean; dirty?: boolean } = {}) {

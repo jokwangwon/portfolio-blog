@@ -50,6 +50,16 @@ public class Post extends SoftDeletableEntity {
     @Column(nullable = false, length = 20)
     private PostVisibility visibility = PostVisibility.PUBLIC;
 
+    @Column(name = "edit_version", nullable = false)
+    private long editVersion = 0;
+    @Column(name = "edited_at")
+    private LocalDateTime editedAt;
+    @Column(name = "content_format", nullable = false, length = 30)
+    private String contentFormat = "MARKDOWN_V1";
+
+    public void recordEdit() { editVersion++; editedAt = LocalDateTime.now(); }
+    public void recordCreation() { editedAt = LocalDateTime.now(); }
+
     @Column(name = "view_count", nullable = false)
     private Integer viewCount = 0;
 

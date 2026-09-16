@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 public class PostService {
 
     private final PostRepository postRepository;
+    @org.springframework.beans.factory.annotation.Value("${app.blog.require-edit-version:true}")
+    private boolean requireEditVersion = true;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final LikeRepository likeRepository;
@@ -59,7 +61,7 @@ public class PostService {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
         PostStatus state = status == null || status.isBlank() ? null : PostStatus.valueOf(status.toUpperCase(java.util.Locale.ROOT));
-        return postRepository.findOwnedWithFilters(author.getId(), state, visibility, pageable).map(PostResponse::from);
+        return postRepository.findOwnedWithFilters(author.getId(), state, visibility, pageable).map(PostResponse::summary);
     }
 
     @Transactional
@@ -75,7 +77,10 @@ public class PostService {
                 && !post.getAuthor().getUsername().equals(username)) {
             throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         }
-        if (post.isPubliclyReadable()) post.incrementViewCount();
+        if (post.isPubliclyReadable()) {
+            postRepository.incrementViews(id);
+            return PostResponse.from(post).toBuilder().viewCount(post.getViewCount() + 1).build();
+        }
         return PostResponse.from(post);
     }
 
@@ -130,6 +135,7 @@ public class PostService {
             post.updateTags(tags);
         }
 
+        post.recordCreation();
         postRepository.save(post);
         attachmentService.synchronize(post, post.getContent());
         return PostResponse.from(post);
@@ -144,6 +150,10 @@ public class PostService {
             throw new ForbiddenException("POST_FORBIDDEN", "게시글 수정 권한이 없습니다");
         }
 
+        Long expected = request.getExpectedEditVersion();
+        if (expected == null && requireEditVersion) throw new com.portfolio.common.exception.PostEditVersionRequiredException();
+        if (expected != null && expected != post.getEditVersion()) throw new com.portfolio.common.exception.PostEditConflictException();
+
         Category category = null;
         if (request.getCategoryId() != null) {
             category = categoryRepository.findById(request.getCategoryId())
@@ -157,12 +167,21 @@ public class PostService {
                     : request.getContent();
         }
 
+        List<Tag> requestedTags = request.getTagIds() == null ? post.getTags() : tagRepository.findByIdIn(request.getTagIds());
+        PostStatus requestedStatus = request.getStatus() == null ? post.getStatus() : PostStatus.valueOf(request.getStatus());
+        var requestedVisibility = request.getVisibility() == null ? post.getVisibility() : request.getVisibility();
+        if (java.util.Objects.equals(post.getTitle(), request.getTitle())
+                && java.util.Objects.equals(post.getContent(), request.getContent())
+                && java.util.Objects.equals(post.getExcerpt(), excerpt)
+                && java.util.Objects.equals(post.getCategory() == null ? null : post.getCategory().getId(), category == null ? null : category.getId())
+                && post.getTags().stream().map(Tag::getId).sorted().toList().equals(requestedTags.stream().map(Tag::getId).sorted().toList())
+                && post.getStatus() == requestedStatus && post.getVisibility() == requestedVisibility) return PostResponse.from(post);
+
         post.update(request.getTitle(), post.getSlug(), request.getContent(), excerpt, category);
         post.changeVisibility(request.getVisibility());
 
         if (request.getTagIds() != null) {
-            List<Tag> tags = tagRepository.findByIdIn(request.getTagIds());
-            post.updateTags(tags);
+            post.updateTags(requestedTags);
         }
 
         if ("PUBLISHED".equals(request.getStatus()) && post.getStatus() != PostStatus.PUBLISHED) {
@@ -173,6 +192,7 @@ public class PostService {
             post.archive();
         }
 
+        post.recordEdit();
         attachmentService.synchronize(post, post.getContent());
         return PostResponse.from(post);
     }
@@ -205,7 +225,7 @@ public class PostService {
         }
 
         likeRepository.save(new Like(user, post));
-        post.incrementLikeCount();
+        postRepository.changeLikes(postId, 1);
     }
 
     @Transactional
@@ -221,7 +241,7 @@ public class PostService {
         }
 
         likeRepository.deleteByUserIdAndPostId(user.getId(), postId);
-        post.decrementLikeCount();
+        postRepository.changeLikes(postId, -1);
     }
 
     private String generateUniqueSlug(String title) {

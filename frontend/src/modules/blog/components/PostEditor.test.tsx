@@ -1,3 +1,4 @@
+import { fetchPostById } from "../api/blogApi";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Link from "next/link";
@@ -10,7 +11,8 @@ import type { PostResponse } from "@/src/types/api";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("next/dynamic", () => ({ default: () => function Editor({ content, onChange, onBusyChange }: { content: string; onChange: (s: string) => void; onBusyChange?: (busy: boolean) => void }) { return <><textarea aria-label="본문 편집" value={content} onChange={e => onChange(e.target.value)} /><button onClick={() => onBusyChange?.(true)}>업로드 시작 테스트</button></>; } }));
 vi.mock("./MarkdownRenderer", () => ({ default: ({ content }: { content: string }) => <article>{content}</article> }));
-const savedPost = { id: 7, title: "제목", content: "본문", status: "DRAFT", tags: [], author: { id: 1, username: "admin" }, updatedAt: "2026-09-13T00:00:00" } as PostResponse;
+vi.mock("../api/blogApi", () => ({ fetchPostById: vi.fn() }));
+const savedPost = { editVersion: 0, id: 7, title: "제목", content: "본문", status: "DRAFT", tags: [], author: { id: 1, username: "admin" }, updatedAt: "2026-09-13T00:00:00" } as PostResponse;
 function write() { fireEvent.change(screen.getByLabelText("제목"), { target: { value: "제목" } }); fireEvent.change(screen.getByLabelText("본문 편집"), { target: { value: "본문" } }); }
 beforeEach(() => { localStorage.clear(); clearDraft(); clearDraft(7); });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
@@ -160,4 +162,42 @@ describe("글 작성 저장 흐름", () => {
     expect(screen.getByRole("status")).not.toHaveTextContent("서버에 임시저장했습니다");
   });
 
+});
+
+
+it("충돌 후 입력과 기준 버전을 보존하고 비교한 버전을 명시적으로 선택한다", async () => {
+ const onSubmit=vi.fn().mockRejectedValueOnce({response:{status:409,data:{code:"POST_EDIT_CONFLICT"}}}).mockResolvedValue({...savedPost,editVersion:2});
+ vi.mocked(fetchPostById).mockResolvedValue({...savedPost,content:"다른 탭의 최신 글",editVersion:1});
+ render(<PostEditor initialData={savedPost} categories={[]} tags={[]} isPending={false} onSubmit={onSubmit}/>);
+ fireEvent.change(screen.getByLabelText("본문 편집"),{target:{value:"이 탭에서 작성한 글"}});
+ fireEvent.click(screen.getByRole("button",{name:"임시저장"}));
+ expect(await screen.findByText(/다른 곳에서 글이 변경되었습니다/)).toBeInTheDocument();
+ expect(screen.getByLabelText("본문 편집")).toHaveValue("이 탭에서 작성한 글");
+ expect(loadDraft(7)?.expectedEditVersion).toBe(0);
+ fireEvent.click(screen.getByRole("button",{name:"최신 글 비교"}));
+ expect(await screen.findByLabelText("최신 서버 본문")).toHaveValue("다른 탭의 최신 글");
+ expect(onSubmit).toHaveBeenCalledTimes(1);
+ fireEvent.click(screen.getByRole("button",{name:"비교한 버전으로 계속 편집"}));
+ expect(onSubmit).toHaveBeenCalledTimes(1);
+ fireEvent.click(screen.getByRole("button",{name:"임시저장"}));
+ await waitFor(()=>expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({content:"이 탭에서 작성한 글",expectedEditVersion:1})));
+});
+it("연속 임시저장은 성공 응답 버전을 사용하고 배경 재조회는 기준을 바꾸지 않는다", async () => {
+ const onSubmit=vi.fn().mockResolvedValue({...savedPost,editVersion:1});
+ const props={categories:[],tags:[],isPending:false,onSubmit};
+ const {rerender}=render(<PostEditor initialData={savedPost} {...props}/>);
+ rerender(<PostEditor initialData={{...savedPost,editVersion:5}} {...props}/>);
+ fireEvent.change(screen.getByLabelText("본문 편집"),{target:{value:"첫 편집"}});fireEvent.click(screen.getByRole("button",{name:"임시저장"}));
+ await waitFor(()=>expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({expectedEditVersion:0})));
+ await screen.findByText(/서버에 임시저장했습니다/);
+ fireEvent.change(screen.getByLabelText("본문 편집"),{target:{value:"다음 편집"}});fireEvent.click(screen.getByRole("button",{name:"임시저장"}));
+ await waitFor(()=>expect(onSubmit).toHaveBeenLastCalledWith(expect.objectContaining({expectedEditVersion:1})));
+});
+it("오래된 복구본의 버전을 최신 서버 버전으로 몰래 올리지 않는다", () => {
+ localStorage.setItem("blog_draft_edit_7",JSON.stringify({title:"복구",content:"이전 글",excerpt:"",tagIds:[],status:"DRAFT",savedAt:Date.now(),expectedEditVersion:1}));
+ render(<PostEditor initialData={{...savedPost,editVersion:3}} categories={[]} tags={[]} isPending={false} onSubmit={vi.fn()}/>);
+ fireEvent.click(screen.getByRole("button",{name:"복원"}));
+ expect(screen.getByLabelText("본문 편집")).toHaveValue("이전 글");
+ expect(screen.getByRole("button",{name:"최신 글 비교"})).toBeInTheDocument();
+ expect(screen.getByRole("button",{name:"임시저장"})).toBeDisabled();
 });

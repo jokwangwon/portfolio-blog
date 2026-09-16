@@ -38,6 +38,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errorBody("BAD_REQUEST", "이미지 파일을 선택해 주세요", null));
     }
 
+    @ExceptionHandler(com.portfolio.common.exception.PostEditConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleEditConflict(Exception ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody("POST_EDIT_CONFLICT", ex.getMessage(), null));
+    }
+    @ExceptionHandler(com.portfolio.common.exception.PostEditVersionRequiredException.class)
+    public ResponseEntity<Map<String, Object>> handleEditVersionRequired(Exception ex) {
+        return ResponseEntity.badRequest().body(errorBody("POST_EDIT_VERSION_REQUIRED", ex.getMessage(), null));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()

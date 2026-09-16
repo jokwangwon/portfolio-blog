@@ -82,7 +82,7 @@ class AttachmentIntegrationTest extends IntegrationTestBase {
     }
 
     private Map<String, Object> postBody(String content, String state, String visibility) {
-        return Map.of("title", "Attachment study", "content", content,
+        return Map.of("expectedEditVersion", 0, "title", "Attachment study", "content", content,
                 "status", state, "visibility", visibility);
     }
 
@@ -93,10 +93,13 @@ class AttachmentIntegrationTest extends IntegrationTestBase {
                 .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).get("id").asLong();
     }
 
+    @Autowired private com.portfolio.domain.blog.repository.PostRepository postVersions;
     private void updatePost(long id, String content, String state, String visibility) throws Exception {
+        var request = new java.util.HashMap<>(postBody(content, state, visibility));
+        request.put("expectedEditVersion", postVersions.findById(id).orElseThrow().getEditVersion());
         mockMvc.perform(put("/api/portal/posts/" + id).header("Authorization", token("attachment-owner"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(postBody(content, state, visibility))))
+                        .content(mapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
     }
 

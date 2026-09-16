@@ -1,5 +1,14 @@
 # API 명세서 (API Specification)
 
+## 글 저장 충돌 방지 (2026-09-16 구현)
+
+- 글 응답에 `editVersion`, `editedAt`, `contentFormat: MARKDOWN_V1`을 제공한다. 기존 글은 버전 0, 편집 시각 null로 시작한다.
+- `PUT /posts/{id}`는 작성자만 가능하며 `expectedEditVersion`(0 이상 안전 정수)을 반드시 보낸다. 현재 버전과 다르면 **409 `POST_EDIT_CONFLICT`**, 생략하면 **400 `POST_EDIT_VERSION_REQUIRED`**다. 오류에 최신 비공개 본문을 포함하지 않는다.
+- DB 행 잠금 안에서 권한과 버전을 검사한다. 실제 글·분류·상태·공개 범위가 달라질 때만 버전과 편집 시각을 갱신한다. 같은 내용 재저장, 조회수·좋아요 변경은 편집 버전에 영향을 주지 않는다.
+- 편집 중인 버전은 서버 재조회만으로 바뀌지 않는다. 충돌 시 입력을 유지하고 최신 글 비교를 제공한다. 사용자가 비교한 버전으로 계속 편집하기를 선택해도 자동 저장하지 않는다.
+- `GET /posts/my`는 본문을 제외한 목록 응답이다. 본문은 권한이 확인된 상세 조회로 가져온다.
+- 상세: [구현 범위](../architecture/blog-edit-conflicts.md). 수정 이력·AI 작업 저장은 후속 단계다.
+
 ## 이미지 첨부 (2026-09-15 구현)
 
 | 경로 | 동작 | 권한/응답 |
@@ -11,7 +20,7 @@ PNG/JPEG만 지원하며 입력/재인코딩 결과 10MiB, 한 변 8192px, 총 2
 
 업로드 URL은 `/api/portal/attachments/{UUID}`이며 미연결 상태는 소유자만 조회한다. 글 생성/수정 시 실제 Markdown/HTML 이미지 참조를 연결하고 제거된 참조는 연결을 해제한다. 타인 소유/다른 글에 연결된 첨부, 실제 이미지 위치의 data/blob URL과 비정규 첨부 주소는 400이다. 코드 예시의 주소는 첨부로 처리하지 않는다. 공개 여부는 조회 시 현재 글에서 판단한다. [상세 계약](../architecture/image-attachments-design.md).
 
-> 향후 버전 조건 저장·수정 이력·영속 AI 작업 API는 [저장·AI 데이터 설계](../architecture/knowledge-storage-ai-design.md)의 제안 계약이다. 현재 OpenAPI에 구현된 경로로 추가하지 않았다.
+> 향후 수정 이력·영속 AI 작업 API는 [저장·AI 데이터 설계](../architecture/knowledge-storage-ai-design.md)의 제안 계약이다. 현재 OpenAPI에 구현된 경로로 추가하지 않았다.
 
 > 2026-09-13 공개 정책: 운영 `app.public-read-only=true`에서는 회원가입·OAuth2·댓글·좋아요를
 > 차단한다. 게시글/분류/AI 쓰기는 ADMIN만 허용한다. 개발 프로필의 USER+ 설명과 구분한다.

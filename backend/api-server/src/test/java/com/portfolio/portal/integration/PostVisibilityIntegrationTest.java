@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PostVisibilityIntegrationTest extends IntegrationTestBase {
  @Autowired JwtTokenProvider jwt;
  String token(String name){return "Bearer "+jwt.generateAccessToken(new UsernamePasswordAuthenticationToken(name,null,List.of(new SimpleGrantedAuthority(name.equals("owner")?"ROLE_ADMIN":"ROLE_USER"))));}
+ @Autowired PostRepository postVersions;
  @Autowired ObjectMapper mapper; @Autowired UserRepository users;
  @Autowired CategoryRepository categories; @Autowired TagRepository tags;
  Long categoryId; Long tagId;
@@ -30,6 +31,7 @@ class PostVisibilityIntegrationTest extends IntegrationTestBase {
   Map<String,Object> b=new HashMap<>(Map.of("title",title,"content","needle content","status",state,"categoryId",categoryId,"tagIds",List.of(tagId)));
   if(visibility!=null)b.put("visibility",visibility);return b;
  }
+ Map<String,Object> versioned(long id,Map<String,Object> body){body.put("expectedEditVersion",postVersions.findById(id).orElseThrow().getEditVersion());return body;}
  JsonNode create(String title,String state,String visibility)throws Exception{
   return mapper.readTree(mockMvc.perform(post("/api/portal/posts").header("Authorization",token("owner")).contentType(MediaType.APPLICATION_JSON)
    .content(mapper.writeValueAsString(body(title,state,visibility)))).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString());
@@ -53,7 +55,7 @@ class PostVisibilityIntegrationTest extends IntegrationTestBase {
   mockMvc.perform(post("/api/portal/posts/"+id+"/comments").header("Authorization",token("other")).contentType(MediaType.APPLICATION_JSON)
    .content("{\"content\":\"Existing discussion\"}")).andExpect(status().isCreated());
   for(String visibility:new String[]{"PRIVATE",null})mockMvc.perform(put("/api/portal/posts/"+id).header("Authorization",token("owner"))
-   .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(body("Now private","PUBLISHED",visibility))))
+   .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(versioned(id,body("Now private","PUBLISHED",visibility)))))
    .andExpect(status().isOk()).andExpect(jsonPath("$.visibility").value("PRIVATE"));
   mockMvc.perform(get("/api/portal/posts/"+id)).andExpect(status().isNotFound());
   mockMvc.perform(get("/api/portal/posts/"+id+"/comments")).andExpect(status().isNotFound());
