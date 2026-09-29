@@ -1,13 +1,17 @@
 # 포트폴리오 포털 (Portfolio Portal)
 
-> Dell Pro Max GB10 기반 로컬 AI 벤치마크를 포함한 3D 인터랙티브 포트폴리오 플랫폼
+> 홈서버에서 운영하는 개인 포트폴리오와 블로그 — Next.js, Spring Boot, PostgreSQL
+
+**공개 중 (2026-09-13)**: [https://gwangwon.dev](https://gwangwon.dev) — 방문자 조회 전용입니다. 운영에서는 회원가입·소셜 로그인·댓글·좋아요를 닫고
+관리자만 글을 관리합니다. 아래 기능 목록은 개발 모드를 포함한 구현 현황입니다. 공개 주소에서 페이지 조회와 관리자 인증을 검증했습니다.
+[공개 준비 설계](docs/architecture/public-release-design.md) · [배포 가이드](docs/guides/DEPLOYMENT_GUIDE.md)
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
-[![Tests](https://img.shields.io/badge/tests-240%20passing-brightgreen.svg)](#테스트)
+[![Tests](https://img.shields.io/badge/tests-272%20passing-brightgreen.svg)](#테스트)
 
 ---
 
@@ -446,7 +450,7 @@ cloudflared tunnel --url http://localhost:80
 
 상세 절차: [docs/guides/DEPLOYMENT_GUIDE.md](docs/guides/DEPLOYMENT_GUIDE.md)
 
-> 라이브 URL은 도메인 확보 후 여기에 게시 예정
+> 라이브 URL: [https://gwangwon.dev](https://gwangwon.dev)
 
 ---
 
@@ -473,7 +477,7 @@ cloudflared tunnel --url http://localhost:80
 - **개발자**: 조광원
 - **이메일**: tgdata200@gmail.com
 - **GitHub**: https://github.com/jokwangwon
-- **블로그**: 도메인 확보 후 게시 예정
+- **블로그**: [gwangwon.dev/blog](https://gwangwon.dev/blog)
 
 ---
 

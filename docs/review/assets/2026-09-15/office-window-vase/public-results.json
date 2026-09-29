@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "seasons": 4,
+  "automaticSeason": "autumn",
+  "realCodexAttendance": true,
+  "attendanceCount": 1,
+  "interactions": {
+    "keyboard": true,
+    "mobile": true,
+    "noAttendanceChange": true
+  },
+  "sizes": [
+    {
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "overflow": false
+    }
+  ],
+  "checks": {
+    "/health": 200,
+    "/api/admin/office/events": 404,
+    "POST /api/office": 405,
+    "POST /api/office/events": 405
+  },
+  "errors": []
+}

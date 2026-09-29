@@ -1,0 +1,130 @@
+[
+  {
+    "name": "desktop",
+    "overflow": false,
+    "previewStyle": {
+      "fontSize": "24px",
+      "marginTop": "0px"
+    },
+    "articleStyle": "24px",
+    "writes": [
+      {
+        "method": "POST",
+        "status": "DRAFT"
+      },
+      {
+        "method": "POST",
+        "status": "DRAFT"
+      },
+      {
+        "method": "PUT",
+        "status": "DRAFT"
+      },
+      {
+        "method": "PUT",
+        "status": "PUBLISHED"
+      }
+    ],
+    "errors": [],
+    "restored": true,
+    "failedSaveRetained": true,
+    "draftContinued": true,
+    "publishedFixture": true
+  },
+  {
+    "name": "mobile",
+    "overflow": false,
+    "previewStyle": {
+      "fontSize": "24px",
+      "marginTop": "0px"
+    },
+    "articleStyle": "24px",
+    "writes": [
+      {
+        "method": "POST",
+        "status": "DRAFT"
+      },
+      {
+        "method": "POST",
+        "status": "DRAFT"
+      },
+      {
+        "method": "PUT",
+        "status": "DRAFT"
+      },
+      {
+        "method": "PUT",
+        "status": "PUBLISHED"
+      }
+    ],
+    "errors": [],
+    "restored": true,
+    "failedSaveRetained": true,
+    "draftContinued": true,
+    "publishedFixture": true
+  },
+  {
+    "name": "small",
+    "overflow": false,
+    "previewStyle": {
+      "fontSize": "24px",
+      "marginTop": "0px"
+    },
+    "articleStyle": "24px",
+    "writes": [
+      {
+        "method": "POST",
+        "status": "DRAFT"
+      },
+      {
+        "method": "POST",
+        "status": "DRAFT"
+      },
+      {
+        "method": "PUT",
+        "status": "DRAFT"
+      },
+      {
+        "method": "PUT",
+        "status": "PUBLISHED"
+      }
+    ],
+    "errors": [],
+    "restored": true,
+    "failedSaveRetained": true,
+    "draftContinued": true,
+    "publishedFixture": true
+  },
+  {
+    "name": "dark",
+    "overflow": false,
+    "previewStyle": {
+      "fontSize": "24px",
+      "marginTop": "0px"
+    },
+    "articleStyle": "24px",
+    "writes": [
+      {
+        "method": "POST",
+        "status": "DRAFT"
+      },
+      {
+        "method": "POST",
+        "status": "DRAFT"
+      },
+      {
+        "method": "PUT",
+        "status": "DRAFT"
+      },
+      {
+        "method": "PUT",
+        "status": "PUBLISHED"
+      }
+    ],
+    "errors": [],
+    "restored": true,
+    "failedSaveRetained": true,
+    "draftContinued": true,
+    "publishedFixture": true
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "dayNight": true,
+  "seasons": 4,
+  "arrivalDeparture": true,
+  "titleSelection": true,
+  "staleClearsTitle": true,
+  "sizes": [
+    {
+      "width": 390,
+      "dpr": 1,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "dpr": 1,
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "dpr": 2,
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

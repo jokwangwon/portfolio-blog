@@ -1,0 +1,16 @@
+[
+  {
+    "scenario": "undo-to-server",
+    "inputBeforeReload": "서버에 저장된 원래 본문",
+    "recoveryBeforeReload": "수정했지만 최종적으로 사용하지 않을 본문",
+    "restored": "수정했지만 최종적으로 사용하지 않을 본문",
+    "dialogCount": 0
+  },
+  {
+    "scenario": "storage-error-navigation",
+    "storageFailureShown": true,
+    "navigatedToBlog": true,
+    "dialogCount": 0,
+    "recovery": null
+  }
+]

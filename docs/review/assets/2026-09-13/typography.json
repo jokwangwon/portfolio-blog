@@ -1,0 +1,98 @@
+{
+  "fonts": [
+    {
+      "selector": "html",
+      "family": "\"Times New Roman\"",
+      "size": "16px",
+      "color": "rgb(0, 0, 0)",
+      "lineHeight": "24px"
+    },
+    {
+      "selector": "body",
+      "family": "\"Times New Roman\"",
+      "size": "16px",
+      "color": "lab(2.75381 0 0)",
+      "lineHeight": "24px"
+    },
+    {
+      "selector": "h1",
+      "family": "\"Times New Roman\"",
+      "size": "72px",
+      "color": "lab(2.75381 0 0)",
+      "lineHeight": "72px"
+    },
+    {
+      "selector": "#projects h2",
+      "family": "\"Times New Roman\"",
+      "size": "30px",
+      "color": "lab(2.75381 0 0)",
+      "lineHeight": "36px"
+    },
+    {
+      "selector": "#projects p",
+      "family": "\"Times New Roman\"",
+      "size": "16px",
+      "color": "lab(48.496 0 0)",
+      "lineHeight": "24px"
+    }
+  ],
+  "fontSans": "",
+  "fontGeist": "\"Geist\", \"Geist Fallback\"",
+  "buttons": [
+    {
+      "text": "About",
+      "label": null,
+      "height": 36
+    },
+    {
+      "text": "Projects",
+      "label": null,
+      "height": 36
+    },
+    {
+      "text": "",
+      "label": "다크 모드로 전환",
+      "height": 28
+    },
+    {
+      "text": "프로젝트 보기",
+      "label": null,
+      "height": 36
+    },
+    {
+      "text": "",
+      "label": "아래로 스크롤",
+      "height": 32
+    },
+    {
+      "text": "Backend",
+      "label": null,
+      "height": 28
+    },
+    {
+      "text": "Frontend",
+      "label": null,
+      "height": 28
+    },
+    {
+      "text": "Infra",
+      "label": null,
+      "height": 28
+    },
+    {
+      "text": "AI 연동 · 도구",
+      "label": null,
+      "height": 28
+    },
+    {
+      "text": "GitHub",
+      "label": null,
+      "height": 66
+    },
+    {
+      "text": "",
+      "label": "테마 설정 열기",
+      "height": 44
+    }
+  ]
+}

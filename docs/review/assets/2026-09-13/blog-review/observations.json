@@ -1,0 +1,146 @@
+[
+  {
+    "name": "desktop",
+    "mode": "real-empty",
+    "overflow": false,
+    "scrollWidth": 1440,
+    "width": 1440,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n카테고리\n전체\nTechnology\nAlgorithm\nProjects\nGB10 Lab\nDevOps\nAI & ML\n아직 게시글이 없습니다.",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  },
+  {
+    "name": "desktop",
+    "mode": "fixture-list",
+    "overflow": false,
+    "scrollWidth": 1440,
+    "width": 1440,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n카테고리\n전체\nOracle 학습\nOracle 학습\n2026년 9월 1일\n[검토용 예시] Oracle 로그 분석에서 날짜 경계를 확인한 과정\n\n화면 검토용 가상 글입니다. 문제 상황, 확인 과정, 결과와 한계를 설명하는 글의 길이와 표시를 검토합니다.\n\n검토용 작성자\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n조회 0\n좋아요 0\nOracle 학습\n2026년 9월 1일\n[검토용 예시] 프로젝트를 공개하며 남긴 배포 기록\n\n화면 검토용 가상 글입니다. 문제 상황, 확인 과정, 결과와 한계를 설명하는 글의 길이와 표시를 검토합니다.\n\n검토용 작성자\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n조회 0\n좋아요 0",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  },
+  {
+    "name": "desktop",
+    "mode": "fixture-detail",
+    "overflow": false,
+    "scrollWidth": 1440,
+    "width": 1440,
+    "body": "← 목록으로\nOracle 학습\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n[검토용 예시] Oracle 로그 분석에서 날짜 경계를 확인한 과정\n검토용 작성자\n2026년 9월 1일 오전 09:00\n조회 0\n문제와 확인 과정\n\n이 글은 화면 검토를 위한 가상 데이터입니다. 실제 작업 성과를 나타내지 않습니다.\n\n긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다.\n\nSQL 예시\nSELECT event_timestamp, message_text FROM diagnostic_events WHERE event_timestamp >= TIMESTAMP '2026-08-01 00:00:00' ORDER BY event_timestamp;\n\n비교 표\n구분\t관찰\t다음 확인\n예시 입력\t날짜 경계\t시간대 구분\n기록\n\n확인한 범위와 남은 문제를 구분합니다.",
+    "alertCount": 0,
+    "h2Ids": [
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  {
+    "name": "desktop",
+    "mode": "fixture-error",
+    "overflow": false,
+    "scrollWidth": 1440,
+    "width": 1440,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n카테고리\n전체\nOracle 학습",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  },
+  {
+    "name": "mobile",
+    "mode": "real-empty",
+    "overflow": false,
+    "scrollWidth": 390,
+    "width": 390,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n전체\nTechnology\nAlgorithm\nProjects\nGB10 Lab\nDevOps\nAI & ML\n아직 게시글이 없습니다.",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  },
+  {
+    "name": "mobile",
+    "mode": "fixture-list",
+    "overflow": true,
+    "scrollWidth": 410,
+    "width": 390,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n전체\nOracle 학습\nOracle 학습\n2026년 9월 1일\n[검토용 예시] Oracle 로그 분석에서 날짜 경계를 확인한 과정\n\n화면 검토용 가상 글입니다. 문제 상황, 확인 과정, 결과와 한계를 설명하는 글의 길이와 표시를 검토합니다.\n\n검토용 작성자\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n조회 0\n좋아요 0\nOracle 학습\n2026년 9월 1일\n[검토용 예시] 프로젝트를 공개하며 남긴 배포 기록\n\n화면 검토용 가상 글입니다. 문제 상황, 확인 과정, 결과와 한계를 설명하는 글의 길이와 표시를 검토합니다.\n\n검토용 작성자\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n조회 0\n좋아요 0",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  },
+  {
+    "name": "mobile",
+    "mode": "fixture-detail",
+    "overflow": true,
+    "scrollWidth": 452,
+    "width": 390,
+    "body": "← 목록으로\nOracle 학습\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n[검토용 예시] Oracle 로그 분석에서 날짜 경계를 확인한 과정\n검토용 작성자\n2026년 9월 1일 오전 09:00\n조회 0\n문제와 확인 과정\n\n이 글은 화면 검토를 위한 가상 데이터입니다. 실제 작업 성과를 나타내지 않습니다.\n\n긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다.\n\nSQL 예시\nSELECT event_timestamp, message_text FROM diagnostic_events WHERE event_timestamp >= TIMESTAMP '2026-08-01 00:00:00' ORDER BY event_timestamp;\n\n비교 표\n구분\t관찰\t다음 확인\n예시 입력\t날짜 경계\t시간대 구분\n기록\n\n확인한 범위와 남은 문제를 구분합니다.",
+    "alertCount": 0,
+    "h2Ids": [
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  {
+    "name": "mobile",
+    "mode": "fixture-error",
+    "overflow": false,
+    "scrollWidth": 390,
+    "width": 390,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n전체\nOracle 학습",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  },
+  {
+    "name": "small",
+    "mode": "real-empty",
+    "overflow": false,
+    "scrollWidth": 320,
+    "width": 320,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n전체\nTechnology\nAlgorithm\nProjects\nGB10 Lab\nDevOps\nAI & ML\n아직 게시글이 없습니다.",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  },
+  {
+    "name": "small",
+    "mode": "fixture-list",
+    "overflow": true,
+    "scrollWidth": 410,
+    "width": 320,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n전체\nOracle 학습\nOracle 학습\n2026년 9월 1일\n[검토용 예시] Oracle 로그 분석에서 날짜 경계를 확인한 과정\n\n화면 검토용 가상 글입니다. 문제 상황, 확인 과정, 결과와 한계를 설명하는 글의 길이와 표시를 검토합니다.\n\n검토용 작성자\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n조회 0\n좋아요 0\nOracle 학습\n2026년 9월 1일\n[검토용 예시] 프로젝트를 공개하며 남긴 배포 기록\n\n화면 검토용 가상 글입니다. 문제 상황, 확인 과정, 결과와 한계를 설명하는 글의 길이와 표시를 검토합니다.\n\n검토용 작성자\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n조회 0\n좋아요 0",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  },
+  {
+    "name": "small",
+    "mode": "fixture-detail",
+    "overflow": true,
+    "scrollWidth": 452,
+    "width": 320,
+    "body": "← 목록으로\nOracle 학습\n#OracleDatabase\n#Troubleshooting\n#PostgreSQL\n[검토용 예시] Oracle 로그 분석에서 날짜 경계를 확인한 과정\n검토용 작성자\n2026년 9월 1일 오전 09:00\n조회 0\n문제와 확인 과정\n\n이 글은 화면 검토를 위한 가상 데이터입니다. 실제 작업 성과를 나타내지 않습니다.\n\n긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다. 긴 본문에서 문단 간격과 줄 길이를 확인합니다.\n\nSQL 예시\nSELECT event_timestamp, message_text FROM diagnostic_events WHERE event_timestamp >= TIMESTAMP '2026-08-01 00:00:00' ORDER BY event_timestamp;\n\n비교 표\n구분\t관찰\t다음 확인\n예시 입력\t날짜 경계\t시간대 구분\n기록\n\n확인한 범위와 남은 문제를 구분합니다.",
+    "alertCount": 0,
+    "h2Ids": [
+      "",
+      "",
+      "",
+      ""
+    ]
+  },
+  {
+    "name": "small",
+    "mode": "fixture-error",
+    "overflow": false,
+    "scrollWidth": 320,
+    "width": 320,
+    "body": "블로그\n\n개발 경험과 기술을 공유합니다\n\n전체\nOracle 학습",
+    "searchLabel": null,
+    "alertCount": 0,
+    "h2Ids": []
+  }
+]

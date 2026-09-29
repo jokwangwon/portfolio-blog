@@ -1,0 +1,582 @@
+[
+  {
+    "name": "desktop",
+    "overflow": false,
+    "aboutHeight": 444,
+    "projectsHeight": 1873,
+    "placeholderAbout": false,
+    "placeholderCards": 0,
+    "cardCount": 6,
+    "cardHeights": [
+      500,
+      500,
+      472,
+      472,
+      472,
+      472
+    ],
+    "highlights": [
+      [
+        {
+          "text": "인증·초안·게시글 관리",
+          "visible": true
+        },
+        {
+          "text": "백엔드·프런트엔드 테스트",
+          "visible": true
+        },
+        {
+          "text": "DB 백업·복원 검증",
+          "visible": true
+        },
+        {
+          "text": "HTTPS 공개",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "학습 모드 3종",
+          "visible": true
+        },
+        {
+          "text": "문제 생성 결과의 형식·범위 검사",
+          "visible": true
+        },
+        {
+          "text": "학습 콘텐츠와 테스트 코드",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "타임스탬프 단위 파싱",
+          "visible": true
+        },
+        {
+          "text": "정규식 기반 이벤트 분류",
+          "visible": true
+        },
+        {
+          "text": "학습용 로그와 설계 노트",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "HTML → 슬라이드 JSON → PPTX",
+          "visible": true
+        },
+        {
+          "text": "문서 동기화·검증",
+          "visible": true
+        },
+        {
+          "text": "슬라이드 미리보기",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "게임 규칙 엔진",
+          "visible": true
+        },
+        {
+          "text": "설정 파일과 수치 설계",
+          "visible": true
+        },
+        {
+          "text": "맵 제작·검증 도구",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "요구사항·설계 기록",
+          "visible": true
+        },
+        {
+          "text": "Git hooks와 검사 스크립트",
+          "visible": true
+        },
+        {
+          "text": "개발 작업 흐름 실험",
+          "visible": true
+        }
+      ]
+    ],
+    "links": [
+      {
+        "label": "Portfolio & Blog 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/portfolio-blog",
+        "height": 44
+      },
+      {
+        "label": "Portfolio & Blog 사이트 보기 (새 탭)",
+        "url": "https://gwangwon.dev/",
+        "height": 44
+      },
+      {
+        "label": "Oracle 학습 게임 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/oracle_bootcamp_study_game",
+        "height": 44
+      },
+      {
+        "label": "Oracle Alert Log 분석 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/Alert-log-project",
+        "height": 44
+      },
+      {
+        "label": "학습자료 → 발표자료 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/ora-ppt-gen",
+        "height": 44
+      },
+      {
+        "label": "혼천 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/honcheon-server",
+        "height": 44
+      },
+      {
+        "label": "AI 개발 도구 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/AI_development_tool",
+        "height": 44
+      }
+    ],
+    "errors": []
+  },
+  {
+    "name": "mobile",
+    "overflow": false,
+    "aboutHeight": 648,
+    "projectsHeight": 3398,
+    "placeholderAbout": false,
+    "placeholderCards": 0,
+    "cardCount": 6,
+    "cardHeights": [
+      543,
+      492,
+      487,
+      464,
+      464,
+      487
+    ],
+    "highlights": [
+      [
+        {
+          "text": "인증·초안·게시글 관리",
+          "visible": true
+        },
+        {
+          "text": "백엔드·프런트엔드 테스트",
+          "visible": true
+        },
+        {
+          "text": "DB 백업·복원 검증",
+          "visible": true
+        },
+        {
+          "text": "HTTPS 공개",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "학습 모드 3종",
+          "visible": true
+        },
+        {
+          "text": "문제 생성 결과의 형식·범위 검사",
+          "visible": true
+        },
+        {
+          "text": "학습 콘텐츠와 테스트 코드",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "타임스탬프 단위 파싱",
+          "visible": true
+        },
+        {
+          "text": "정규식 기반 이벤트 분류",
+          "visible": true
+        },
+        {
+          "text": "학습용 로그와 설계 노트",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "HTML → 슬라이드 JSON → PPTX",
+          "visible": true
+        },
+        {
+          "text": "문서 동기화·검증",
+          "visible": true
+        },
+        {
+          "text": "슬라이드 미리보기",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "게임 규칙 엔진",
+          "visible": true
+        },
+        {
+          "text": "설정 파일과 수치 설계",
+          "visible": true
+        },
+        {
+          "text": "맵 제작·검증 도구",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "요구사항·설계 기록",
+          "visible": true
+        },
+        {
+          "text": "Git hooks와 검사 스크립트",
+          "visible": true
+        },
+        {
+          "text": "개발 작업 흐름 실험",
+          "visible": true
+        }
+      ]
+    ],
+    "links": [
+      {
+        "label": "Portfolio & Blog 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/portfolio-blog",
+        "height": 44
+      },
+      {
+        "label": "Portfolio & Blog 사이트 보기 (새 탭)",
+        "url": "https://gwangwon.dev/",
+        "height": 44
+      },
+      {
+        "label": "Oracle 학습 게임 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/oracle_bootcamp_study_game",
+        "height": 44
+      },
+      {
+        "label": "Oracle Alert Log 분석 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/Alert-log-project",
+        "height": 44
+      },
+      {
+        "label": "학습자료 → 발표자료 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/ora-ppt-gen",
+        "height": 44
+      },
+      {
+        "label": "혼천 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/honcheon-server",
+        "height": 44
+      },
+      {
+        "label": "AI 개발 도구 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/AI_development_tool",
+        "height": 44
+      }
+    ],
+    "errors": []
+  },
+  {
+    "name": "small",
+    "overflow": false,
+    "aboutHeight": 726,
+    "projectsHeight": 3711,
+    "placeholderAbout": false,
+    "placeholderCards": 0,
+    "cardCount": 6,
+    "cardHeights": [
+      618,
+      538,
+      510,
+      538,
+      510,
+      538
+    ],
+    "highlights": [
+      [
+        {
+          "text": "인증·초안·게시글 관리",
+          "visible": true
+        },
+        {
+          "text": "백엔드·프런트엔드 테스트",
+          "visible": true
+        },
+        {
+          "text": "DB 백업·복원 검증",
+          "visible": true
+        },
+        {
+          "text": "HTTPS 공개",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "학습 모드 3종",
+          "visible": true
+        },
+        {
+          "text": "문제 생성 결과의 형식·범위 검사",
+          "visible": true
+        },
+        {
+          "text": "학습 콘텐츠와 테스트 코드",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "타임스탬프 단위 파싱",
+          "visible": true
+        },
+        {
+          "text": "정규식 기반 이벤트 분류",
+          "visible": true
+        },
+        {
+          "text": "학습용 로그와 설계 노트",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "HTML → 슬라이드 JSON → PPTX",
+          "visible": true
+        },
+        {
+          "text": "문서 동기화·검증",
+          "visible": true
+        },
+        {
+          "text": "슬라이드 미리보기",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "게임 규칙 엔진",
+          "visible": true
+        },
+        {
+          "text": "설정 파일과 수치 설계",
+          "visible": true
+        },
+        {
+          "text": "맵 제작·검증 도구",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "요구사항·설계 기록",
+          "visible": true
+        },
+        {
+          "text": "Git hooks와 검사 스크립트",
+          "visible": true
+        },
+        {
+          "text": "개발 작업 흐름 실험",
+          "visible": true
+        }
+      ]
+    ],
+    "links": [
+      {
+        "label": "Portfolio & Blog 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/portfolio-blog",
+        "height": 44
+      },
+      {
+        "label": "Portfolio & Blog 사이트 보기 (새 탭)",
+        "url": "https://gwangwon.dev/",
+        "height": 44
+      },
+      {
+        "label": "Oracle 학습 게임 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/oracle_bootcamp_study_game",
+        "height": 44
+      },
+      {
+        "label": "Oracle Alert Log 분석 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/Alert-log-project",
+        "height": 44
+      },
+      {
+        "label": "학습자료 → 발표자료 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/ora-ppt-gen",
+        "height": 44
+      },
+      {
+        "label": "혼천 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/honcheon-server",
+        "height": 44
+      },
+      {
+        "label": "AI 개발 도구 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/AI_development_tool",
+        "height": 44
+      }
+    ],
+    "errors": []
+  },
+  {
+    "name": "dark",
+    "overflow": false,
+    "aboutHeight": 444,
+    "projectsHeight": 1873,
+    "placeholderAbout": false,
+    "placeholderCards": 0,
+    "cardCount": 6,
+    "cardHeights": [
+      500,
+      500,
+      472,
+      472,
+      472,
+      472
+    ],
+    "highlights": [
+      [
+        {
+          "text": "인증·초안·게시글 관리",
+          "visible": true
+        },
+        {
+          "text": "백엔드·프런트엔드 테스트",
+          "visible": true
+        },
+        {
+          "text": "DB 백업·복원 검증",
+          "visible": true
+        },
+        {
+          "text": "HTTPS 공개",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "학습 모드 3종",
+          "visible": true
+        },
+        {
+          "text": "문제 생성 결과의 형식·범위 검사",
+          "visible": true
+        },
+        {
+          "text": "학습 콘텐츠와 테스트 코드",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "타임스탬프 단위 파싱",
+          "visible": true
+        },
+        {
+          "text": "정규식 기반 이벤트 분류",
+          "visible": true
+        },
+        {
+          "text": "학습용 로그와 설계 노트",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "HTML → 슬라이드 JSON → PPTX",
+          "visible": true
+        },
+        {
+          "text": "문서 동기화·검증",
+          "visible": true
+        },
+        {
+          "text": "슬라이드 미리보기",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "게임 규칙 엔진",
+          "visible": true
+        },
+        {
+          "text": "설정 파일과 수치 설계",
+          "visible": true
+        },
+        {
+          "text": "맵 제작·검증 도구",
+          "visible": true
+        }
+      ],
+      [
+        {
+          "text": "요구사항·설계 기록",
+          "visible": true
+        },
+        {
+          "text": "Git hooks와 검사 스크립트",
+          "visible": true
+        },
+        {
+          "text": "개발 작업 흐름 실험",
+          "visible": true
+        }
+      ]
+    ],
+    "links": [
+      {
+        "label": "Portfolio & Blog 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/portfolio-blog",
+        "height": 44
+      },
+      {
+        "label": "Portfolio & Blog 사이트 보기 (새 탭)",
+        "url": "https://gwangwon.dev/",
+        "height": 44
+      },
+      {
+        "label": "Oracle 학습 게임 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/oracle_bootcamp_study_game",
+        "height": 44
+      },
+      {
+        "label": "Oracle Alert Log 분석 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/Alert-log-project",
+        "height": 44
+      },
+      {
+        "label": "학습자료 → 발표자료 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/ora-ppt-gen",
+        "height": 44
+      },
+      {
+        "label": "혼천 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/honcheon-server",
+        "height": 44
+      },
+      {
+        "label": "AI 개발 도구 소스 코드 (새 탭)",
+        "url": "https://github.com/jokwangwon/AI_development_tool",
+        "height": 44
+      }
+    ],
+    "errors": []
+  }
+]
