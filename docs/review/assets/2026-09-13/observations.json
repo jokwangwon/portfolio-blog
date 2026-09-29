@@ -1,0 +1,191 @@
+[
+  {
+    "variant": "desktop-light",
+    "title": "조광원 | 포트폴리오 & 블로그",
+    "height": 5583,
+    "viewport": 900,
+    "overflow": false,
+    "sections": [
+      {
+        "id": "hero",
+        "top": 0,
+        "height": 900
+      },
+      {
+        "id": "about",
+        "top": 930,
+        "height": 576
+      },
+      {
+        "id": "tech-stack",
+        "top": 1506,
+        "height": 506
+      },
+      {
+        "id": "projects",
+        "top": 2012,
+        "height": 2011
+      },
+      {
+        "id": "experience",
+        "top": 4022,
+        "height": 552
+      },
+      {
+        "id": "blog",
+        "top": 4574,
+        "height": 532
+      },
+      {
+        "id": "contact",
+        "top": 5106,
+        "height": 438
+      }
+    ],
+    "headings": [
+      "조광원입니다.",
+      "About",
+      "조광원",
+      "Tech Stack",
+      "Projects",
+      "Portfolio & Blog",
+      "Oracle 학습 게임",
+      "Oracle Alert Log 분석",
+      "학습자료 → 발표자료",
+      "혼천",
+      "AI 개발 도구",
+      "학습과 프로젝트 기록",
+      "개인 포트폴리오 공개",
+      "부트캠프 수료",
+      "Blog",
+      "Contact"
+    ],
+    "errors": []
+  },
+  {
+    "variant": "mobile-light",
+    "title": "조광원 | 포트폴리오 & 블로그",
+    "height": 7099,
+    "viewport": 844,
+    "overflow": false,
+    "sections": [
+      {
+        "id": "hero",
+        "top": 0,
+        "height": 844
+      },
+      {
+        "id": "about",
+        "top": 874,
+        "height": 940
+      },
+      {
+        "id": "tech-stack",
+        "top": 1814,
+        "height": 559
+      },
+      {
+        "id": "projects",
+        "top": 2373,
+        "height": 3274
+      },
+      {
+        "id": "experience",
+        "top": 5646,
+        "height": 528
+      },
+      {
+        "id": "blog",
+        "top": 6174,
+        "height": 488
+      },
+      {
+        "id": "contact",
+        "top": 6662,
+        "height": 398
+      }
+    ],
+    "headings": [
+      "조광원입니다.",
+      "About",
+      "조광원",
+      "Tech Stack",
+      "Projects",
+      "Portfolio & Blog",
+      "Oracle 학습 게임",
+      "Oracle Alert Log 분석",
+      "학습자료 → 발표자료",
+      "혼천",
+      "AI 개발 도구",
+      "학습과 프로젝트 기록",
+      "개인 포트폴리오 공개",
+      "부트캠프 수료",
+      "Blog",
+      "Contact"
+    ],
+    "errors": []
+  },
+  {
+    "variant": "desktop-dark",
+    "title": "조광원 | 포트폴리오 & 블로그",
+    "height": 5583,
+    "viewport": 900,
+    "overflow": false,
+    "sections": [
+      {
+        "id": "hero",
+        "top": 0,
+        "height": 900
+      },
+      {
+        "id": "about",
+        "top": 930,
+        "height": 576
+      },
+      {
+        "id": "tech-stack",
+        "top": 1506,
+        "height": 506
+      },
+      {
+        "id": "projects",
+        "top": 2012,
+        "height": 2011
+      },
+      {
+        "id": "experience",
+        "top": 4022,
+        "height": 552
+      },
+      {
+        "id": "blog",
+        "top": 4574,
+        "height": 532
+      },
+      {
+        "id": "contact",
+        "top": 5106,
+        "height": 438
+      }
+    ],
+    "headings": [
+      "조광원입니다.",
+      "About",
+      "조광원",
+      "Tech Stack",
+      "Projects",
+      "Portfolio & Blog",
+      "Oracle 학습 게임",
+      "Oracle Alert Log 분석",
+      "학습자료 → 발표자료",
+      "혼천",
+      "AI 개발 도구",
+      "학습과 프로젝트 기록",
+      "개인 포트폴리오 공개",
+      "부트캠프 수료",
+      "Blog",
+      "Contact"
+    ],
+    "errors": []
+  }
+]

@@ -1,5 +1,7 @@
 # Depth 2: 서비스별 모듈 구조
 
+> 첨부는 domain의 Attachment/AttachmentRepository, module-blog의 AttachmentController/AttachmentService/AttachmentReferences, api-server의 V3 migration으로 구현했다. [API 계약](../api/API_SPECIFICATION.md).
+
 > 이 문서는 [blog-architecture-context.md](./blog-architecture-context.md)의 Depth 1을 기반으로
 > 각 **독립 서비스**의 내부 모듈 구조를 정의합니다.
 
@@ -781,3 +783,14 @@ location /api/project-m/ {
 
 **이 문서는 서비스별 모듈 구조를 정의합니다.**
 **새 서비스 추가 시 2-4절의 가이드를 따르세요.**
+
+
+## 공개 1차 버전 운영 정책 (2026-09-13)
+
+[공개 준비 설계](public-release-design.md)에 따라 운영에서는 방문자 조회만 허용한다.
+SecurityConfig는 회원가입/OAuth2/댓글/좋아요를 차단하고 게시글·분류·AI 쓰기를 ADMIN으로 제한한다.
+PostService는 미공개 글 작성자를 검사한다. HealthController는 DB를 확인하고 장애 시 503을 반환한다.
+
+### Office 출퇴근 연결 (2026-09-15)
+
+공개 Office는 로컬 Python 수집기와 Next.js SSE 조회를 사용한다. 새 Spring 모듈이나 테이블은 만들지 않는다. [현행 명세](office-presence-design.md).

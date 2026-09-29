@@ -1,0 +1,50 @@
+[
+  {
+    "width": 1280,
+    "scenario": "undo",
+    "passed": true,
+    "dialogs": 0
+  },
+  {
+    "width": 1280,
+    "scenario": "storage-navigation",
+    "passed": true,
+    "dialogs": 3
+  },
+  {
+    "width": 1280,
+    "scenario": "storage-back",
+    "passed": true,
+    "dialogs": 1
+  },
+  {
+    "width": 1280,
+    "scenario": "saved",
+    "passed": true,
+    "dialogs": 0
+  },
+  {
+    "width": 390,
+    "scenario": "undo",
+    "passed": true,
+    "dialogs": 0
+  },
+  {
+    "width": 390,
+    "scenario": "storage-navigation",
+    "passed": true,
+    "dialogs": 3
+  },
+  {
+    "width": 390,
+    "scenario": "storage-back",
+    "passed": true,
+    "dialogs": 1
+  },
+  {
+    "width": 390,
+    "scenario": "saved",
+    "passed": true,
+    "dialogs": 0
+  }
+]

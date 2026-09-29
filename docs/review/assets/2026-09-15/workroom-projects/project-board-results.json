@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "groupedByProject": true,
+  "selectSession": true,
+  "recentOnlyWhenIdle": true,
+  "recentDoesNotAffectAttendance": true,
+  "reload": true,
+  "heartbeatDoesNotChangeActivityTime": true,
+  "hiddenOnDisconnectAndOff": true,
+  "sizes": [
+    {
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "overflow": false
+    }
+  ],
+  "errors": []
+}

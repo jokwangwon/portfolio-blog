@@ -1,0 +1,38 @@
+[
+  {
+    "width": 1280,
+    "scheme": "light",
+    "status": 200,
+    "careerEntries": 3,
+    "learningEntries": 2,
+    "menuWorks": true,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "scheme": "dark",
+    "status": 200,
+    "careerEntries": 3,
+    "learningEntries": 2,
+    "menuWorks": true,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "scheme": "light",
+    "status": 200,
+    "careerEntries": 3,
+    "learningEntries": 2,
+    "menuWorks": true,
+    "overflow": false
+  },
+  {
+    "width": 320,
+    "scheme": "light",
+    "status": 200,
+    "careerEntries": 3,
+    "learningEntries": 2,
+    "menuWorks": true,
+    "overflow": false
+  }
+]

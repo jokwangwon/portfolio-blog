@@ -1,5 +1,9 @@
 # Pixel Office - AI 에이전트 가상 사무실 설계
 
+> 2026-09-15: 공개 Office는 [작업 세션 출퇴근 설계](office-presence-design.md)를 적용한다. 아래 GitHub 관련 내용은 이전 버전 기록이다.
+
+> 이전(2026-09-13) 공개 소개: GitHub 활동을 주기적으로 조회해 캐릭터 상태로 표현하는 시각화다. 실제 AI 에이전트의 개발 상황을 실시간 중계한다고 소개하지 않는다.
+
 **Status**: Accepted (MVP Revised)
 **Date**: 2026-03-26
 **Revised**: 2026-04-06 — MVP 축소 + Canvas 2D 전환 ([ADR-008](../decisions/ADR-008-pixel-office-canvas2d-mvp.md))

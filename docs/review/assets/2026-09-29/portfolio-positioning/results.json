@@ -1,0 +1,98 @@
+[
+  {
+    "width": 320,
+    "theme": "light",
+    "passed": true,
+    "pageErrors": [],
+    "sectionOrder": [
+      "projects",
+      "publication",
+      "personal-projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ]
+  },
+  {
+    "width": 320,
+    "theme": "dark",
+    "passed": true,
+    "pageErrors": [],
+    "sectionOrder": [
+      "projects",
+      "publication",
+      "personal-projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ]
+  },
+  {
+    "width": 390,
+    "theme": "light",
+    "passed": true,
+    "pageErrors": [],
+    "sectionOrder": [
+      "projects",
+      "publication",
+      "personal-projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ]
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "passed": true,
+    "pageErrors": [],
+    "sectionOrder": [
+      "projects",
+      "publication",
+      "personal-projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ]
+  },
+  {
+    "width": 1280,
+    "theme": "light",
+    "passed": true,
+    "pageErrors": [],
+    "sectionOrder": [
+      "projects",
+      "publication",
+      "personal-projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ]
+  },
+  {
+    "width": 1280,
+    "theme": "dark",
+    "passed": true,
+    "pageErrors": [],
+    "sectionOrder": [
+      "projects",
+      "publication",
+      "personal-projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ]
+  }
+]

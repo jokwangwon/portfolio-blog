@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "threeSpaceNavigation": true,
+  "boardAnchor": true,
+  "projectLinks": 6,
+  "publicPostStates": [
+    "loading",
+    "empty",
+    "populated",
+    "error",
+    "retry"
+  ],
+  "postHref": true,
+  "portfolioAnchor": true,
+  "sizes": [
+    {
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "requests": 11
+}
