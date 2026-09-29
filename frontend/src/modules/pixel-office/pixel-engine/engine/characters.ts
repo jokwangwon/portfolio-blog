@@ -99,6 +99,10 @@ export function updateCharacter(
 
   switch (ch.state) {
     case CharacterState.TYPE: {
+      if (ch.currentTool === 'AwaitInput' && ch.isActive) {
+        ch.frame = 0; ch.frameTimer = 0;
+        break;
+      }
       if (ch.frameTimer >= TYPE_FRAME_DURATION_SEC) {
         ch.frameTimer -= TYPE_FRAME_DURATION_SEC;
         ch.frame = (ch.frame + 1) % 2;

@@ -1,60 +1,27 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { techStack, techCategories } from "../data/techStack";
 import { MotionSection } from "@/src/shared/animations/MotionSection";
-import { staggerContainer, scaleIn } from "@/src/shared/animations/variants";
-import { useReducedMotion } from "@/src/shared/animations/useReducedMotion";
-import ProficiencyBar from "./ProficiencyBar";
 
 export default function TechStackSection() {
-  const [activeCategory, setActiveCategory] = useState<string>("Backend");
-  const reduced = useReducedMotion();
-
-  const filtered = techStack.filter((t) => t.category === activeCategory);
-
   return (
-    <MotionSection id="tech-stack" className="py-24 md:py-32 bg-muted/30 dark:bg-muted/10">
+    <MotionSection id="tech-stack" className="py-16 md:py-20 bg-muted/30 dark:bg-muted/10">
       <div className="max-w-5xl mx-auto px-6">
-        <h2 className="text-3xl font-bold tracking-tight mb-12">Tech Stack</h2>
-
-        <div className="flex flex-wrap gap-2 mb-8">
-          {techCategories.map((cat) => (
-            <Button
-              key={cat}
-              variant={activeCategory === cat ? "default" : "outline"}
-              size="sm"
-              onClick={() => setActiveCategory(cat)}
-            >
-              {cat}
-            </Button>
+        <h2 className="text-3xl font-bold tracking-tight mb-4">기술과 사용 맥락</h2>
+        <p className="text-muted-foreground mb-8">실무, 개인 프로젝트, 연구에서 사용한 기술을 구분했습니다.</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {techCategories.map((category) => (
+            <section key={category} className="glass-card rounded-xl p-5">
+              <h3 className="text-base font-semibold mb-5">{category}</h3>
+              <dl className="space-y-5">
+                {techStack.filter((tech) => tech.category === category).map((tech) => (
+                  <div key={tech.name}>
+                    <dt className="text-sm font-medium mb-1">{tech.name}</dt>
+                    <dd className="text-xs text-muted-foreground leading-relaxed">{tech.usage}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
           ))}
         </div>
-
-        <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-4"
-          key={activeCategory}
-          variants={staggerContainer}
-          initial={reduced ? "visible" : "hidden"}
-          animate="visible"
-        >
-          {filtered.map((tech) => (
-            <motion.div
-              key={tech.name}
-              variants={scaleIn}
-              className="glass-card rounded-lg p-4 transition-all duration-200 hover:-translate-y-1"
-            >
-              <span className="text-sm font-medium text-foreground block mb-2 text-center">
-                {tech.name}
-              </span>
-              {tech.proficiency != null && (
-                <ProficiencyBar value={tech.proficiency} />
-              )}
-            </motion.div>
-          ))}
-        </motion.div>
       </div>
     </MotionSection>
   );

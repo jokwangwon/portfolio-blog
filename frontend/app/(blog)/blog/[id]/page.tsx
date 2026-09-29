@@ -3,8 +3,8 @@
 import { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import MarkdownRenderer from "@/src/modules/blog/components/MarkdownRenderer";
+import { PUBLIC_READ_ONLY, canWritePosts } from "@/src/shell/auth/publicAccess";
 import { usePostDetail, useDeletePost } from "@/src/modules/blog/hooks/usePosts";
 import { useAuth } from "@/src/shell/auth/useAuth";
 import { formatDateTime } from "@/src/shared/utils/format";
@@ -38,7 +38,7 @@ export default function PostDetailPage({
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const isAuthor =
-    isAuthenticated && user && post && user.username === post.author.username;
+    isAuthenticated && canWritePosts(user) && user && post && user.username === post.author.username;
 
   function handleDelete() {
     deletePost.mutate(postId, {
@@ -85,6 +85,7 @@ export default function PostDetailPage({
           ))}
         </div>
 
+        {post.visibility === "PRIVATE" && <Badge variant="outline" className="mb-3">비공개 · 나만 볼 수 있는 글</Badge>}
         <h1 className="text-3xl font-bold text-foreground mb-4">
           {post.title}
         </h1>
@@ -93,7 +94,7 @@ export default function PostDetailPage({
           <span>{post.author.username}</span>
           <span>{formatDateTime(post.publishedAt || post.createdAt)}</span>
           <span>조회 {post.viewCount}</span>
-          <LikeButton postId={post.id} likeCount={post.likeCount} />
+          {!PUBLIC_READ_ONLY && post.visibility !== "PRIVATE" && <LikeButton postId={post.id} likeCount={post.likeCount} />}
         </div>
 
         {isAuthor && (
@@ -140,11 +141,9 @@ export default function PostDetailPage({
 
       <Separator className="mb-8" />
 
-      <div className="prose prose-neutral max-w-none">
-        <Markdown remarkPlugins={[remarkGfm]}>{post.content}</Markdown>
-      </div>
+      <MarkdownRenderer content={post.content} />
 
-      <CommentSection postId={post.id} />
+      {!PUBLIC_READ_ONLY && post.visibility !== "PRIVATE" && post.status === "PUBLISHED" && <CommentSection postId={post.id} />}
     </article>
   );
 }

@@ -1,0 +1,15 @@
+[
+  {
+    "path": "/",
+    "status": 200
+  },
+  {
+    "path": "/blog",
+    "status": 200
+  },
+  {
+    "path": "/health",
+    "status": 200,
+    "health": "UP"
+  }
+]

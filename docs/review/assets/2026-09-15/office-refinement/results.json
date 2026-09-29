@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "checks": {
+    "/api/office": {
+      "status": 200,
+      "data": {
+        "connection": "connected",
+        "enabled": true,
+        "updatedAt": 1789411690096,
+        "sessions": []
+      }
+    },
+    "/health": {
+      "status": 200
+    },
+    "/api/admin/office/events": {
+      "status": 404
+    },
+    "POST /api/office": 405,
+    "POST /api/office/events": 405
+  },
+  "sizes": [
+    {
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "overflow": false
+    }
+  ],
+  "realTask": "frontend tests and lint",
+  "arrival": true,
+  "departure": true,
+  "codexNativeHook": "pending user trust and next conversation",
+  "publicTitle": true,
+  "titleCleared": true,
+  "automaticSeason": "autumn",
+  "pageErrors": []
+}

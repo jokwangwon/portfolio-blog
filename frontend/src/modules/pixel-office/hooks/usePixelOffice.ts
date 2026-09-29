@@ -1,196 +1,58 @@
 "use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { OfficeState } from "../pixel-engine/engine/officeState";
 import { loadPixelOfficeAssets } from "../pixel-engine/assetLoader";
-import { useAgentStatus } from "./useAgentStatus";
-import { EventMapper } from "../engine/EventMapper";
-import type { Character } from "../pixel-engine/types";
+import { usePresence } from "./usePresence";
+import { Attendance } from "../presence/attendance";
+import { ACTIVITY_LABELS, SOURCE_LABELS } from "../presence/presence";
 
-const AGENT_IDS = {
-  BACKEND: 1,
-  FRONTEND: 2,
-  DEVOPS: 3,
-} as const;
-
-const AGENT_NAMES: Record<number, string> = {
-  1: "백엔드 개발자",
-  2: "프론트엔드 개발자",
-  3: "DevOps 엔지니어",
-};
-
-const AGENT_ROLES: Record<number, string> = {
-  1: "BACKEND",
-  2: "FRONTEND",
-  3: "DEVOPS",
-};
-
-interface UsePixelOfficeReturn {
-  officeState: OfficeState | null;
-  isLoading: boolean;
-  selectedAgentId: number | null;
-  setSelectedAgentId: (id: number | null) => void;
-  getAgentName: (id: number) => string;
-  getAgentRole: (id: number) => string;
-  getSelectedCharacter: () => Character | null;
-  replayActive: boolean;
-}
-
-export function usePixelOffice(): UsePixelOfficeReturn {
-  const officeStateRef = useRef<OfficeState | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
-  const [replayActive, setReplayActive] = useState(true);
-  const initializedRef = useRef(false);
-
-  const { data: activityData } = useAgentStatus();
-
-  // Load assets and initialize OfficeState
-  useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
-
-    (async () => {
-      try {
-        const { layout } = await loadPixelOfficeAssets("/assets/pixel-office/");
-
-        const state = new OfficeState(layout ?? undefined);
-        officeStateRef.current = state;
-
-        // Add 3 agents
-        state.addAgent(AGENT_IDS.BACKEND, 0, 0, undefined, false);
-        state.addAgent(AGENT_IDS.FRONTEND, 1, 0, undefined, false);
-        state.addAgent(AGENT_IDS.DEVOPS, 2, 0, undefined, false);
-
-        setIsLoading(false);
-      } catch (err) {
-        console.error("[PixelOffice] Failed to load assets:", err);
-        setIsLoading(false);
-      }
-    })();
-  }, []);
-
-  // Process GitHub events → activate/deactivate agents
-  useEffect(() => {
-    if (!activityData || !officeStateRef.current) return;
-    const state = officeStateRef.current;
-
-    for (const event of activityData.events) {
-      const updates = EventMapper.mapEvent(event);
-      for (const update of updates) {
-        const agentId = AGENT_IDS[update.agentId as keyof typeof AGENT_IDS];
-        if (!agentId) continue;
-        const ch = state.characters.get(agentId);
-        if (!ch) continue;
-
-        if (!ch.isActive) {
-          state.setAgentActive(agentId, true);
-          if (update.task) {
-            state.showWaitingBubble(agentId);
-          }
-          // Deactivate after 5 seconds
-          setTimeout(() => {
-            if (officeStateRef.current) {
-              officeStateRef.current.setAgentActive(agentId, false);
-            }
-          }, 5000);
-        }
-      }
-    }
-
-    // Inactivity check — rest all agents
-    if (activityData.lastActivity) {
-      const inactiveUpdates = EventMapper.checkInactivity(
-        new Date(activityData.lastActivity), new Date(), 12,
-      );
-      if (inactiveUpdates.length > 0) {
-        for (const update of inactiveUpdates) {
-          const agentId = AGENT_IDS[update.agentId as keyof typeof AGENT_IDS];
-          if (agentId) {
-            state.setAgentActive(agentId, false);
-          }
-        }
-      }
-    }
-  }, [activityData]);
-
-  // Timelapse replay from real GitHub events
-  useEffect(() => {
-    if (!replayActive || !activityData || !officeStateRef.current) return;
-
-    const realEvents = activityData.events;
-    if (realEvents.length === 0) {
-      // Defer state update to avoid cascading renders in effect
-      const t = setTimeout(() => setReplayActive(false), 0);
-      return () => clearTimeout(t);
-    }
-
-    // Map real events to agent activations with compressed timing (2s intervals)
-    const replayQueue = realEvents.slice(0, 10).map((event, i) => {
-      const updates = EventMapper.mapEvent(event);
-      const role = updates[0]?.agentId as keyof typeof AGENT_IDS | undefined;
-      const agentId = role ? AGENT_IDS[role] : AGENT_IDS.FRONTEND;
-      // Guess tool from event type
-      const tool = event.type === "ACTION_RUN" || event.type === "ACTION_COMPLETE" ? "Bash"
-        : event.path.includes("test") ? "Grep" : "Edit";
-      return { delay: 2000 + i * 2000, agentId, tool };
-    });
-
-    const allTimers: ReturnType<typeof setTimeout>[] = [];
-
-    for (const { delay, agentId, tool } of replayQueue) {
-      const activateTimer = setTimeout(() => {
-        const state = officeStateRef.current;
-        if (!state) return;
-        state.setAgentActive(agentId, true);
-        state.setAgentTool(agentId, tool);
-        state.showWaitingBubble(agentId);
-      }, delay);
-
-      const deactivateTimer = setTimeout(() => {
-        const state = officeStateRef.current;
-        if (!state) return;
-        state.setAgentActive(agentId, false);
-        state.setAgentTool(agentId, null);
-      }, delay + 3000);
-
-      allTimers.push(activateTimer, deactivateTimer);
-    }
-
-    const totalDuration = replayQueue.length * 2000 + 5000;
-    const stopTimer = setTimeout(() => setReplayActive(false), totalDuration);
-    allTimers.push(stopTimer);
-
-    return () => {
-      allTimers.forEach(clearTimeout);
-    };
-  }, [replayActive, activityData]);
-
-  const getAgentName = useCallback((id: number) => AGENT_NAMES[id] ?? `Agent ${id}`, []);
-  const getAgentRole = useCallback((id: number) => AGENT_ROLES[id] ?? "UNKNOWN", []);
-
-  const getSelectedCharacter = useCallback((): Character | null => {
-    if (selectedAgentId == null || !officeStateRef.current) return null;
-    return officeStateRef.current.characters.get(selectedAgentId) ?? null;
-  }, [selectedAgentId]);
-
+export function usePixelOffice(legacy = false) {
   const [officeState, setOfficeState] = useState<OfficeState | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [assetError, setAssetError] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<number | null>(null);
+  const attendance = useRef(new Attendance());
+  const presence = usePresence(!legacy);
 
-  // Sync ref → state when loading completes
   useEffect(() => {
-    if (!isLoading && officeStateRef.current && !officeState) {
-      setOfficeState(officeStateRef.current);
-    }
-  }, [isLoading, officeState]);
+    let disposed = false;
+    loadPixelOfficeAssets("/assets/pixel-office/").then(({ layout }) => {
+      if (disposed) return;
+      const state = new OfficeState(layout ?? undefined);
+      if (legacy) for (let id = 1; id <= 3; id++) state.addAgent(id, id - 1, 0);
+      setOfficeState(state);
+      setIsLoading(false);
+    }).catch(() => {
+      if (!disposed) { setAssetError(true); setIsLoading(false); }
+    });
+    return () => { disposed = true; };
+  }, [legacy]);
 
-  return {
-    officeState,
-    isLoading,
-    selectedAgentId,
-    setSelectedAgentId,
-    getAgentName,
-    getAgentRole,
-    getSelectedCharacter,
-    replayActive,
-  };
+  useEffect(() => {
+    if (officeState && !legacy) attendance.current.sync(officeState, presence.sessions, presence.connection === "connected" && presence.enabled);
+  }, [officeState, presence, legacy]);
+
+  const advanceAttendance = useCallback((dt: number, reducedMotion: boolean) =>
+    officeState && !legacy ? attendance.current.update(officeState, dt, reducedMotion) : 0,
+    [officeState, legacy]);
+
+  const getSession = useCallback((id: number) =>
+    presence.sessions.find(s => attendance.current.idFor(s.id) === id), [presence]);
+  const getAgentName = useCallback((id: number) => {
+    if (legacy) return ["", "백엔드 개발자", "프론트엔드 개발자", "DevOps 엔지니어"][id] ?? "작업";
+    const session = getSession(id);
+    return session ? SOURCE_LABELS[session.source] + " · 세션 " + id : "종료된 작업";
+  }, [getSession, legacy]);
+  const getAgentRole = useCallback((id: number) => {
+    const session = getSession(id);
+    return session ? ACTIVITY_LABELS[session.activity] : "작업";
+  }, [getSession]);
+  const getSelectedCharacter = useCallback(() => {
+    if (selectedAgentId === null || (!legacy && !getSession(selectedAgentId))) return null;
+    return officeState?.characters.get(selectedAgentId) ?? null;
+  }, [selectedAgentId, officeState, legacy, getSession]);
+
+  return { officeState, isLoading, assetError, selectedAgentId, setSelectedAgentId,
+    getAgentName, getAgentRole, getSelectedCharacter, presence, advanceAttendance,
+    sessionAgentId: (id: string) => attendance.current.idFor(id) };
 }

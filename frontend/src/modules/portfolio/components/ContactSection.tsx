@@ -1,30 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Mail, FolderGit2, Globe, FileText } from "lucide-react";
+import { FolderGit2 } from "lucide-react";
 import { MotionSection } from "@/src/shared/animations/MotionSection";
 
 const links = [
-  {
-    icon: Mail,
-    label: "Email",
-    href: "mailto:jokwangwon@example.com",
-  },
-  {
-    icon: FolderGit2,
-    label: "GitHub",
-    href: "https://github.com/jokwangwon",
-  },
-  {
-    icon: Globe,
-    label: "LinkedIn",
-    href: "https://linkedin.com/in/",
-  },
-  {
-    icon: FileText,
-    label: "Resume",
-    href: "#",
-  },
+  { icon: FolderGit2, label: "GitHub", href: "https://github.com/jokwangwon" },
 ];
 
 export default function ContactSection() {
@@ -38,7 +19,7 @@ export default function ContactSection() {
           Contact
         </h2>
         <p className="text-muted-foreground mb-10">
-          함께 일하고 싶으시다면 편하게 연락주세요.
+          프로젝트 코드와 작업 기록은 GitHub에서 확인할 수 있습니다.
         </p>
         <div className="flex gap-4 justify-center">
           {links.map(({ icon: Icon, label, href }) => (

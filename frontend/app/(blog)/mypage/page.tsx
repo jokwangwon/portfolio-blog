@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { canWritePosts } from "@/src/shell/auth/publicAccess";
 import { useAuth } from "@/src/shell/auth/useAuth";
 import { useMyProfile, ProfileCard, PasswordChangeForm } from "@/src/modules/user";
 import { useMyPosts } from "@/src/modules/blog/hooks/usePosts";
@@ -13,9 +14,9 @@ import { buttonVariants } from "@/components/ui/button";
 
 export default function MyPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: profile, isLoading: profileLoading } = useMyProfile();
-  const { data: myPosts, isLoading: postsLoading } = useMyPosts({ size: 5 });
+  const { data: myPosts, isLoading: postsLoading } = useMyPosts({ size: 5 }, !authLoading && isAuthenticated && canWritePosts(user));
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -37,14 +38,14 @@ export default function MyPage() {
 
       <Separator />
 
-      <section className="space-y-4">
+      {canWritePosts(user) && <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">내가 쓴 글</h2>
           <Link
             href="/blog/drafts"
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
-            임시저장 글 보기
+            내 기록 보기
           </Link>
         </div>
 
@@ -61,7 +62,7 @@ export default function MyPage() {
             아직 작성한 글이 없습니다.
           </p>
         )}
-      </section>
+      </section>}
     </div>
   );
 }

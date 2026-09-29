@@ -338,6 +338,8 @@ export interface Project {
 
 ### 3.3 Tech Stack 아이콘 + 숙련도 바
 
+> 2026-09-13 공개 소개 수정: 평가 근거가 없는 숙련도 수치는 공개 화면에서 제거하고 기술별 사용 용도로 대체한다. 아래 내용은 초기 디자인 기록이다.
+
 #### 3.3.1 TechIcon (`src/modules/portfolio/components/TechIcon.tsx`)
 
 ```
@@ -602,3 +604,11 @@ PortfolioHeader.tsx            — Stage 3 (Office 네비)
 projects.ts (data)             — Stage 2
 techStack.ts (data)            — Stage 2
 ```
+
+
+## 공개 화면 단순화 (2026-09-13, 디자인 3단계)
+
+사용자가 첫 화면의 장식을 줄이고 대표 프로젝트를 앞세우도록 요청했다.
+홈 Hero에서 HeroCanvas와 이름 그라데이션을 제거하고 콘텐츠 높이에 맞는 소개로 교체했다.
+3D 관련 코드는 보존하지만 홈에서는 마운트하지 않는다. Projects를 About/기술보다 앞으로 옮기고 대표 2개·나머지 4개를 구분한다.
+공통 DevThemePanel은 개발 모드에서만 렌더링한다. 기존 3D·테마 패널 공개 스펙보다 이 적용 기록이 우선한다.

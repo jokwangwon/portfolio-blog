@@ -1,0 +1,12 @@
+{
+  "status": 200,
+  "connection": "connected",
+  "sessions": [
+    {
+      "source": "codex",
+      "activity": "waiting"
+    }
+  ],
+  "light": "on",
+  "errors": []
+}

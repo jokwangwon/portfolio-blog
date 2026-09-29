@@ -36,6 +36,9 @@ public abstract class IntegrationTestBase {
     protected MockMvc mockMvc;
 
     @Autowired
+    private com.portfolio.domain.blog.repository.AttachmentRepository attachmentRepository;
+
+    @Autowired
     private LikeRepository likeRepository;
 
     @Autowired
@@ -67,6 +70,7 @@ public abstract class IntegrationTestBase {
     void cleanDatabase() {
         likeRepository.deleteAll();
         commentRepository.deleteAll();
+        attachmentRepository.deleteAll();
         postRepository.deleteAll();
         categoryRepository.deleteAll();
         tagRepository.deleteAll();

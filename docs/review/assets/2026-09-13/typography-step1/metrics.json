@@ -1,0 +1,62 @@
+[
+  {
+    "name": "desktop-light",
+    "family": "\"Pretendard Variable\", Geist, \"Geist Fallback\", system-ui, sans-serif",
+    "headingSize": "72px",
+    "wordBreak": "keep-all",
+    "overflow": false,
+    "subtitle": "balance",
+    "renderedFonts": [
+      {
+        "name": "Pretendard Variable",
+        "custom": true
+      }
+    ],
+    "errors": []
+  },
+  {
+    "name": "mobile-light",
+    "family": "\"Pretendard Variable\", Geist, \"Geist Fallback\", system-ui, sans-serif",
+    "headingSize": "36px",
+    "wordBreak": "keep-all",
+    "overflow": false,
+    "subtitle": "balance",
+    "renderedFonts": [
+      {
+        "name": "Pretendard Variable",
+        "custom": true
+      }
+    ],
+    "errors": []
+  },
+  {
+    "name": "mobile-small",
+    "family": "\"Pretendard Variable\", Geist, \"Geist Fallback\", system-ui, sans-serif",
+    "headingSize": "36px",
+    "wordBreak": "keep-all",
+    "overflow": false,
+    "subtitle": "balance",
+    "renderedFonts": [
+      {
+        "name": "Pretendard Variable",
+        "custom": true
+      }
+    ],
+    "errors": []
+  },
+  {
+    "name": "desktop-dark",
+    "family": "\"Pretendard Variable\", Geist, \"Geist Fallback\", system-ui, sans-serif",
+    "headingSize": "72px",
+    "wordBreak": "keep-all",
+    "overflow": false,
+    "subtitle": "balance",
+    "renderedFonts": [
+      {
+        "name": "Pretendard Variable",
+        "custom": true
+      }
+    ],
+    "errors": []
+  }
+]

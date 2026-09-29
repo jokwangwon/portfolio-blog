@@ -30,7 +30,7 @@ export function MotionSection({
     <motion.section
       ref={ref}
       id={id}
-      className={className}
+      className={`scroll-mt-24 ${className ?? ""}`}
       initial={reduced ? "visible" : "hidden"}
       animate={isInView || reduced ? "visible" : "hidden"}
       variants={variants}

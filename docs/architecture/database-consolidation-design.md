@@ -1,5 +1,7 @@
 # 데이터베이스 물리 분리 설계 (Service-per-Database)
 
+> 2026-09-15 현재 실행 이력은 V1__init_portal_schema, V2__post_visibility, V3__image_attachments이다. 아래 과거 계획의 버전 예시와 구분한다. [현재 ERD](database-erd.md).
+
 > **아키텍처 리뷰 + ADR-006 반영 문서**
 > 기존 3개 DB → 서비스별 독립 PostgreSQL 인스턴스 (물리 분리)
 

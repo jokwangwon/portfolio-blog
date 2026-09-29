@@ -3,6 +3,10 @@ package com.portfolio.portal.health;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -10,13 +14,25 @@ import java.util.Map;
 @RestController
 public class HealthController {
 
+    private final DataSource dataSource;
+
+    public HealthController(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
     @GetMapping("/health")
-    public Map<String, Object> health() {
-        return Map.of(
-                "status", "UP",
+    public ResponseEntity<Map<String, Object>> health() {
+        boolean healthy;
+        try (Connection connection = dataSource.getConnection()) {
+            healthy = connection.isValid(2);
+        } catch (SQLException e) {
+            healthy = false;
+        }
+        return ResponseEntity.status(healthy ? 200 : 503).body(Map.of(
+                "status", healthy ? "UP" : "DOWN",
                 "service", "portfolio-portal-api",
                 "timestamp", LocalDateTime.now().toString()
-        );
+        ));
     }
 
     @GetMapping("/api/summary")

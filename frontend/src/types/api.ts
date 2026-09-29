@@ -43,13 +43,19 @@ export interface TagResponse {
   slug: string;
 }
 
+export type PostVisibility = "PUBLIC" | "PRIVATE";
+
 export interface PostResponse {
+  editVersion?: number;
+  editedAt?: string;
+  contentFormat?: string;
   id: number;
   title: string;
   slug: string;
   content: string;
   excerpt?: string;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  visibility?: PostVisibility;
   viewCount: number;
   likeCount: number;
   author: Author;
@@ -78,12 +84,14 @@ export interface PageResponse<T> {
 // === Blog Requests ===
 
 export interface PostRequest {
+  expectedEditVersion?: number;
   title: string;
   content: string;
   excerpt?: string;
   categoryId?: number;
   tagIds?: number[];
   status?: "DRAFT" | "PUBLISHED";
+  visibility?: PostVisibility;
 }
 
 export interface LikeResponse {

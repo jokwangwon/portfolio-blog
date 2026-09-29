@@ -1,0 +1,14 @@
+{
+  "status": 200,
+  "connected": "connected",
+  "active": 3,
+  "projects": [
+    "honcheon-server",
+    "portfolio-blog",
+    "weather_companion"
+  ],
+  "departureAttribute": "0",
+  "waitingAttribute": "1",
+  "noOverflow": true,
+  "jsErrors": []
+}

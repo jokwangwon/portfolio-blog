@@ -194,3 +194,12 @@ site/
 !.gitkeep
 !.editorconfig
 !DEVELOPMENT_GUIDE.md
+
+# Private production database backups
+/backups/
+
+# Local Office session records and public heartbeat (never source assets)
+.office-presence/
+
+# Private uploaded images belong to persistent storage, never source control.
+**/data/attachments/

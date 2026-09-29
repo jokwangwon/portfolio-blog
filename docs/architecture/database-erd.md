@@ -1,5 +1,13 @@
 # 데이터베이스 ERD (Entity Relationship Diagram)
 
+## 이미지 첨부 — Flyway V3 (2026-09-15)
+
+현재 `attachments` 테이블을 추가했다. `id UUID PK`, `owner_id → users.id`, nullable `post_id → posts.id`, unique `storage_key VARCHAR(50)`, `media_type VARCHAR(30)`, `byte_size BIGINT`, `width/height INTEGER`, `sha256 VARCHAR(64)`, `created_at TIMESTAMP`를 저장한다. `post_id`, `(owner_id, created_at DESC)` 인덱스를 사용한다. 실제 PNG/JPEG 파일은 `portal_attachments_data` 볼륨에 있다.
+
+한 첨부는 한 소유자와 최대 한 글에 연결된다. 행 잠금으로 동시 연결을 직렬화하며 본문·연결 변경은 같은 트랜잭션이다. 제거된 이미지는 미연결 소유자 전용으로 유지한다. [설계](image-attachments-design.md).
+
+> 향후 글 버전·수정 이력·AI 작업 구조는 [저장·AI 데이터 설계](knowledge-storage-ai-design.md)를 참고한다. 이 ERD의 현재 구현과 구분하며 이력·AI 테이블은 아직 미적용이다. 위 첨부 테이블과 구분한다.
+
 > **데이터베이스 스키마 시각화**
 > 테이블 간 관계, 외래키, 인덱스를 명확히 표현
 
@@ -110,6 +118,10 @@ Table posts {
   content text [not null, note: 'Markdown 형식']
   excerpt varchar(200) [null, note: '요약문, 미제공 시 앱에서 자동 생성']
   status varchar(20) [not null, default: 'DRAFT', note: 'DRAFT, PUBLISHED, ARCHIVED']
+  visibility varchar(20) [not null, default: 'PUBLIC', note: 'PUBLIC/PRIVATE — 작성 상태와 독립']
+  edit_version bigint [not null, default: 0, note: 'V4: 실제 편집 시 증가, 0 이상']
+  edited_at timestamp [null, note: 'V4: 기존 글 null, 생성/실제 편집 시 기록']
+  content_format varchar(30) [not null, default: 'MARKDOWN_V1']
   view_count int [not null, default: 0]
   like_count int [not null, default: 0]
   created_at timestamp [not null, default: `now()`]

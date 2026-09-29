@@ -291,6 +291,7 @@ export function renderFrame(
   tileColors?: Array<ColorValue | null>,
   layoutCols?: number,
   layoutRows?: number,
+  decorateFloor?: (ctx:CanvasRenderingContext2D,x:number,y:number)=>void,
 ): { offsetX: number; offsetY: number } {
   // Clear
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -307,6 +308,8 @@ export function renderFrame(
 
   // Draw tiles (floor + wall base color)
   renderTileGrid(ctx, tileMap, offsetX, offsetY, zoom, tileColors, layoutCols);
+
+  decorateFloor?.(ctx,offsetX,offsetY);
 
   // Seat indicators (below furniture/characters, on top of floor)
   if (selection) {

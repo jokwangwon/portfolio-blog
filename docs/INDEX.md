@@ -2,9 +2,13 @@
 
 > **프로젝트 문서 전체 구조 및 읽는 순서**
 
-**최종 업데이트**: 2026-04-06
+**최종 업데이트**: 2026-09-29
 
 ---
+
+최근 구현: [AI Backend 포트폴리오 개편](content/portfolio-positioning-2026-09-29.md) · [2026-09-29 세션](sessions/SESSION_2026-09-29.md). 코드·로컬 검증 완료, 운영 배포 전.
+
+이전 구현: [글 저장 충돌 방지](architecture/blog-edit-conflicts.md) · [검증·배포](review/blog-edit-conflicts-2026-09-16.md) · [2026-09-16 세션](sessions/SESSION_2026-09-16.md).
 
 ## 📖 문서 읽는 순서 (권장)
 
@@ -18,9 +22,20 @@
 5. **[docs/review/architecture-review.md](review/architecture-review.md)** - 아키텍처 검토 보고서 (평가 4.2/5.0)
 
 ### 3. 기능 설계
+- [글 저장·조회와 AI 데이터 구조](architecture/knowledge-storage-ai-design.md) — 현재 DB/브라우저 저장 조사, 수정 이력·AI 작업/결과 설계와 구현 순서
+- [블로그 공개 범위·내 기록 배포](review/blog-visibility-2026-09-15.md) — 구현, API 보호, 마이그레이션·브라우저 검증, 복구 기준
+- [포트폴리오 공개 범위 기준](content/portfolio-disclosure-policy.md) — 공개 요약·지원용 문서·개인 기록 구분
+- [개인 지식 저장소 확장안](architecture/knowledge-workspace-design.md) — 공개 기본/선택 비공개, 공부·독서·업무 기록, 링크·역링크·그래프 설계 초안
+- [기원테크·트러스트에이아이 자료 전달 양식](content/career-records-intake.md) — GPT/Claude 정리 요청문과 직접 입력 양식
+- [공개 1차 버전 준비](architecture/public-release-design.md) — 조회 전용 정책·초안 보호·운영 검증 기준
 6. **[docs/architecture/pixel-office-design.md](architecture/pixel-office-design.md)** 🟠 - AI 픽셀 오피스 설계 (2D 가상 사무실 대시보드)
 7. **[docs/architecture/blog-ui-design.md](architecture/blog-ui-design.md)** 🟠 - Blog UI 디자인 명세 (컴포넌트, 레이아웃, 디자인 토큰)
 8. **[docs/architecture/portfolio-landing-design.md](architecture/portfolio-landing-design.md)** 🟠 - 포트폴리오 랜딩 페이지 설계 (Route Group 분리, 섹션 스펙)
+
+- [공개 화면·채용 포트폴리오 검토](review/design-review-2026-09-13.md) — 실제 PC/모바일 캡처, 정보 우선순위와 개선 제안, 글꼴·카드 개선 적용 기록
+- [블로그 읽기 흐름 검토](review/blog-review-2026-09-13.md) — 본문 스타일, 모바일 넘침, 오류·검색 흐름과 단계별 개선안
+- [글 작성 사용성 개선](review/editor-review-2026-09-13.md) — 복구본 보호, 서버 임시저장·발행, 편집·미리보기 검증
+- [설계·구현·배포 정합성 검토](review/design-conformance-2026-09-14.md) — 저장 예외 2건 재현, 콘텐츠·요약 계약, 배포 추적성 평가
 
 ### 4. 개선된 설계 (아키텍처 리뷰 반영)
 7. **[docs/architecture/database-consolidation-design.md](architecture/database-consolidation-design.md)** 🔴 - 서비스별 DB 물리 분리 설계
@@ -217,3 +232,14 @@ architecture-review.md (검토 및 개선안)
 
 **이 문서는 프로젝트의 모든 문서를 안내하는 인덱스입니다.**
 **새로운 문서 추가 시 반드시 이 파일도 업데이트하세요.**
+
+- [Office 출퇴근 설계](architecture/office-presence-design.md)
+- [Office 방송 운영](guides/OFFICE_PRESENCE.md)
+
+- [Office 계절 테마와 작업 칠판](architecture/office-season-board-design.md)
+
+- [Office 디자인·출근 표시 진단](review/office-design-diagnosis-2026-09-15.md)
+
+- [이미지 첨부 구현·검증](review/image-attachments-2026-09-15.md): PNG/JPEG 업로드, 공개 권한, 백업/복원, 병렬 프로젝트 출근.
+
+- [작업실 퇴근·대기 설계](architecture/office-departure-design.md)

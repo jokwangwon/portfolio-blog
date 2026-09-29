@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { Suspense } from "react";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { renderWithProviders } from "@/src/test/test-utils";
+import { renderWithProviders, unauthenticatedState } from "@/src/test/test-utils";
 import PostDetailPage from "./page";
 
 describe("PostDetailPage 라우트", () => {
@@ -26,7 +26,8 @@ describe("PostDetailPage 라우트", () => {
     renderWithProviders(
       <Suspense fallback={null}>
         <PostDetailPage params={params} />
-      </Suspense>
+      </Suspense>,
+      { preloadedState: unauthenticatedState }
     );
 
     expect(await screen.findByText("Test Post")).toBeInTheDocument();

@@ -92,9 +92,9 @@ class PostControllerTest {
     @Test
     @DisplayName("GET /posts/{id} - 게시글 상세를 반환한다")
     void getPost() {
-        given(postService.getPost(1L)).willReturn(postResponse);
+        given(postService.getPost(1L, null)).willReturn(postResponse);
 
-        ResponseEntity<PostResponse> response = controller.getPost(1L);
+        ResponseEntity<PostResponse> response = controller.getPost(1L, null);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody().getTitle()).isEqualTo("Test Post");

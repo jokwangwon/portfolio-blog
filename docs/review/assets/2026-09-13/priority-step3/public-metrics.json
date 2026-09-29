@@ -1,0 +1,94 @@
+[
+  {
+    "name": "desktop",
+    "overflow": false,
+    "heroHeight": 476,
+    "projectsTop": 475.5,
+    "projectTitleTop": 769.5,
+    "featuredCount": 2,
+    "otherCount": 4,
+    "sourceLinks": 6,
+    "canvasCount": 0,
+    "sectionOrder": [
+      "",
+      "projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ],
+    "height": 4334,
+    "anchorTop": 192.5,
+    "errors": []
+  },
+  {
+    "name": "mobile",
+    "overflow": false,
+    "heroHeight": 443,
+    "projectsTop": 442.5,
+    "projectTitleTop": 708.5,
+    "featuredCount": 2,
+    "otherCount": 4,
+    "sourceLinks": 6,
+    "canvasCount": 0,
+    "sectionOrder": [
+      "",
+      "projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ],
+    "height": 5466,
+    "anchorTop": 176.5,
+    "errors": []
+  },
+  {
+    "name": "small",
+    "overflow": false,
+    "heroHeight": 443,
+    "projectsTop": 442.5,
+    "projectTitleTop": 728.5,
+    "featuredCount": 2,
+    "otherCount": 4,
+    "sourceLinks": 6,
+    "canvasCount": 0,
+    "sectionOrder": [
+      "",
+      "projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ],
+    "height": 5974,
+    "anchorTop": 176.5,
+    "errors": []
+  },
+  {
+    "name": "dark",
+    "overflow": false,
+    "heroHeight": 476,
+    "projectsTop": 475.5,
+    "projectTitleTop": 769.5,
+    "featuredCount": 2,
+    "otherCount": 4,
+    "sourceLinks": 6,
+    "canvasCount": 0,
+    "sectionOrder": [
+      "",
+      "projects",
+      "about",
+      "tech-stack",
+      "experience",
+      "blog",
+      "contact"
+    ],
+    "height": 4334,
+    "anchorTop": 192.5,
+    "errors": []
+  }
+]

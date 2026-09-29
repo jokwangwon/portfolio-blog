@@ -1,0 +1,363 @@
+{
+  "passed": true,
+  "threeSpaceNavigation": true,
+  "boardAnchor": true,
+  "portfolioContents": true,
+  "contrast": [
+    {
+      "label": "public light spring",
+      "values": [
+        {
+          "name": "room label",
+          "ratio": 5.273298725535693
+        },
+        {
+          "name": "feedback",
+          "ratio": 5.273298725535693
+        },
+        {
+          "name": "season mark",
+          "ratio": 4.850531213530124
+        },
+        {
+          "name": "zoom label",
+          "ratio": 5.273298725535693
+        },
+        {
+          "name": "board label",
+          "ratio": 5.481322011227904
+        },
+        {
+          "name": "board hint",
+          "ratio": 5.670742951010434
+        },
+        {
+          "name": "button",
+          "ratio": 11.526676115030309
+        },
+        {
+          "name": "select",
+          "ratio": 11.526676115030309
+        },
+        {
+          "name": "calendar badge",
+          "ratio": 4.563194009319577
+        }
+      ]
+    },
+    {
+      "label": "public dark spring",
+      "values": [
+        {
+          "name": "room label",
+          "ratio": 8.120834242993578
+        },
+        {
+          "name": "feedback",
+          "ratio": 8.120834242993578
+        },
+        {
+          "name": "season mark",
+          "ratio": 8.090952886452314
+        },
+        {
+          "name": "zoom label",
+          "ratio": 8.120834242993578
+        },
+        {
+          "name": "board label",
+          "ratio": 7.014692048147517
+        },
+        {
+          "name": "board hint",
+          "ratio": 7.257102466167727
+        },
+        {
+          "name": "button",
+          "ratio": 10.606151445628093
+        },
+        {
+          "name": "select",
+          "ratio": 10.606151445628093
+        },
+        {
+          "name": "calendar badge",
+          "ratio": 4.563194009319577
+        }
+      ]
+    },
+    {
+      "label": "public light summer",
+      "values": [
+        {
+          "name": "room label",
+          "ratio": 5.2308117910502405
+        },
+        {
+          "name": "feedback",
+          "ratio": 5.2308117910502405
+        },
+        {
+          "name": "season mark",
+          "ratio": 5.722647699540141
+        },
+        {
+          "name": "zoom label",
+          "ratio": 5.2308117910502405
+        },
+        {
+          "name": "board label",
+          "ratio": 5.840937402102778
+        },
+        {
+          "name": "board hint",
+          "ratio": 6.042785760883907
+        },
+        {
+          "name": "button",
+          "ratio": 11.526676115030309
+        },
+        {
+          "name": "select",
+          "ratio": 11.526676115030309
+        },
+        {
+          "name": "calendar badge",
+          "ratio": 5.80343468242216
+        }
+      ]
+    },
+    {
+      "label": "public dark summer",
+      "values": [
+        {
+          "name": "room label",
+          "ratio": 8.090401364113168
+        },
+        {
+          "name": "feedback",
+          "ratio": 8.090401364113168
+        },
+        {
+          "name": "season mark",
+          "ratio": 7.347788465163487
+        },
+        {
+          "name": "zoom label",
+          "ratio": 8.090401364113168
+        },
+        {
+          "name": "board label",
+          "ratio": 7.297103239888197
+        },
+        {
+          "name": "board hint",
+          "ratio": 7.549273090620999
+        },
+        {
+          "name": "button",
+          "ratio": 10.606151445628093
+        },
+        {
+          "name": "select",
+          "ratio": 10.606151445628093
+        },
+        {
+          "name": "calendar badge",
+          "ratio": 5.80343468242216
+        }
+      ]
+    },
+    {
+      "label": "public light autumn",
+      "values": [
+        {
+          "name": "room label",
+          "ratio": 5.135729011456163
+        },
+        {
+          "name": "feedback",
+          "ratio": 5.135729011456163
+        },
+        {
+          "name": "season mark",
+          "ratio": 5.4607178454061875
+        },
+        {
+          "name": "zoom label",
+          "ratio": 5.135729011456163
+        },
+        {
+          "name": "board label",
+          "ratio": 5.614722081248564
+        },
+        {
+          "name": "board hint",
+          "ratio": 5.808752997707998
+        },
+        {
+          "name": "button",
+          "ratio": 11.526676115030309
+        },
+        {
+          "name": "select",
+          "ratio": 11.526676115030309
+        },
+        {
+          "name": "calendar badge",
+          "ratio": 5.478962933115466
+        }
+      ]
+    },
+    {
+      "label": "public dark autumn",
+      "values": [
+        {
+          "name": "room label",
+          "ratio": 8.154899664254113
+        },
+        {
+          "name": "feedback",
+          "ratio": 8.154899664254113
+        },
+        {
+          "name": "season mark",
+          "ratio": 7.580792421043851
+        },
+        {
+          "name": "zoom label",
+          "ratio": 8.154899664254113
+        },
+        {
+          "name": "board label",
+          "ratio": 7.174658970126822
+        },
+        {
+          "name": "board hint",
+          "ratio": 7.422597449558745
+        },
+        {
+          "name": "button",
+          "ratio": 10.606151445628093
+        },
+        {
+          "name": "select",
+          "ratio": 10.606151445628093
+        },
+        {
+          "name": "calendar badge",
+          "ratio": 5.478962933115466
+        }
+      ]
+    },
+    {
+      "label": "public light winter",
+      "values": [
+        {
+          "name": "room label",
+          "ratio": 5.217070669707864
+        },
+        {
+          "name": "feedback",
+          "ratio": 5.217070669707864
+        },
+        {
+          "name": "season mark",
+          "ratio": 5.054605814220262
+        },
+        {
+          "name": "zoom label",
+          "ratio": 5.217070669707864
+        },
+        {
+          "name": "board label",
+          "ratio": 5.817275298628175
+        },
+        {
+          "name": "board hint",
+          "ratio": 6.018305953602046
+        },
+        {
+          "name": "button",
+          "ratio": 11.526676115030309
+        },
+        {
+          "name": "select",
+          "ratio": 11.526676115030309
+        },
+        {
+          "name": "calendar badge",
+          "ratio": 4.98782551660949
+        }
+      ]
+    },
+    {
+      "label": "public dark winter",
+      "values": [
+        {
+          "name": "room label",
+          "ratio": 8.083321257658756
+        },
+        {
+          "name": "feedback",
+          "ratio": 8.083321257658756
+        },
+        {
+          "name": "season mark",
+          "ratio": 7.839925169613523
+        },
+        {
+          "name": "zoom label",
+          "ratio": 8.083321257658756
+        },
+        {
+          "name": "board label",
+          "ratio": 7.266557677940881
+        },
+        {
+          "name": "board hint",
+          "ratio": 7.517671949556383
+        },
+        {
+          "name": "button",
+          "ratio": 10.606151445628093
+        },
+        {
+          "name": "select",
+          "ratio": 10.606151445628093
+        },
+        {
+          "name": "calendar badge",
+          "ratio": 4.98782551660949
+        }
+      ]
+    }
+  ],
+  "actualThemeToggleAndReload": true,
+  "seasons": 4,
+  "automaticSeason": "autumn",
+  "realCodexAttendance": true,
+  "attendanceCount": 1,
+  "interactions": {
+    "keyboard": true,
+    "mobile": true,
+    "noAttendanceChange": true
+  },
+  "sizes": [
+    {
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "overflow": false
+    }
+  ],
+  "checks": {
+    "/health": 200,
+    "/api/admin/office/events": 404,
+    "POST /api/office": 405,
+    "POST /api/office/events": 405
+  },
+  "errors": []
+}

@@ -1,0 +1,42 @@
+{
+  "/health": {
+    "status": 200
+  },
+  "/api/portal/posts": {
+    "status": 200
+  },
+  "/api/office": {
+    "status": 200,
+    "snapshot": {
+      "connection": "connected",
+      "enabled": true,
+      "updatedAt": 1789463176946,
+      "sessions": [
+        {
+          "projectName": "portfolio-blog",
+          "id": "33361a85-2962-449f-b1ed-5097c6c1c897",
+          "source": "codex",
+          "activity": "waiting",
+          "startedAt": 1789460475516
+        }
+      ],
+      "recentProject": {
+        "projectName": "portfolio-blog",
+        "lastActiveAt": 1789463132368
+      }
+    }
+  },
+  "/api/portal/attachments/00000000-0000-4000-8000-000000000000": {
+    "status": 404
+  },
+  "/blog": {
+    "status": 200,
+    "bodyRendered": true
+  },
+  "/office": {
+    "status": 200,
+    "bodyRendered": true
+  },
+  "anonymousUploadStatus": 401,
+  "jsErrors": []
+}

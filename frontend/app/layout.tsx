@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio Platform",
-  description: "Blog, AI Benchmark, and Project Showcase",
+  title: "조광원 | AI Backend / Backend Developer",
+  description: "AI 분석 결과를 실제 서비스 기능으로 연결하는 개발자 조광원입니다. Python·FastAPI 백엔드, 데이터 집계·권한 처리·LLM 연동·온프레미스 운영 경험과 KCI 제1저자 논문, 개인 프로젝트를 소개합니다.",
 };
 
 export default function RootLayout({

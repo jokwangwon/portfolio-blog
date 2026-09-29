@@ -1,0 +1,29 @@
+[
+  {
+    "width": 1280,
+    "status": 200,
+    "summaryEntries": 5,
+    "detailBullets": 0,
+    "htmlAndLoadedScriptsClean": true,
+    "scriptCount": 15,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "status": 200,
+    "summaryEntries": 5,
+    "detailBullets": 0,
+    "htmlAndLoadedScriptsClean": true,
+    "scriptCount": 18,
+    "overflow": false
+  },
+  {
+    "width": 320,
+    "status": 200,
+    "summaryEntries": 5,
+    "detailBullets": 0,
+    "htmlAndLoadedScriptsClean": true,
+    "scriptCount": 15,
+    "overflow": false
+  }
+]

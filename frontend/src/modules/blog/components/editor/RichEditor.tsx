@@ -1,10 +1,12 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
+import { Button } from "@/components/ui/button";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
-import Image from "@tiptap/extension-image";
+import { AttachmentImage } from "./extensions/attachment-image";
+import { uploadImage } from "../../api/attachmentApi";
 import Link from "@tiptap/extension-link";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
@@ -32,9 +34,17 @@ const lowlight = createLowlight(common);
 interface RichEditorProps {
   content: string;
   onChange: (md: string) => void;
+  disabled?: boolean;
+  onBusyChange?: (busy: boolean) => void;
 }
 
-export default function RichEditor({ content, onChange }: RichEditorProps) {
+export default function RichEditor({ content, onChange, disabled = false, onBusyChange }: RichEditorProps) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
+  const uploadInFlight = useRef(false);
+  const liveProps = useRef({ disabled, onBusyChange });
+  liveProps.current = { disabled, onBusyChange };
   const [slashPos, setSlashPos] = useState<{ top: number; left: number } | null>(null);
   const [slashQuery, setSlashQuery] = useState("");
   const [dropIndicatorTop, setDropIndicatorTop] = useState<number | null>(null);
@@ -47,10 +57,10 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({ codeBlock: false }),
+      StarterKit.configure({ codeBlock: false, link: false }),
       Placeholder.configure({ placeholder: "내용을 입력하세요... ( / 로 명령어 사용)" }),
       CodeBlockLowlight.configure({ lowlight }),
-      Image.configure({ allowBase64: true }),
+      AttachmentImage,
       Link.configure({ openOnClick: false }),
       TaskList,
       TaskItem.configure({ nested: true }),
@@ -76,6 +86,7 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
       onChange(md);
     },
     editorProps: {
+      attributes: { role: "textbox", "aria-label": "본문 편집", "aria-multiline": "true" },
       handleKeyDown: (_view, event) => {
         // Slash command trigger
         if (event.key === "/") {
@@ -162,17 +173,8 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         if (!file?.type.startsWith("image/")) return false;
 
         event.preventDefault();
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result !== "string") return;
-          const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
-          if (pos) {
-            const node = view.state.schema.nodes.image.create({ src: reader.result });
-            const tr = view.state.tr.insert(pos.pos, node);
-            view.dispatch(tr);
-          }
-        };
-        reader.readAsDataURL(file);
+        const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+        void insertImage(file, pos?.pos ?? view.state.selection.from);
         return true;
       },
       handlePaste: (view, event) => {
@@ -185,14 +187,7 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
             const file = item.getAsFile();
             if (!file) continue;
 
-            const reader = new FileReader();
-            reader.onload = () => {
-              if (typeof reader.result !== "string") return;
-              const node = view.state.schema.nodes.image.create({ src: reader.result });
-              const tr = view.state.tr.replaceSelectionWith(node);
-              view.dispatch(tr);
-            };
-            reader.readAsDataURL(file);
+            void insertImage(file, view.state.selection.from);
             return true;
           }
         }
@@ -201,11 +196,30 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
     },
   });
 
+  async function insertImage(file: File, position?: number) {
+    if (!editor || editor.isDestroyed || uploadInFlight.current || liveProps.current.disabled) return;
+    uploadInFlight.current = true;
+    editor.setEditable(false, false);
+    setUploading(true); setUploadError(""); liveProps.current.onBusyChange?.(true);
+    const insertion = position ?? editor.state.selection.from;
+    try {
+      const uploaded = await uploadImage(file);
+      if (!editor.isDestroyed) editor.chain().insertContentAt(insertion, { type: "image", attrs: { src: uploaded.url, alt: "첨부 이미지" } }).run();
+    } catch (error) {
+      if (!editor.isDestroyed) setUploadError(error instanceof Error ? error.message : "이미지를 업로드하지 못했습니다. 다시 추가해 주세요.");
+    } finally {
+      uploadInFlight.current = false;
+      if (!editor.isDestroyed) { setUploading(false); liveProps.current.onBusyChange?.(false); }
+    }
+  }
+
+  useEffect(() => { if (editor && !editor.isDestroyed) editor.setEditable(!disabled && !uploading, false); }, [editor, disabled, uploading]);
+
   // Sync external content changes
   useEffect(() => {
     if (editor && content !== lastContentRef.current) {
       lastContentRef.current = content;
-      editor.commands.setContent(content);
+      editor.commands.setContent(content, { emitUpdate: false });
     }
   }, [content, editor]);
 
@@ -327,6 +341,18 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
 
   return (
     <div ref={containerRef} className="relative">
+      {uploading && <p role="status" className="px-3 py-2 text-sm">이미지를 업로드하는 중… 잠시만 기다려 주세요.</p>}
+      {uploadError && <p role="alert" className="px-3 py-2 text-sm text-destructive">{uploadError}</p>}
+      <div role="group" aria-label="본문 서식" className="flex flex-wrap gap-1 border-b border-input px-2 py-1">
+        <input ref={fileInput} aria-label="이미지 파일" type="file" accept="image/png,image/jpeg" className="hidden" disabled={disabled || uploading} onChange={e => { const file = e.target.files?.[0]; e.target.value = ""; if (file) void insertImage(file); }} />
+        <Button variant="ghost" className="min-h-10" disabled={disabled || uploading} onMouseDown={e => e.preventDefault()} onClick={() => fileInput.current?.click()}>이미지 추가</Button>
+        <Button variant="ghost" className="min-h-10" aria-pressed={editor.isActive("heading", { level: 2 })} onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>제목</Button>
+        <Button variant="ghost" className="min-h-10 font-bold" aria-pressed={editor.isActive("bold")} onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().toggleBold().run()}>굵게</Button>
+        <Button variant="ghost" className="min-h-10" aria-pressed={editor.isActive("bulletList")} onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().toggleBulletList().run()}>목록</Button>
+        <Button variant="ghost" className="min-h-10" aria-pressed={editor.isActive("codeBlock")} onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>코드</Button>
+        <Button variant="ghost" className="min-h-10" onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().undo().run()}>되돌리기</Button>
+        <Button variant="ghost" className="min-h-10" onMouseDown={e => e.preventDefault()} onClick={() => editor.chain().focus().redo().run()}>다시 실행</Button>
+      </div>
       <BubbleToolbar editor={editor} />
       <TableMenu editor={editor} />
       <div
@@ -351,9 +377,6 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         )}
         <div
           className="cursor-text"
-          role="textbox"
-          tabIndex={-1}
-          onKeyDown={() => editor.commands.focus()}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               editor.chain().focus("end").run();
@@ -375,9 +398,9 @@ export default function RichEditor({ content, onChange }: RichEditorProps) {
         />
       )}
       <div className="px-4 py-2 text-xs text-muted-foreground border-t border-input flex gap-4 flex-wrap">
-        <span><kbd className="px-1 rounded bg-muted">⌘B</kbd> 볼드</span>
-        <span><kbd className="px-1 rounded bg-muted">⌘I</kbd> 이탤릭</span>
-        <span><kbd className="px-1 rounded bg-muted">⌘E</kbd> 코드</span>
+        <span><kbd className="px-1 rounded bg-muted">Ctrl/Cmd+B</kbd> 볼드</span>
+        <span><kbd className="px-1 rounded bg-muted">Ctrl/Cmd+I</kbd> 이탤릭</span>
+        <span><kbd className="px-1 rounded bg-muted">Ctrl/Cmd+E</kbd> 코드</span>
         <span><kbd className="px-1 rounded bg-muted">/</kbd> 명령어</span>
         <span><kbd className="px-1 rounded bg-muted">Tab</kbd> 들여쓰기</span>
         <span><kbd className="px-1 rounded bg-muted">Shift+Enter</kbd> 줄바꿈</span>

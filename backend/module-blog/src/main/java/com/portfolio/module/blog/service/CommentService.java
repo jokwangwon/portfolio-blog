@@ -28,6 +28,7 @@ public class CommentService {
     private final UserRepository userRepository;
 
     public Page<CommentResponse> getComments(Long postId, Pageable pageable) {
+        requirePublicPost(postId);
         return commentRepository.findRootCommentsByPostId(postId, pageable)
                 .map(comment -> {
                     List<CommentResponse> replies = commentRepository.findRepliesByParentId(comment.getId())
@@ -40,8 +41,7 @@ public class CommentService {
 
     @Transactional
     public CommentResponse createComment(Long postId, CommentRequest request, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
+        Post post = requirePublicPost(postId);
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
 
@@ -49,6 +49,7 @@ public class CommentService {
         if (request.getParentId() != null) {
             parent = commentRepository.findByIdAndDeletedAtIsNull(request.getParentId())
                     .orElseThrow(() -> new ResourceNotFoundException("COMMENT_NOT_FOUND", "부모 댓글을 찾을 수 없습니다"));
+            if (!parent.getPost().getId().equals(postId)) throw new ResourceNotFoundException("COMMENT_NOT_FOUND", "부모 댓글을 찾을 수 없습니다");
             // 최대 2단계 깊이 제한
             if (parent.getParent() != null) {
                 throw new IllegalArgumentException("댓글은 최대 2단계까지만 허용됩니다");
@@ -71,6 +72,8 @@ public class CommentService {
         Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다"));
 
+        if (!comment.getPost().getId().equals(postId) || !comment.getPost().isPubliclyReadable())
+            throw new ResourceNotFoundException("COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다");
         if (!comment.getAuthor().getUsername().equals(username)) {
             throw new ForbiddenException("COMMENT_FORBIDDEN", "댓글 수정 권한이 없습니다");
         }
@@ -84,10 +87,16 @@ public class CommentService {
         Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다"));
 
+        if (!comment.getPost().getId().equals(postId) || !comment.getPost().isPubliclyReadable())
+            throw new ResourceNotFoundException("COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다");
         if (!comment.getAuthor().getUsername().equals(username)) {
             throw new ForbiddenException("COMMENT_FORBIDDEN", "댓글 삭제 권한이 없습니다");
         }
 
         comment.delete(); // Soft delete — "[삭제된 댓글입니다]"로 표시
+    }
+    private Post requirePublicPost(Long postId) {
+        return postRepository.findByIdAndDeletedAtIsNull(postId).filter(Post::isPubliclyReadable)
+                .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
     }
 }
