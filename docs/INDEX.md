@@ -2,11 +2,13 @@
 
 > **프로젝트 문서 전체 구조 및 읽는 순서**
 
-**최종 업데이트**: 2026-09-29
+**최종 업데이트**: 2026-09-30
 
 ---
 
-최근 구현: [AI Backend 포트폴리오 개편](content/portfolio-positioning-2026-09-29.md) · [2026-09-29 세션](sessions/SESSION_2026-09-29.md). 코드·로컬 검증 완료, 운영 배포 전.
+최근 문서: [GitHub README 정리](sessions/SESSION_2026-09-30.md). 실제 서비스와 코드 근거 중심으로 소개를 정리했다.
+
+최근 구현: [AI Backend 포트폴리오 개편](content/portfolio-positioning-2026-09-29.md) · [2026-09-29 세션](sessions/SESSION_2026-09-29.md). 이후 PR #15 병합 및 2026-09-29 공개 배포 완료.
 
 이전 구현: [글 저장 충돌 방지](architecture/blog-edit-conflicts.md) · [검증·배포](review/blog-edit-conflicts-2026-09-16.md) · [2026-09-16 세션](sessions/SESSION_2026-09-16.md).
 

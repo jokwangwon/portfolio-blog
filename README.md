@@ -1,492 +1,78 @@
-# 포트폴리오 포털 (Portfolio Portal)
+# Portfolio & Blog — gwangwon.dev
 
-> 홈서버에서 운영하는 개인 포트폴리오와 블로그 — Next.js, Spring Boot, PostgreSQL
+**[실제 서비스: https://gwangwon.dev](https://gwangwon.dev)** · **Production / Deployed**
 
-**공개 중 (2026-09-13)**: [https://gwangwon.dev](https://gwangwon.dev) — 방문자 조회 전용입니다. 운영에서는 회원가입·소셜 로그인·댓글·좋아요를 닫고
-관리자만 글을 관리합니다. 아래 기능 목록은 개발 모드를 포함한 구현 현황입니다. 공개 주소에서 페이지 조회와 관리자 인증을 검증했습니다.
-[공개 준비 설계](docs/architecture/public-release-design.md) · [배포 가이드](docs/guides/DEPLOYMENT_GUIDE.md)
+조광원의 AI Backend / Backend Developer 포트폴리오와 기술 기록을 운영하는 웹 서비스입니다.
+프로젝트의 담당 범위와 구현 근거를 소개하고, 글 작성·공개 범위·이미지 첨부·동시 편집 충돌을 백엔드와 연결합니다.
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
-[![Tests](https://img.shields.io/badge/tests-272%20passing-brightgreen.svg)](#테스트)
+## 문제와 내가 한 일
 
----
+포트폴리오의 소개 문구와 실제 구현 근거가 분리되지 않도록 프로젝트 설명·논문·공개 코드를 한곳에서 탐색하게 만들었습니다.
+기술 기록에는 공개/비공개 접근 제어와 저장 충돌 처리가 필요했고, 이를 직접 운영하는 서비스 안에서 구현했습니다.
 
-## 📋 목차
+## 현재 기능
 
-- [프로젝트 소개](#프로젝트-소개)
-- [주요 기능](#주요-기능)
-- [기술 스택](#기술-스택)
-- [아키텍처](#아키텍처)
-- [시작하기](#시작하기)
-- [프로젝트 구조](#프로젝트-구조)
-- [개발 가이드](#개발-가이드)
-- [배포](#배포)
-- [라이선스](#라이선스)
+| 구현 | 판단과 근거 |
+| --- | --- |
+| 포트폴리오 정보 구조 | 직무·경력 근거 → Selected Work → Publication 순으로 구성하고 구현과 설계 상태를 분리했습니다. [콘텐츠 근거](docs/content/portfolio-positioning-2026-09-29.md) |
+| 글 작성·조회·공개 범위 | 공개 읽기와 소유자 쓰기를 분리하고 비공개 글 접근을 API에서 제한합니다. [API 명세](docs/api/API_SPECIFICATION.md) |
+| 이미지 첨부 | 글 공개 범위에 맞춰 첨부 조회 권한을 적용하고 DB와 첨부를 함께 백업합니다. [구현·검증](docs/review/image-attachments-2026-09-15.md) |
+| 편집 충돌 처리 | 버전이 다른 저장 요청은 충돌로 알리고 최신 글과 복구본을 확인하게 합니다. [두 탭 검증](docs/review/blog-edit-conflicts-2026-09-16.md) |
+| 작업실 화면 | 로컬 작업 이벤트를 수집해 AI 도구를 활용하는 개발 활동을 보여줍니다. [수집 구조](docs/guides/OFFICE_PRESENCE.md) |
+| 운영 | Docker 기반 실행, 외부 HTTPS 연결, DB·첨부 백업과 배포 후 공개 경로 확인을 수행합니다. [배포 가이드](docs/guides/DEPLOYMENT_GUIDE.md) |
 
----
+## Architecture · 기술 선택
 
-## 프로젝트 소개
-
-2026년 포트폴리오용 플랫폼 프로젝트입니다. 중앙 포털에서 블로그, AI 벤치마크 등 독립 서비스들을 통합 관리합니다.
-
-### 핵심 차별화 요소
-
-1. **3D 인터랙티브 UI** — React Three Fiber 기반 랜딩 + Glassmorphism 라이트/다크 디자인 시스템
-2. **Pixel Office** — 실제 GitHub 활동을 픽셀 아트 가상 사무실로 시각화 (공개 페이지 + 관리자 실시간 SSE)
-3. **멀티 백엔드 MSA** — Spring Boot(포털) + FastAPI(AI 서비스), Service Registry 패턴
-4. **로컬 AI 벤치마크** — GB10에서 실행한 LLM 성능 측정 (🚧 개발 예정)
-
-### 블로그 콘텐츠
-
-- 초보 개발자를 위한 알고리즘 학습 자료
-- 프로그래밍 언어 학습 기록 (Python, TypeScript, React, Rust, Java, Spring)
-- 개인 프로젝트 소개 (PhotoToon, Project-M 등)
-- Dell Pro Max GB10 사용 경험 및 트러블슈팅
-- AI 모델별 벤치마크 및 성능 평가 (그래프 시각화)
-
----
-
-## 주요 기능
-
-### 블로그
-- ✅ 리치 에디터 (Tiptap WYSIWYG — 슬래시 명령, 표, 코드 하이라이팅, 수식(KaTeX), Mermaid 다이어그램, 이미지)
-- ✅ 자동 저장 + 초안 복구, 마크다운 소스 토글
-- ✅ AI 요약 (로컬 Ollama / Gemini 연동 excerpt 자동 생성)
-- ✅ 카테고리/태그 분류, 검색, 페이지네이션
-- ✅ 댓글(대댓글)/좋아요/조회수
-
-### 포트폴리오 랜딩 & 디자인
-- ✅ 3D Hero (React Three Fiber) + 스크롤 애니메이션 (framer-motion)
-- ✅ Glassmorphism 디자인 시스템 — 라이트(Warm Glass)/다크(Cool Glass) 테마
-- ✅ 7개 섹션 (Hero, About, Tech Stack, Projects, Experience, Blog Preview, Contact)
-
-### Pixel Office
-- ✅ GitHub 활동 → 픽셀 아트 가상 사무실 시각화 (실제 스프라이트, BFS 길찾기, 상태 머신)
-- ✅ 관리자 페이지: 개발 도구 Hook 이벤트 실시간 SSE 스트리밍
-- ✅ 줌/팬, 에이전트 클릭 상세 패널
-
-### AI 모델 벤치마크 (🚧 개발 예정)
-- 모델 리스트, 추론 테스트, 성능 메트릭 시각화 (Tokens/sec, VRAM)
-
-### 인증/인가
-- ✅ JWT 기반 인증 (Refresh Token Rotation, HttpOnly Cookie)
-- ✅ 소셜 로그인 (Google, GitHub)
-- ✅ 역할 기반 권한 관리 (ADMIN, USER)
-
----
-
-## 기술 스택
-
-### Frontend
-- **Framework**: Next.js 16 (App Router)
-- **UI Library**: React 19, shadcn/ui (Base UI)
-- **3D / 애니메이션**: React Three Fiber + drei, framer-motion
-- **에디터**: Tiptap 3 (lowlight, KaTeX, Mermaid)
-- **State**: Redux Toolkit / TanStack Query
-- **Styling**: TailwindCSS v4 (oklch 디자인 토큰)
-- **Test**: Vitest + React Testing Library + MSW
-- **Language**: TypeScript
-
-### Portal API (Backend)
-- **Language**: Java 17
-- **Framework**: Spring Boot 3.2 (멀티 모듈 7개)
-- **Security**: Spring Security + JWT (jti, Rotation) + OAuth2
-- **ORM**: JPA, **Migration**: Flyway
-- **Resilience**: Resilience4j (CircuitBreaker/Retry)
-- **Database**: PostgreSQL 15 (`portal-db` 독립 인스턴스)
-- **Test**: JUnit 5 + Testcontainers
-- **Build**: Gradle
-
-### AI Backend (내부 서비스)
-- **Language**: Python 3.11+
-- **Framework**: FastAPI 0.115
-- **LLM**: LangChain + Ollama(로컬) / Gemini, Notion 연동
-- **Server**: Uvicorn
-
-### AI Benchmark API (🚧 예정)
-- FastAPI + TimescaleDB (`ai-bench-db` 독립 인스턴스), NVIDIA GB10 GPU 메트릭
-
-### Infrastructure
-- **Containerization**: Docker, Docker Compose
-- **Reverse Proxy**: Nginx (API Gateway)
-- **CI/CD**: GitHub Actions (backend/frontend/docs 게이트)
-- **Exposure**: Cloudflare Tunnel (GB10 홈서버)
-- **Observability**: Logback JSON 로깅, Sentry, MDC request 추적
-
----
-
-## 아키텍처
-
-### 시스템 구조도
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Client (Browser)                         │
-└─────────────────────────────┬───────────────────────────────────┘
-                              ▼  Cloudflare Tunnel (TLS)
-┌─────────────────────────────────────────────────────────────────┐
-│                    Nginx API Gateway                             │
-│           /api/portal/* → Portal API                            │
-│           /api/ai/*     → AI Benchmark API (🚧 예정)             │
-│           /*            → Frontend (Next.js)                    │
-└──────┬──────────────────────┬──────────────────────┬────────────┘
-       │                      │                      │
-       ▼                      ▼                      ▼
-┌──────────────┐   ┌──────────────────┐   ┌─────────────────┐
-│ Frontend     │   │  Portal API      │   │ AI Benchmark API│
-│ (Next.js)    │   │  (Spring Boot)   │   │ (FastAPI)       │
-│ • 3D UI      │   │  • 블로그 CRUD   │   │ • 모델 추론     │
-│ • Pixel Office│  │  • 인증/인가     │   │ • 벤치마크      │
-│              │   │  • Service Registry│ │ • GPU 메트릭    │
-└──────────────┘   └───┬──────────┬───┘   │   (🚧 예정)     │
-                       │          │       └────────┬────────┘
-                       │          ▼ REST           │
-                       │   ┌──────────────┐        │
-                       │   │  AI Backend  │        │
-                       │   │  (FastAPI)   │        │
-                       │   │ • 글 요약    │        │
-                       │   │ • Ollama/Gemini │     │
-                       │   └──────────────┘        │
-                       ▼                           ▼
-                ┌─────────────┐            ┌──────────────┐
-                │  portal-db  │            │ ai-bench-db  │
-                │ (PostgreSQL)│            │ (TimescaleDB)│
-                │  독립 컨테이너│            │  독립 컨테이너│
-                └─────────────┘            └──────────────┘
+```mermaid
+flowchart LR
+    Visitor[방문자 / 작성자] --> Web[Next.js · React]
+    Web --> API[Spring Boot API]
+    API --> DB[(PostgreSQL)]
+    API --> Files[첨부 파일 저장소]
+    API -. AI 요약 연동 .-> AI[FastAPI]
+    AI -.-> LLM[LLM]
+    Hooks[로컬 작업 이벤트] --> Office[작업실 수집 API]
+    Office --> Web
 ```
 
-> 각 서비스는 독립 실행 가능하며, 자기 DB에만 접근합니다. 서비스 간 데이터가 필요하면 REST API를 호출합니다.
-> 자세한 아키텍처: [ADR-006](docs/decisions/ADR-006-microservice-architecture.md)
+- **Next.js / React / TypeScript**: 포트폴리오·기록·작업실 화면을 같은 웹 앱에서 구성합니다.
+- **Spring Boot / PostgreSQL**: 인증, 글 접근 권한과 편집 버전을 API·DB에서 처리합니다. 백엔드는 역할별 Gradle 모듈로 분리했습니다.
+- **FastAPI**: AI 요약 연동 코드를 별도 서비스로 둡니다. 영속적인 AI 실행 이력·분석 기능은 아직 설계 단계입니다.
+- **Docker Compose**: 서비스 실행 설정과 영속 저장소를 관리합니다. 선택·실험용 서비스는 현재 운영 기능과 구분합니다.
 
-### 주요 디자인 패턴
-- **Frontend**: Shell App + Feature Modules (서비스별 라우트)
-- **Portal API**: 멀티 모듈 + 계층형 아키텍처 + Service Registry
-- **AI Benchmark API**: 3계층 (Router-Service-Infrastructure) + 독립 서비스
+## 실행
 
-자세한 아키텍처 문서: [docs/architecture/](docs/)
-
----
-
-## 시작하기
-
-### 사전 요구사항
-
-- **Docker**: 20.10 이상
-- **Docker Compose**: 2.0 이상
-
-> **로컬 개발 시 추가 요구사항**:
-> - Java 17+ (Spring Boot 개발 시)
-> - Node.js 18+ (Frontend 개발 시)
-> - Python 3.11+ (AI API 개발 시)
-
----
-
-### ⚡ Quick Start (Docker Compose)
-
-#### 1. 저장소 클론
-
-```bash
-git clone https://github.com/jokwangwon/portfolio-blog.git
-cd portfolio-blog
-```
-
-#### 2. 환경 변수 설정
-
-```bash
-# .env 파일 생성 (템플릿 복사)
-cp .env.example .env
-
-# .env 파일 수정 (최소한 JWT_SECRET은 반드시 변경!)
-# JWT_SECRET 생성 예시: openssl rand -base64 64
-```
-
-#### 3. 데이터베이스만 실행 (기본)
-
-```bash
-docker-compose up -d
-
-# 실행 확인
-docker-compose ps
-```
-
-이제 PostgreSQL (+ TimescaleDB)이 실행됩니다:
-- **PostgreSQL**: `localhost:5432`
-- **pgAdmin** (선택): `docker-compose --profile tools up -d` 실행 후 `localhost:5050`
-
-#### 4. 전체 스택 실행 (옵션)
-
-```bash
-# Backend + Frontend + AI API 모두 실행
-docker-compose --profile backend --profile frontend up -d
-
-# 또는 선택적으로 실행
-docker-compose --profile backend up -d    # Backend만
-docker-compose --profile frontend up -d   # Frontend만
-```
-
-서비스 URL:
-- **Frontend**: http://localhost:3000
-- **Portal API**: http://localhost:8080
-- **AI Backend**: http://localhost:8081
-- **pgAdmin**: http://localhost:5050 (tools 프로필 사용 시)
-
----
-
-### 🛠️ 로컬 개발 모드 (Docker 없이)
-
-Docker 대신 직접 실행하고 싶다면:
-
-#### 1. 데이터베이스 실행
-
-```bash
-# PostgreSQL + TimescaleDB만 Docker로 실행
-docker-compose up -d portal-db ai-bench-db
-```
-
-#### 2. Backend 실행
-
-```bash
-cd backend/api-server
-./gradlew bootRun
-
-# 또는 IDE에서 ApiServerApplication 실행
-# http://localhost:8080
-```
-
-#### 3. Frontend 실행
+프런트엔드 화면 개발에는 Node.js 20과 npm이 필요합니다.
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
-
-# http://localhost:3000
 ```
 
-#### 4. AI Backend 실행 (선택 — 글 요약 기능)
+글·인증 등 API 기능은 백엔드와 DB 설정이 필요합니다. Java 17, PostgreSQL, 환경 변수 및 전체 서비스 실행 절차는
+[개발 가이드](docs/guides/DEVELOPMENT_GUIDE.md)와 [배포 가이드](docs/guides/DEPLOYMENT_GUIDE.md)를 따릅니다.
+환경 변수 이름은 [.env.example](.env.example)에 있으며 실제 값은 커밋하지 않습니다.
 
-```bash
-cd ai-backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8081
+## 테스트와 운영 근거
 
-# http://localhost:8081 (로컬 Ollama 또는 GEMINI_API_KEY 필요)
-```
+- [GitHub Actions CI](.github/workflows/ci.yml): 백엔드 Gradle check, 프런트엔드 lint·build·test, 문서 교차 참조 검증. [실행 결과](https://github.com/jokwangwon/portfolio-blog/actions/workflows/ci.yml)
+- 프런트엔드: `cd frontend && npm ci && npm test`
+- 백엔드: `cd backend && ./gradlew check` — 통합 테스트에는 Docker/Testcontainers 환경이 필요합니다.
+- 배포는 운영 절차에 따라 수행합니다. **CI 통과와 운영 배포는 별개**이며 자동 CD가 구현됐다고 주장하지 않습니다.
+- [백업 스크립트](scripts/backup-portal.sh), [이미지 첨부 검증](docs/review/image-attachments-2026-09-15.md), [편집 충돌 검증](docs/review/blog-edit-conflicts-2026-09-16.md)에서 백업·복구와 실제 API 검증 근거를 확인할 수 있습니다.
+- 인증·권한·입력 검증은 구현되어 있지만 보안 인증이나 외부 보안 심사를 받은 서비스라는 의미는 아닙니다.
 
----
+## 현재 상태와 한계
 
-### 📊 데이터베이스 초기화
+**Production / Deployed** — 포트폴리오·기록·작업실을 공개 운영합니다. 2026-09-29 포트폴리오 메시지 개편 화면을 반영했습니다.
 
-Flyway 마이그레이션이 자동으로 실행되어 스키마와 시드 데이터를 생성합니다.
+글 수정 이력·복원과 영속 AI 분석은 설계 단계입니다. 과거 설계 문서의 벤치마크·확장 서비스는 공개 운영 기능과 구분해야 합니다.
+운영 규모·사용자 수·성능 개선 수치는 추정하지 않습니다.
 
-**기본 관리자 계정**:
-- Email: `admin@example.com`
-- Password: `Admin123!`
+## AI-assisted development
 
-**수동 마이그레이션 실행**:
+AI agent를 코드 생성·반복 작업에 활용합니다. 요구사항 정의, 설계 판단, 코드 리뷰와 테스트·배포 검증은 개발자의 책임으로 두고
+검증 결과를 [세션 기록](docs/sessions/README.md)과 리뷰 문서에 남깁니다.
 
-```bash
-cd backend/api-server
-./gradlew flywayMigrate
-```
-
----
-
-## 프로젝트 구조
-
-```
-portfolio-blog/
-├── backend/              # Portal API (Spring Boot 멀티 모듈)
-│   ├── common/          # 공통 유틸/예외
-│   ├── domain/          # 엔티티 + 리포지토리
-│   ├── security/        # 인증/인가 (JWT, OAuth2)
-│   ├── module-blog/     # 블로그 비즈니스 로직
-│   ├── module-user/     # 사용자 관리
-│   ├── module-registry/ # Service Registry (서비스 등록/상태 관리)
-│   └── api-server/      # 실행 가능한 메인 앱 (Controller, AI 프록시)
-│
-├── ai-backend/          # AI Backend (FastAPI 내부 서비스 — 글 요약)
-│   ├── app/             # main, llm_service(LangChain), notion_service
-│   └── tests/
-│
-├── frontend/            # Next.js Shell App
-│   ├── app/             # App Router — (portfolio)/(blog)/(auth)/admin 라우트 그룹
-│   ├── src/
-│   │   ├── shell/       # 레이아웃, 인증, 테마, API 클라이언트
-│   │   ├── modules/     # Feature Modules (blog, portfolio, pixel-office)
-│   │   └── shared/      # 애니메이션/컴포넌트/유틸
-│   └── public/          # 정적 파일 (픽셀 에셋 포함)
-│
-├── nginx/               # API Gateway 설정
-├── scripts/             # 하네스/문서 검증 스크립트
-└── docs/                # 프로젝트 문서 (헌법, 아키텍처, ADR, 세션 로그)
-```
-
----
-
-## 개발 가이드
-
-### 개발 컨벤션
-
-프로젝트의 코딩 스타일, Git 워크플로우, API 설계 규칙 등은 다음 문서를 참고하세요:
-
-📖 **[DEVELOPMENT_GUIDE.md](docs/guides/DEVELOPMENT_GUIDE.md)**
-
-주요 내용:
-- 코딩 컨벤션 (Java, TypeScript, Python)
-- Git 브랜치 전략 및 커밋 메시지 규칙
-- RESTful API 설계 원칙
-- 데이터베이스 네이밍 규칙
-- 에러 처리 규칙
-- 테스트 작성 가이드
-
-### 브랜치 전략
-
-```
-main (프로덕션)
-  ↑
-develop (개발 통합)
-  ↑
-feature/* (기능 개발)
-```
-
-### 커밋 메시지
-
-```bash
-feat(auth): JWT 인증 구현
-fix(post): 조회수 증가 버그 수정
-docs(readme): 설치 가이드 추가
-```
-
-자세한 내용은 [DEVELOPMENT_GUIDE.md](docs/guides/DEVELOPMENT_GUIDE.md) 참고
-
----
-
-## API 문서
-
-### Swagger UI
-
-개발 서버 실행 후 다음 URL에서 API 문서 확인:
-
-- **Portal API**: http://localhost:8080/swagger-ui.html
-- **AI Backend**: http://localhost:8081/docs
-
-전체 명세: [docs/api/API_SPECIFICATION.md](docs/api/API_SPECIFICATION.md)
-
-### 주요 엔드포인트
-
-#### 인증 (Portal API)
-```
-POST   /api/portal/auth/login
-POST   /api/portal/auth/signup
-POST   /api/portal/auth/refresh
-GET    /api/portal/auth/me
-```
-
-#### 게시글 (Portal API)
-```
-GET    /api/portal/posts            # 목록 (카테고리/페이지네이션)
-GET    /api/portal/posts/search     # 검색
-GET    /api/portal/posts/{id}
-POST   /api/portal/posts
-PUT    /api/portal/posts/{id}
-DELETE /api/portal/posts/{id}
-POST   /api/portal/posts/{id}/like
-```
-
-#### AI (Portal API → AI Backend 프록시)
-```
-POST   /api/portal/ai/summarize     # 게시글 excerpt 자동 생성
-```
-
----
-
-## 테스트
-
-현재 **백엔드 131개** (단위 + Testcontainers 통합) / **프론트엔드 109개** (Vitest + RTL + MSW) 테스트가 CI에서 실행됩니다.
-
-### Backend
-
-```bash
-cd backend
-./gradlew test              # 전체 (통합 테스트는 Docker 필요)
-
-# 특정 모듈만 테스트
-./gradlew :module-blog:test
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm test
-
-# 커버리지
-npm run test:coverage
-```
-
----
-
-## 배포
-
-**GB10 홈서버 + Cloudflare Tunnel** 구성으로 배포합니다. AI Backend가 로컬 Ollama(GB10 GPU)에 의존하므로 전체 스택을 단일 호스트에서 운영하고, Cloudflare Tunnel이 TLS와 외부 노출을 담당합니다 (포트포워딩 불필요).
-
-```bash
-# 프로덕션 스택 기동 (Nginx 게이트웨이 포함)
-docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile backend --profile frontend --profile gateway up -d
-
-# Cloudflare Tunnel 연결 (도메인 설정 후)
-docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile deploy up -d cloudflared
-
-# 도메인 없이 임시 검증 (trycloudflare)
-cloudflared tunnel --url http://localhost:80
-```
-
-상세 절차: [docs/guides/DEPLOYMENT_GUIDE.md](docs/guides/DEPLOYMENT_GUIDE.md)
-
-> 라이브 URL: [https://gwangwon.dev](https://gwangwon.dev)
-
----
-
-## 기여하기
-
-현재는 개인 프로젝트이지만, 피드백은 환영합니다!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'feat(scope): Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 라이선스
-
-이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참고하세요.
-
----
-
-## 문의
-
-- **개발자**: 조광원
-- **이메일**: tgdata200@gmail.com
-- **GitHub**: https://github.com/jokwangwon
-- **블로그**: [gwangwon.dev/blog](https://gwangwon.dev/blog)
-
----
-
-## 감사의 말
-
-- Spring Boot / Next.js / FastAPI 팀
-- [pixel-agents](CREDITS.md) — Pixel Office 렌더링 엔진 원작 (MIT)
-- Ollama Contributors
-
----
-
-**Made with ❤️ and ☕**
+[문서 인덱스](docs/INDEX.md) · [현재 개발 상태](docs/CONTEXT.md) · [개발자 프로필](https://github.com/jokwangwon)
