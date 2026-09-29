@@ -8,14 +8,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class PostResponse {
+    private long editVersion;
+    private LocalDateTime editedAt;
+    private String contentFormat;
     private Long id;
     private String title;
     private String slug;
     private String content;
     private String excerpt;
     private String status;
+    private String visibility;
     private Integer viewCount;
     private Integer likeCount;
     private AuthorDto author;
@@ -28,11 +32,13 @@ public class PostResponse {
     public static PostResponse from(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
+                .editVersion(post.getEditVersion()).editedAt(post.getEditedAt()).contentFormat(post.getContentFormat())
                 .title(post.getTitle())
                 .slug(post.getSlug())
                 .content(post.getContent())
                 .excerpt(post.getExcerpt())
                 .status(post.getStatus().name())
+                .visibility(post.getVisibility().name())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .author(new AuthorDto(post.getAuthor().getId(), post.getAuthor().getUsername()))
@@ -51,10 +57,12 @@ public class PostResponse {
     public static PostResponse summary(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
+                .editVersion(post.getEditVersion()).editedAt(post.getEditedAt()).contentFormat(post.getContentFormat())
                 .title(post.getTitle())
                 .slug(post.getSlug())
                 .excerpt(post.getExcerpt())
                 .status(post.getStatus().name())
+                .visibility(post.getVisibility().name())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .author(new AuthorDto(post.getAuthor().getId(), post.getAuthor().getUsername()))
@@ -64,6 +72,7 @@ public class PostResponse {
                 .tags(post.getTags().stream()
                         .map(t -> new TagDto(t.getId(), t.getName(), t.getSlug()))
                         .toList())
+                .updatedAt(post.getUpdatedAt())
                 .createdAt(post.getCreatedAt())
                 .publishedAt(post.getPublishedAt())
                 .build();

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import apiClient from "@shell/api/client";
@@ -14,6 +15,7 @@ import type {
 } from "@/src/types/api";
 
 export function useAuth() {
+  const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAppSelector(
@@ -67,10 +69,12 @@ export function useAuth() {
     try {
       await apiClient.post("/auth/logout");
     } finally {
+      await queryClient.cancelQueries();
+      queryClient.clear();
       dispatch(clearCredentials());
       router.push("/");
     }
-  }, [dispatch, router]);
+  }, [dispatch, router, queryClient]);
 
   return { user, isAuthenticated, isLoading, login, signup, logout };
 }

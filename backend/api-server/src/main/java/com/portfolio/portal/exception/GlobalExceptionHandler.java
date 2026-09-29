@@ -8,6 +8,8 @@ import com.portfolio.portal.ai.AiServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
@@ -24,6 +26,27 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler({com.portfolio.common.exception.PayloadTooLargeException.class,
+            org.springframework.web.multipart.MaxUploadSizeExceededException.class})
+    public ResponseEntity<Map<String, Object>> handleUploadLimit(Exception ex) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(errorBody("IMAGE_TOO_LARGE", "이미지는 10MB 이하로 추가해 주세요", null));
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingFile(Exception ex) {
+        return ResponseEntity.badRequest().body(errorBody("BAD_REQUEST", "이미지 파일을 선택해 주세요", null));
+    }
+
+    @ExceptionHandler(com.portfolio.common.exception.PostEditConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleEditConflict(Exception ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorBody("POST_EDIT_CONFLICT", ex.getMessage(), null));
+    }
+    @ExceptionHandler(com.portfolio.common.exception.PostEditVersionRequiredException.class)
+    public ResponseEntity<Map<String, Object>> handleEditVersionRequired(Exception ex) {
+        return ResponseEntity.badRequest().body(errorBody("POST_EDIT_VERSION_REQUIRED", ex.getMessage(), null));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()
@@ -31,6 +54,11 @@ public class GlobalExceptionHandler {
                 .toList();
 
         return ResponseEntity.badRequest().body(errorBody("VALIDATION_ERROR", "입력값 검증 실패", errors));
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<Map<String, Object>> handleMalformedRequest(Exception ex) {
+        return ResponseEntity.badRequest().body(errorBody("BAD_REQUEST", "요청 형식이 올바르지 않습니다", null));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

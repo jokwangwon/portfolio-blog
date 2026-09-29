@@ -1,0 +1,29 @@
+{
+  "health": {
+    "status": 200
+  },
+  "posts": {
+    "status": 200,
+    "totalElements": 0
+  },
+  "categories": {
+    "status": 200
+  },
+  "office": {
+    "status": 200
+  },
+  "myRecords": {
+    "status": 401
+  },
+  "visitorWrite": 401,
+  "/": {
+    "noOverflow": true
+  },
+  "/blog": {
+    "noOverflow": true
+  },
+  "/office": {
+    "noOverflow": true
+  },
+  "jsErrors": []
+}

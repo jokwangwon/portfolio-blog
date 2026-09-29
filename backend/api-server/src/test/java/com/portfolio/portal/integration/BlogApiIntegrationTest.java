@@ -43,6 +43,44 @@ class BlogApiIntegrationTest extends IntegrationTestBase {
         userAccessToken = createUserAndGetToken();
     }
 
+    @Test
+    void unpublishedPostIsVisibleOnlyToItsAuthor() throws Exception {
+        Long postId = createPost("Private draft", "Private content", "DRAFT");
+        mockMvc.perform(get("/api/portal/posts/" + postId)).andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/portal/posts/" + postId)
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/portal/posts/" + postId)
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.viewCount").value(0));
+    }
+
+    @Test
+    void myPostsRequiresAuthenticationAndFiltersDrafts() throws Exception {
+        createPost("Private draft", "Private content", "DRAFT");
+        createPost("Public post", "Public content", "PUBLISHED");
+        mockMvc.perform(get("/api/portal/posts/my")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/portal/posts/my").param("status", "DRAFT")
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Private draft"));
+        mockMvc.perform(get("/api/portal/posts/my").param("status", "DRAFT")
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    @Test
+    void archivedPostIsNotPublic() throws Exception {
+        Long postId = createPost("Archived post", "Private content", "PUBLISHED");
+        mockMvc.perform(put("/api/portal/posts/" + postId)
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "expectedEditVersion", 0, "title", "Archived post", "content", "Private content", "status", "ARCHIVED"))))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/portal/posts/" + postId)).andExpect(status().isNotFound());
+    }
+
     // === Category API Tests ===
 
     @Test
@@ -190,7 +228,7 @@ class BlogApiIntegrationTest extends IntegrationTestBase {
                         .header("Authorization", "Bearer " + userAccessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                Map.of("title", "Updated Title", "content", "Updated content", "status", "PUBLISHED"))))
+                                Map.of("expectedEditVersion", 0, "title", "Updated Title", "content", "Updated content", "status", "PUBLISHED"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Updated Title"));
     }

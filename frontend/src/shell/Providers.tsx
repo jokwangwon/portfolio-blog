@@ -13,7 +13,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           {children}
-          <DevThemePanel />
+          {process.env.NODE_ENV === "development" && <DevThemePanel />}
         </AuthProvider>
       </QueryClientProvider>
     </Provider>

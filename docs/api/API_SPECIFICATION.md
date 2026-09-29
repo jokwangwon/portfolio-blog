@@ -1,5 +1,36 @@
 # API 명세서 (API Specification)
 
+## 글 저장 충돌 방지 (2026-09-16 구현)
+
+- 글 응답에 `editVersion`, `editedAt`, `contentFormat: MARKDOWN_V1`을 제공한다. 기존 글은 버전 0, 편집 시각 null로 시작한다.
+- `PUT /posts/{id}`는 작성자만 가능하며 `expectedEditVersion`(0 이상 안전 정수)을 반드시 보낸다. 현재 버전과 다르면 **409 `POST_EDIT_CONFLICT`**, 생략하면 **400 `POST_EDIT_VERSION_REQUIRED`**다. 오류에 최신 비공개 본문을 포함하지 않는다.
+- DB 행 잠금 안에서 권한과 버전을 검사한다. 실제 글·분류·상태·공개 범위가 달라질 때만 버전과 편집 시각을 갱신한다. 같은 내용 재저장, 조회수·좋아요 변경은 편집 버전에 영향을 주지 않는다.
+- 편집 중인 버전은 서버 재조회만으로 바뀌지 않는다. 충돌 시 입력을 유지하고 최신 글 비교를 제공한다. 사용자가 비교한 버전으로 계속 편집하기를 선택해도 자동 저장하지 않는다.
+- `GET /posts/my`는 본문을 제외한 목록 응답이다. 본문은 권한이 확인된 상세 조회로 가져온다.
+- 상세: [구현 범위](../architecture/blog-edit-conflicts.md). 수정 이력·AI 작업 저장은 후속 단계다.
+
+## 이미지 첨부 (2026-09-15 구현)
+
+| 경로 | 동작 | 권한/응답 |
+|---|---|---|
+| `POST /attachments` | multipart `file` 업로드 | 인증 필수, 운영 ADMIN. 201 `{id,url,mediaType,byteSize,width,height}` |
+| `GET /attachments/{id}` | 이미지 바이너리 | 소유자 또는 연결된 글이 미삭제·PUBLISHED·PUBLIC. 나머지 404 |
+
+PNG/JPEG만 지원하며 입력/재인코딩 결과 10MiB, 한 변 8192px, 총 2000만 화소 제한이다. 손상/미지원/치수 초과는 400, 바이트 초과는 413이다. 실제 이미지 판독 후 메타데이터를 제거한다. 조회는 `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`를 반환한다.
+
+업로드 URL은 `/api/portal/attachments/{UUID}`이며 미연결 상태는 소유자만 조회한다. 글 생성/수정 시 실제 Markdown/HTML 이미지 참조를 연결하고 제거된 참조는 연결을 해제한다. 타인 소유/다른 글에 연결된 첨부, 실제 이미지 위치의 data/blob URL과 비정규 첨부 주소는 400이다. 코드 예시의 주소는 첨부로 처리하지 않는다. 공개 여부는 조회 시 현재 글에서 판단한다. [상세 계약](../architecture/image-attachments-design.md).
+
+> 향후 수정 이력·영속 AI 작업 API는 [저장·AI 데이터 설계](../architecture/knowledge-storage-ai-design.md)의 제안 계약이다. 현재 OpenAPI에 구현된 경로로 추가하지 않았다.
+
+> 2026-09-13 공개 정책: 운영 `app.public-read-only=true`에서는 회원가입·OAuth2·댓글·좋아요를
+> 차단한다. 게시글/분류/AI 쓰기는 ADMIN만 허용한다. 개발 프로필의 USER+ 설명과 구분한다.
+> 공개 조회는 PUBLISHED + PUBLIC인 글만 허용한다. DRAFT/ARCHIVED 또는 PRIVATE 상세는 작성자만 200, 그 외에는 404.
+> `GET /posts/my`는 인증 필수(운영 ADMIN), status(DRAFT/PUBLISHED/ARCHIVED)와 visibility(PUBLIC/PRIVATE)의 독립 필터·페이지네이션 지원.
+> 2026-09-15: 글 요청·응답에 `visibility: PUBLIC | PRIVATE` 추가. 생성 생략은 PUBLIC, 수정 생략은 기존 값 유지. 잘못된 공개 범위는 400.
+> 목록·검색·분류·태그·댓글에 비공개 필터 적용, 글 응답은 `Cache-Control: no-store`. 비공개 열람은 조회 수에 반영하지 않는다.
+> `/health`는 DB 연결 정상 200 UP, 연결 실패 503 DOWN. 상세 설계: [공개 준비](../architecture/public-release-design.md).
+
+
 > **REST API 설계 문서**
 > OpenAPI 3.0 기반 Frontend-Backend 계약
 
@@ -1099,12 +1130,11 @@ langfuse:
 }
 ```
 
-**status 값**: `UP` | `DOWN` | `DEGRADED`
+**포털 /health status 값**: `UP` | `DOWN`
 - `UP`: 정상 (DB 연결 포함)
 - `DOWN`: DB 연결 실패 등 핵심 기능 장애
-- `DEGRADED`: 부분 장애 (핵심은 OK, 부가 기능 실패)
 
-**에러 시에도 200 반환** (상태값으로 구분). 서비스 자체가 죽으면 타임아웃 처리.
+**DB 연결 실패 시 503 반환**. 응답에는 `status`, `service`, `timestamp`만 포함하고 내부 연결 정보는 노출하지 않는다. 서비스 자체가 죽으면 타임아웃 처리.
 
 ### GET /api/summary (서비스 요약)
 
@@ -1228,3 +1258,15 @@ export default apiClient;
 **이 명세서는 Frontend-Backend 간 계약입니다.**
 **변경 시 반드시 양측 팀(또는 개발자)에게 공지하세요.**
 **OpenAPI 파일(`openapi.yaml`)과 항상 동기화하세요.**
+
+## 공개 Office 작업 상태 (2026-09-15)
+
+GET `/api/office`: `connection`(connected/unavailable), `enabled`, `updatedAt`(epoch ms/null), `sessions` 배열. 세션 필드는 임의 UUID `id`, `source`(claude/codex/local), `activity`(working/reading/editing/running/testing/waiting), `startedAt`과 아래의 선택적 공개 필드만 허용한다.
+
+GET `/api/office/events`: 같은 스냅샷을 SSE `presence` 이벤트로 약 2초마다 전달. 캐시 없음, 요청 종료 시 타이머 정리. 수집기 하트비트가 15초 초과하면 unavailable 및 빈 배열. 공개 POST/PUT/DELETE 미지원(405).
+
+수집기는 웹 API와 분리된 로컬 프로세스이며 읽기 전용 상태 파일만 공유한다. [운영 안내](../guides/OFFICE_PRESENCE.md), [명세](../architecture/office-presence-design.md). Portal DB/블로그 API 변경 없음.
+
+Office 세션 확장(2026-09-15): 선택적 `publicTitle`(최대 48 Unicode 코드포인트, 일반 문자/숫자/기본 문장부호). 명시적 공개 입력만 전달하며 미지정·유효하지 않은 제목은 필드 생략. 연결 상태 및 기존 클라이언트 계약 유지. [계절·칠판 명세](../architecture/office-season-board-design.md).
+
+Office 프로젝트 확장(2026-09-15): 세션의 선택적 `projectName`은 허용된 프로젝트 루트의 폴더명(최대64자, 일반 문자/숫자/공백 및 `._()-`)이다. 선택적 `recentProject={projectName,lastActiveAt}`는 마지막 실제 활동의 프로젝트 한 건과 epoch ms 시각이다. 현재 인원에 포함하지 않으며 방송 off/연결 장애에서는 생략한다. 절대·하위 경로/원문/명령 필드는 재구성 과정에서 제외한다. 기존 projectName/recentProject 없는 스냅샷과 호환한다.

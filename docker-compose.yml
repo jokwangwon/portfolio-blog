@@ -82,6 +82,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: portfolio-api-server
+    volumes:
+      - portal_attachments_data:/app/data/attachments
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       SPRING_DATASOURCE_URL: jdbc:postgresql://portal-db:5432/${PORTAL_DB_NAME:-portal_db}
@@ -192,6 +194,8 @@ services:
       - gateway
 
 volumes:
+  portal_attachments_data:
+    driver: local
   portal_db_data:
     driver: local
   ai_bench_db_data:

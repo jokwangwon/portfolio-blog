@@ -2,11 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { PUBLIC_READ_ONLY } from "./publicAccess";
 
 export default function SocialLoginButtons() {
+  if (PUBLIC_READ_ONLY) return null;
+
   function handleSocialLogin(provider: "google" | "github") {
-    window.location.href = `${API_BASE}/oauth2/authorize/${provider}`;
+    window.location.href = `/oauth2/authorize/${provider}`;
   }
 
   return (

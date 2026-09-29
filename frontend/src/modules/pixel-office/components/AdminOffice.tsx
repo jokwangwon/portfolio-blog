@@ -37,7 +37,7 @@ export default function AdminOffice() {
     getAgentName,
     getAgentRole,
     getSelectedCharacter,
-  } = usePixelOffice();
+  } = usePixelOffice(true);
 
   const { events, latestEvent, connected, getAnimationForTool } = useHookEvents();
 

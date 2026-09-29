@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio Platform",
-  description: "Blog, AI Benchmark, and Project Showcase",
+  title: "조광원 | 포트폴리오 & 블로그",
+  description: "데이터베이스를 공부하며 웹 서비스와 도구를 만드는 조광원의 프로젝트와 개발 기록입니다.",
 };
 
 export default function RootLayout({

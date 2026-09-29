@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { PUBLIC_READ_ONLY } from "@/src/shell/auth/publicAccess";
 import SocialLoginButtons from "@/src/shell/auth/SocialLoginButtons";
 
 export default function SignupPage() {
@@ -74,6 +75,8 @@ export default function SignupPage() {
       setLoading(false);
     }
   }
+
+  if (PUBLIC_READ_ONLY) return <div className="py-12 text-center"><p>현재 회원가입을 받지 않습니다.</p><Link href="/blog" className="underline">블로그 보기</Link></div>;
 
   return (
     <div className="flex justify-center py-12">

@@ -25,10 +25,13 @@ import java.util.regex.Pattern;
 public class PostService {
 
     private final PostRepository postRepository;
+    @org.springframework.beans.factory.annotation.Value("${app.blog.require-edit-version:true}")
+    private boolean requireEditVersion = true;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
+    private final AttachmentService attachmentService;
 
     public Page<PostResponse> getPublishedPosts(Pageable pageable) {
         return postRepository.findAllByStatusAndDeletedAtIsNull(PostStatus.PUBLISHED, pageable)
@@ -51,29 +54,42 @@ public class PostService {
     }
 
     public Page<PostResponse> getMyPosts(String username, String status, Pageable pageable) {
+        return getMyPosts(username, status, null, pageable);
+    }
+
+    public Page<PostResponse> getMyPosts(String username, String status, PostVisibility visibility, Pageable pageable) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
-
-        if (status != null && !status.isBlank()) {
-            PostStatus postStatus = PostStatus.valueOf(status.toUpperCase());
-            return postRepository.findAllByAuthorAndStatus(author.getId(), postStatus, pageable)
-                    .map(PostResponse::from);
-        }
-        return postRepository.findAllByAuthor(author.getId(), pageable)
-                .map(PostResponse::from);
+        PostStatus state = status == null || status.isBlank() ? null : PostStatus.valueOf(status.toUpperCase(java.util.Locale.ROOT));
+        return postRepository.findOwnedWithFilters(author.getId(), state, visibility, pageable).map(PostResponse::summary);
     }
 
     @Transactional
     public PostResponse getPost(Long id) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        return getPost(id, null);
+    }
+
+    @Transactional
+    public PostResponse getPost(Long id, String username) {
+        Post post = postRepository.findForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
-        post.incrementViewCount();
+        if (!post.isPubliclyReadable()
+                && !post.getAuthor().getUsername().equals(username)) {
+            throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
+        }
+        if (post.isPubliclyReadable()) {
+            postRepository.incrementViews(id);
+            return PostResponse.from(post).toBuilder().viewCount(post.getViewCount() + 1).build();
+        }
         return PostResponse.from(post);
     }
 
     public PostResponse getPostBySlug(String slug) {
         Post post = postRepository.findBySlugAndDeletedAtIsNull(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
+        if (!post.isPubliclyReadable()) {
+            throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
+        }
         return PostResponse.from(post);
     }
 
@@ -107,6 +123,7 @@ public class PostService {
                 .content(request.getContent())
                 .excerpt(excerpt)
                 .status(status)
+                .visibility(request.getVisibility())
                 .build();
 
         if (status == PostStatus.PUBLISHED) {
@@ -118,18 +135,24 @@ public class PostService {
             post.updateTags(tags);
         }
 
+        post.recordCreation();
         postRepository.save(post);
+        attachmentService.synchronize(post, post.getContent());
         return PostResponse.from(post);
     }
 
     @Transactional
     public PostResponse updatePost(Long id, PostRequest request, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        Post post = postRepository.findForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
 
         if (!post.getAuthor().getUsername().equals(username)) {
             throw new ForbiddenException("POST_FORBIDDEN", "게시글 수정 권한이 없습니다");
         }
+
+        Long expected = request.getExpectedEditVersion();
+        if (expected == null && requireEditVersion) throw new com.portfolio.common.exception.PostEditVersionRequiredException();
+        if (expected != null && expected != post.getEditVersion()) throw new com.portfolio.common.exception.PostEditConflictException();
 
         Category category = null;
         if (request.getCategoryId() != null) {
@@ -144,11 +167,21 @@ public class PostService {
                     : request.getContent();
         }
 
+        List<Tag> requestedTags = request.getTagIds() == null ? post.getTags() : tagRepository.findByIdIn(request.getTagIds());
+        PostStatus requestedStatus = request.getStatus() == null ? post.getStatus() : PostStatus.valueOf(request.getStatus());
+        var requestedVisibility = request.getVisibility() == null ? post.getVisibility() : request.getVisibility();
+        if (java.util.Objects.equals(post.getTitle(), request.getTitle())
+                && java.util.Objects.equals(post.getContent(), request.getContent())
+                && java.util.Objects.equals(post.getExcerpt(), excerpt)
+                && java.util.Objects.equals(post.getCategory() == null ? null : post.getCategory().getId(), category == null ? null : category.getId())
+                && post.getTags().stream().map(Tag::getId).sorted().toList().equals(requestedTags.stream().map(Tag::getId).sorted().toList())
+                && post.getStatus() == requestedStatus && post.getVisibility() == requestedVisibility) return PostResponse.from(post);
+
         post.update(request.getTitle(), post.getSlug(), request.getContent(), excerpt, category);
+        post.changeVisibility(request.getVisibility());
 
         if (request.getTagIds() != null) {
-            List<Tag> tags = tagRepository.findByIdIn(request.getTagIds());
-            post.updateTags(tags);
+            post.updateTags(requestedTags);
         }
 
         if ("PUBLISHED".equals(request.getStatus()) && post.getStatus() != PostStatus.PUBLISHED) {
@@ -159,12 +192,14 @@ public class PostService {
             post.archive();
         }
 
+        post.recordEdit();
+        attachmentService.synchronize(post, post.getContent());
         return PostResponse.from(post);
     }
 
     @Transactional
     public void deletePost(Long id, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(id)
+        Post post = postRepository.findForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
 
         User requester = userRepository.findByUsername(username)
@@ -179,8 +214,9 @@ public class PostService {
 
     @Transactional
     public void likePost(Long postId, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
+        Post post = postRepository.findForUpdate(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
+        if (!post.isPubliclyReadable()) throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
 
@@ -189,13 +225,14 @@ public class PostService {
         }
 
         likeRepository.save(new Like(user, post));
-        post.incrementLikeCount();
+        postRepository.changeLikes(postId, 1);
     }
 
     @Transactional
     public void unlikePost(Long postId, String username) {
-        Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
+        Post post = postRepository.findForUpdate(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다"));
+        if (!post.isPubliclyReadable()) throw new ResourceNotFoundException("POST_NOT_FOUND", "게시글을 찾을 수 없습니다");
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND", "사용자를 찾을 수 없습니다"));
 
@@ -204,7 +241,7 @@ public class PostService {
         }
 
         likeRepository.deleteByUserIdAndPostId(user.getId(), postId);
-        post.decrementLikeCount();
+        postRepository.changeLikes(postId, -1);
     }
 
     private String generateUniqueSlug(String title) {

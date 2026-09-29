@@ -31,8 +31,8 @@ export async function fetchPosts(
   return data;
 }
 
-export async function fetchPostById(id: number): Promise<PostResponse> {
-  const { data } = await apiClient.get<PostResponse>(`/posts/${id}`);
+export async function fetchPostById(id: number, signal?: AbortSignal): Promise<PostResponse> {
+  const { data } = await apiClient.get<PostResponse>(`/posts/${id}`, { signal });
   return data;
 }
 
@@ -163,22 +163,25 @@ export async function deleteComment(
 // === My Posts ===
 
 export interface MyPostListParams {
+  visibility?: "PUBLIC" | "PRIVATE";
   status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   page?: number;
   size?: number;
 }
 
 export async function fetchMyPosts(
-  params: MyPostListParams = {}
+  params: MyPostListParams = {}, signal?: AbortSignal
 ): Promise<PageResponse<PostResponse>> {
   const { data } = await apiClient.get<PageResponse<PostResponse>>(
     "/posts/my",
     {
+      signal,
       params: {
         status: params.status,
+        visibility: params.visibility,
         page: params.page ?? 0,
         size: params.size ?? 20,
-        sort: "createdAt,desc",
+        sort: "updatedAt,desc",
       },
     }
   );

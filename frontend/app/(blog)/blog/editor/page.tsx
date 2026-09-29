@@ -13,13 +13,13 @@ import {
   useSummarizePost,
 } from "@/src/modules/blog/hooks/usePosts";
 import PostEditor from "@/src/modules/blog/components/PostEditor";
+import { canWritePosts } from "@/src/shell/auth/publicAccess";
 import Loading from "@/src/shared/components/Loading";
-import { clearDraft } from "@/src/modules/blog/hooks/useAutoSave";
 import { useEffect } from "react";
 
 export default function NewPostPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { data: categories, isLoading: catLoading } = useCategories();
   const { data: tags, isLoading: tagsLoading } = useTags();
   const createPost = useCreatePost();
@@ -37,6 +37,7 @@ export default function NewPostPage() {
 
   if (authLoading || catLoading || tagsLoading) return <Loading />;
   if (!isAuthenticated) return null;
+  if (!canWritePosts(user)) return <p>글 관리는 관리자만 사용할 수 있습니다.</p>;
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -44,13 +45,9 @@ export default function NewPostPage() {
       <PostEditor
         categories={categories ?? []}
         tags={tags ?? []}
-        onSubmit={(data) => {
-          createPost.mutate(data, {
-            onSuccess: (post) => {
-              clearDraft();
-              router.push(`/blog/${post.id}`);
-            },
-          });
+        onSubmit={(data) => createPost.mutateAsync(data)}
+        onSaved={(saved) => {
+          router.replace(saved.status === "PUBLISHED" ? `/blog/${saved.id}` : `/blog/editor/${saved.id}`);
         }}
         isPending={createPost.isPending}
         onCreateCategory={async (name) => {

@@ -1,7 +1,13 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createElement } from "react";
+import { http, HttpResponse } from "msw";
+import { server } from "@/src/test/mocks/server";
+import { mockPost } from "@/src/test/mocks/handlers";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer, { clearCredentials } from "@/src/shell/state/authSlice";
+import { authenticatedState, unauthenticatedState } from "@/src/test/test-utils";
 import {
   usePosts,
   usePostDetail,
@@ -17,7 +23,8 @@ import {
   useDeleteComment,
 } from "./usePosts";
 
-function createWrapper() {
+function createWrapper(preloadedState = unauthenticatedState as typeof authenticatedState | typeof unauthenticatedState) {
+  const store = configureStore({ reducer: { auth: authReducer }, preloadedState });
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false, gcTime: 0 },
@@ -26,8 +33,9 @@ function createWrapper() {
   });
   return {
     wrapper: ({ children }: { children: React.ReactNode }) =>
-      createElement(QueryClientProvider, { client: queryClient }, children),
+      <Provider store={store}><QueryClientProvider client={queryClient}>{children}</QueryClientProvider></Provider>,
     queryClient,
+    store,
   };
 }
 
@@ -56,6 +64,19 @@ describe("usePosts", () => {
 });
 
 describe("usePostDetail", () => {
+  it("로그아웃 후 소유자의 비공개 응답을 재사용하지 않는다", async () => {
+    const { wrapper, store } = createWrapper(authenticatedState);
+    server.use(http.get("/api/portal/posts/1", () => store.getState().auth.user
+      ? HttpResponse.json({ ...mockPost, title: "Owner private record", visibility: "PRIVATE" })
+      : new HttpResponse(null, { status: 404 })));
+    const { result } = renderHook(() => usePostDetail(1), { wrapper });
+    await waitFor(() => expect(result.current.data?.title).toBe("Owner private record"));
+    act(() => { store.dispatch(clearCredentials()); });
+    expect(result.current.data).toBeUndefined();
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.data).toBeUndefined();
+  });
+
   it("should fetch single post by id", async () => {
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => usePostDetail(1), { wrapper });
@@ -129,7 +150,7 @@ describe("useTags", () => {
 
 describe("useCreatePost", () => {
   it("should create a post and invalidate cache", async () => {
-    const { wrapper, queryClient } = createWrapper();
+    const { wrapper } = createWrapper();
     const { result } = renderHook(() => useCreatePost(), { wrapper });
 
     result.current.mutate({

@@ -44,7 +44,7 @@ WORKDIR /app
 
 COPY --from=builder /app/api-server/build/libs/portfolio-portal-api.jar app.jar
 
-RUN chown -R appuser:appgroup /app
+RUN mkdir -p /app/data/attachments && chown -R appuser:appgroup /app
 
 USER appuser
 
